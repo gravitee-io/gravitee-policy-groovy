@@ -23,13 +23,33 @@ import io.gravitee.policy.api.PolicyConfiguration;
  */
 public class GroovyPolicyConfiguration implements PolicyConfiguration {
 
-    private String script;
+    private String onRequestScript;
 
-    public String getScript() {
-        return script;
+    private String onResponseScript;
+
+    private String onResponseContentScript;
+
+    public String getOnRequestScript() {
+        return onRequestScript;
     }
 
-    public void setScript(String script) {
-        this.script = script;
+    public void setOnRequestScript(String onRequestScript) {
+        this.onRequestScript = onRequestScript;
+    }
+
+    public String getOnResponseContentScript() {
+        return onResponseContentScript;
+    }
+
+    public void setOnResponseContentScript(String onResponseContentScript) {
+        this.onResponseContentScript = onResponseContentScript;
+    }
+
+    public String getOnResponseScript() {
+        return onResponseScript;
+    }
+
+    public void setOnResponseScript(String onResponseScript) {
+        this.onResponseScript = onResponseScript;
     }
 }

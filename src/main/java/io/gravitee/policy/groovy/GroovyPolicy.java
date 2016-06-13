@@ -19,16 +19,25 @@ import groovy.lang.Binding;
 import groovy.lang.GroovyCodeSource;
 import groovy.lang.GroovyShell;
 import groovy.lang.Script;
+import io.gravitee.gateway.api.ExecutionContext;
 import io.gravitee.gateway.api.Request;
 import io.gravitee.gateway.api.Response;
+import io.gravitee.gateway.api.buffer.Buffer;
+import io.gravitee.gateway.api.http.stream.TransformableResponseStream;
+import io.gravitee.gateway.api.stream.ReadWriteStream;
+import io.gravitee.gateway.api.stream.exception.TransformationException;
 import io.gravitee.policy.api.PolicyChain;
+import io.gravitee.policy.api.annotations.OnRequest;
 import io.gravitee.policy.api.annotations.OnResponse;
+import io.gravitee.policy.api.annotations.OnResponseContent;
 import io.gravitee.policy.groovy.configuration.GroovyPolicyConfiguration;
 import io.gravitee.policy.groovy.utils.Sha1;
+import org.codehaus.groovy.control.CompilationFailedException;
 import org.codehaus.groovy.runtime.InvokerHelper;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.function.Function;
 
 /**
  * @author David BRASSELY (david at gravitee.io)
@@ -40,29 +49,96 @@ public class GroovyPolicy {
 
     private static final GroovyShell GROOVY_SHELL = new GroovyShell();
 
-    private static ConcurrentMap<String, Class<?>> sources = new ConcurrentHashMap<>();
+    private static final ConcurrentMap<String, Class<?>> sources = new ConcurrentHashMap<>();
 
     public GroovyPolicy(GroovyPolicyConfiguration groovyPolicyConfiguration) {
         this.groovyPolicyConfiguration = groovyPolicyConfiguration;
     }
 
-    @OnResponse
-    public void onResponse(Request request, Response response, PolicyChain policyChain) {
-        // Get script class
-        Class<?> scriptClass = getOrCreate(groovyPolicyConfiguration.getScript());
-
-        // Prepare binding
-        Binding binding = new Binding();
-        binding.setVariable("response", response);
-
-        // And run script
-        Script script = InvokerHelper.createScript(scriptClass, binding);
-        script.run();
-
-        policyChain.doNext(request, response);
+    @OnRequest
+    public void onRequest(Request request, Response response, ExecutionContext executionContext, PolicyChain policyChain) {
+        executeScript(groovyPolicyConfiguration.getOnRequestScript(), request, response, executionContext, policyChain);
     }
 
-    private Class<?> getOrCreate(String script) {
+    @OnResponse
+    public void onResponse(Request request, Response response, ExecutionContext executionContext, PolicyChain policyChain) {
+        executeScript(groovyPolicyConfiguration.getOnResponseScript(), request, response, executionContext, policyChain);
+    }
+
+    @OnResponseContent
+    public ReadWriteStream onResponseContent(Response response) {
+        String script = groovyPolicyConfiguration.getOnResponseContentScript();
+
+        if (script != null && !script.trim().isEmpty()) {
+            return new TransformableResponseStream(response) {
+                @Override
+                protected String to() {
+                    return null;
+                }
+
+                @Override
+                protected Function<Buffer, Buffer> transform() throws TransformationException {
+                    return buffer -> {
+                        try {
+                            // Get script class
+                            Class<?> scriptClass = getOrCreate(groovyPolicyConfiguration.getOnResponseContentScript());
+
+                            // Prepare binding
+                            Binding binding = new Binding();
+                            binding.setVariable("response", buffer.toString());
+
+                            // And run script
+                            Script gScript = InvokerHelper.createScript(scriptClass, binding);
+                            String newContent = (String) gScript.run();
+
+                            return Buffer.buffer(newContent);
+                        } catch (CompilationFailedException cfe) {
+                            throw new TransformationException("Unable to run Groovy script: " + cfe.getMessage(), cfe);
+                        }
+                    };
+                }
+            };
+        }
+
+        return null;
+    }
+
+    private void executeScript(String script, Request request, Response response, ExecutionContext executionContext, PolicyChain policyChain) {
+        if (script == null || script.trim().isEmpty()) {
+            policyChain.doNext(request, response);
+        } else {
+            try {
+                // Get script class
+                Class<?> scriptClass = getOrCreate(script);
+
+                // Prepare binding
+                Binding binding = new Binding();
+                binding.setVariable("response", response);
+                binding.setVariable("request", request);
+                binding.setVariable("context", executionContext);
+                binding.setVariable("result", new PolicyResult());
+
+                // And run script
+                Script gScript = InvokerHelper.createScript(scriptClass, binding);
+                gScript.run();
+
+                PolicyResult result = (PolicyResult) binding.getVariable("result");
+
+                if (result.getResult() == PolicyResult.State.SUCCESS) {
+                    policyChain.doNext(request, response);
+                } else {
+                    policyChain.failWith(io.gravitee.policy.api.PolicyResult.failure(
+                            result.getStatus(),
+                            result.getError()
+                    ));
+                }
+            } catch (CompilationFailedException cfe) {
+                policyChain.failWith(io.gravitee.policy.api.PolicyResult.failure(cfe.getMessage()));
+            }
+        }
+    }
+
+    private Class<?> getOrCreate(String script) throws CompilationFailedException {
         String key = Sha1.sha1(script);
         return sources.computeIfAbsent(key, s -> {
             GroovyCodeSource gcs = new GroovyCodeSource(script, key, GroovyShell.DEFAULT_CODE_BASE);
