@@ -1,0 +1,17 @@
+{
+  "type" : "object",
+  "id" : "urn:jsonschema:io:gravitee:policy:groovy:configuration:GroovyPolicyConfiguration",
+  "properties" : {
+    "script" : {
+      "title": "Groovy script",
+      "type" : "string",
+      "x-schema-form": {
+        "type": "textarea",
+        "placeholder": "Provide your groovy script here"
+      }
+    }
+  },
+  "required": [
+    "script"
+  ]
+}
