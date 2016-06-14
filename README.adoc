@@ -1,4 +1,3 @@
-[[gravitee-groovy-policy]]
 = Groovy Policy
 
 ifdef::env-github[]
@@ -19,7 +18,8 @@ endif::[]
 |===
 
 == Description
-The http://www.groovy-lang.org/[Groovy] policy lets the user (ie. API publisher) to run groovy scripts during all the stages of the request processing through the gateway.
+The http://www.groovy-lang.org/[Groovy] policy lets the user (ie. API publisher) to run groovy scripts during all the
+stages of the request processing through the gateway.
 
 The following groovy script is an example executed during the _OnResponse_ phase to change HTTP headers:
 
@@ -108,3 +108,14 @@ return JsonOutput.toJson(content)
     }
 ]
 ----
+
+== Http Status Code
+
+|===
+|Code |Message
+
+| ```500```
+| The groovy script can not be parsed / compiled or executed (mainly due to a syntax error)
+
+|===
+
