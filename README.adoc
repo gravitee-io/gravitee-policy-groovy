@@ -8,12 +8,13 @@ endif::[]
 
 == Phase
 
+[cols="^2,^2,^2",options="header"]
 |===
-|onRequest |onResponse| OnResponseContent
+|onRequest|onResponse|onResponseContent
 
-| X
-| X
-| X
+|X
+|X
+|X
 
 |===
 
