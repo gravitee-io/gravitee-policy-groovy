@@ -51,8 +51,8 @@ Some variables are automatically bind to the Groovy script to let user to use th
 
 |===
 
-You can also break request or response processing by setting the result to `FAILURE` and by providing an HTTP status
-code and a message (not mandatory, status is equals to 500 (internal server error) by default).
+You can also break request or response processing by setting the result's state to `FAILURE`, providing an HTTP
+status code and a message (not mandatory, status is equals to 500 (internal server error) by default).
 
 [source, groovy]
 ----
@@ -68,7 +68,7 @@ if (request.headers.containsKey('X-Gravitee-Break')) {
 OnResponseContent
 ^^^^^^^^^^^^^^^^^
 
-You can transform response body content by using a groovy script during the _OnResponseContent_ phase.
+You can also transform response body content by using a groovy script during the _OnResponseContent_ phase.
 
 Following is an example to show you how to use _Groovy policy_ to transform a JSON content:
 
