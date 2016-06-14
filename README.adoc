@@ -1,104 +1,106 @@
-= Oauth2 Policy
+[[gravitee-groovy-policy]]
+= Groovy Policy
 
-https://github.com/gravitee-io/gravitee-policy-oauth2[Source code],
-image:http://build.gravitee.io/jenkins/buildStatus/icon?job=gravitee-policy-oauth2["Build status", link="http://build.gravitee.io/jenkins/job/gravitee-policy-oauth2/"]
+image:https://img.shields.io/github/watchers/gravitee-io/gravitee-groovy-policy.svg?style=social&maxAge=2592000)["Github", link="https://github.com/gravitee-io/gravitee-policy-groovy"]
+image:https://ci.gravitee.io/buildStatus/icon?job=gravitee-io/gravitee-policy-groovy/master["Build status", link="https://ci.gravitee.io/job/gravitee-io/job/gravitee-policy-groovy/"]
 
-== Scope
+== Phase
 
 |===
-|onRequest |onResponse
+|onRequest |onResponse| OnResponseContent
 
 | X
-|
+| X
+| X
 
 |===
 
 == Description
+The http://www.groovy-lang.org/[Groovy] policy lets the user (ie. API publisher) to run groovy scripts during all the stages of the request processing through the gateway.
 
-Gravitee.io OAuth 2 policy authentication. Check if an OAuth 2 access token is valid during the request process.
+The following groovy script is an example executed during the _OnResponse_ phase to change HTTP headers:
 
-If the access token is valid, the request is allowed to proceed, if not the process stops and reject the request.
-
-The access token must be supply in the Authorization HTTP request header :
-
-[source]
+[source, groovy]
 ----
-$ curl -H "Authorization: Bearer |accessToken|" \
-           http://gravitee.io-gateway/yourApi/yourRestrictedData
+response.headers.remove 'X-Powered-By'
+response.headers.'X-Gravitee-Gateway-Version' = '0.14.0'
 ----
 
 == Configuration
 
-The policy use the following API properties :
+You can attach a groovy script to all phases of the request processing.
 
+OnRequest / OnResponse
+^^^^^^^^^^^^^^^^^^^^^^
+
+Some variables are automatically bind to the Groovy script to let user to use them and define the policy behavior.
+
+[width="100%",cols="2,10",options="header"]
+.List of groovy script variables
 |===
-|Property |Required |Description |Type |Default
+| Name | Description
 
-|oauth.token.validation.endpoint.url
-|X
-|OAuth 2 Authorization Server Token Validation EndPoint
-|String
-|`http://localhost:8080/oauth/check_token`
-
-|oauth.token.validation.endpoint.http.method
-|X
-|HTTP Method used by the OAuth 2 Authorization Server Token Validation EndPoint
-|String
-|`GET`
-
-|oauth.token.validation.endpoint.is.secure
-|X
-|OAuth 2 Authorization Server Token Validation EndPoint is secured ?
-|Boolean
-|`false`
-
-|oauth.token.validation.endpoint.authorization.header.name
-|
-|The Authorization HTTP Header name if Token Validation EndPoint is secured
-|String
-|`Authorization`
-
-|oauth.token.validation.endpoint.authorization.scheme
-|
-|The Authorization HTTP Header scheme if Token Validation EndPoint is secured
-|String
-|`Basic`
-
-|oauth.token.validation.endpoint.authorization.value
-|
-|The Authorization HTTP Header credentials if Token Validation EndPoint is secured
-|String
-|
-
-|oauth.token.validation.endpoint.token.is.supplied.by.query.param
-|X
-|The OAuth 2 access token is supplied by a HTTP query parameter ?
-|Boolean
-|`true`
-
-|oauth.token.validation.endpoint.token.query.param.name
-|X
-|The OAuth 2 access token HTTP query parameter name
-|String
-|`token`
-
-|oauth.token.validation.endpoint.token.is.supplied.by.http.header
-|
-|The OAuth 2 access token is supplied by a HTTP header ?
-|Boolean
-|`false`
-
-|oauth.token.validation.endpoint.token.header.name
-|X
-|The OAuth 2 access token HTTP header name
-|String
-|
+| *request* | Inbound HTTP request
+| *response* | Outbound HTTP response
+| *context* | `PolicyContext` used to access external component such as services, resources, ...
+| *result* | Result of the groovy script
 
 |===
 
-[source, json]
-.Sample
+You can also break request processing by setting the result to `FAILURE` and by providing an HTTP status code and a message.
+
+[source, groovy]
 ----
-"oauth2": {
+if (request.headers.containsKey('X-Gravitee-Break')) {
+    result.state = FAILURE
+    result.code = 500
+    result.error = 'Stop request processing due to X-Gravitee-Break header'
+} else {
+    request.headers.'X-Groovy-Policy' = 'ok'
 }
+----
+
+OnResponseContent
+^^^^^^^^^^^^^^^^^
+
+You can transform response body content by using a groovy script during the _OnResponseContent_ phase.
+
+Following is an example to show you how to use _Groovy policy_ to transform a JSON content:
+
+===== Input body content
+[source, json]
+----
+[
+    {
+        "age": 32,
+        "firstname": "John",
+        "lastname": "Doe"
+    }
+]
+----
+
+===== Groovy script
+[source, groovy]
+----
+import groovy.json.JsonSlurper
+import groovy.json.JsonOutput
+
+def jsonSlurper = new JsonSlurper()
+def content = jsonSlurper.parseText(response)
+content[0].firstname = 'Hacked ' + content[0].firstname
+content[0].country = 'US'
+return JsonOutput.toJson(content)
+----
+
+===== Output body content
+[source, json]
+----
+[
+    {
+        "age": 32,
+        "firstname": "Hacked John",
+        "lastname": "Doe",
+        "country": "US
+    }
+]
 ----
