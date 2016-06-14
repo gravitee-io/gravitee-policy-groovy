@@ -124,11 +124,11 @@ public class GroovyPolicy {
 
                 PolicyResult result = (PolicyResult) binding.getVariable("result");
 
-                if (result.getResult() == PolicyResult.State.SUCCESS) {
+                if (result.getState() == PolicyResult.State.SUCCESS) {
                     policyChain.doNext(request, response);
                 } else {
                     policyChain.failWith(io.gravitee.policy.api.PolicyResult.failure(
-                            result.getStatus(),
+                            result.getCode(),
                             result.getError()
                     ));
                 }

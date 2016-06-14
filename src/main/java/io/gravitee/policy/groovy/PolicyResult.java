@@ -23,11 +23,11 @@ import io.gravitee.common.http.HttpStatusCode;
  */
 public class PolicyResult {
 
-    private State result = State.SUCCESS;
+    private State state = State.SUCCESS;
 
     private String error;
 
-    private int status = HttpStatusCode.INTERNAL_SERVER_ERROR_500;
+    private int code = HttpStatusCode.INTERNAL_SERVER_ERROR_500;
 
     public String getError() {
         return error;
@@ -37,20 +37,20 @@ public class PolicyResult {
         this.error = error;
     }
 
-    public State getResult() {
-        return result;
+    public int getCode() {
+        return code;
     }
 
-    public void setResult(State result) {
-        this.result = result;
+    public void setCode(int code) {
+        this.code = code;
     }
 
-    public int getStatus() {
-        return status;
+    public State getState() {
+        return state;
     }
 
-    public void setStatus(int status) {
-        this.status = status;
+    public void setState(State state) {
+        this.state = state;
     }
 
     public enum State {
