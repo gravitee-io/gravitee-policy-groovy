@@ -29,7 +29,7 @@ response.headers.remove 'X-Powered-By'
 response.headers.'X-Gravitee-Gateway-Version' = '0.14.0'
 ----
 
-== Configuration
+== Usage
 
 You can attach a groovy script to all phases of the request processing.
 
@@ -108,6 +108,15 @@ return JsonOutput.toJson(content)
     }
 ]
 ----
+
+== Configuration
+[source, json]
+.Configuration example
+"groovy": {
+    "onRequestScript": "request.headers.'X-Gravitee-Gateway' = '0.14.0'",
+    "onResponseScript": "response.headers.remove 'X-Powered-By'",
+    "onResponseContentScript": "" // Not executed if empty
+}
 
 == Http Status Code
 
