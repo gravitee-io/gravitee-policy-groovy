@@ -3,6 +3,7 @@
 
 image:https://img.shields.io/github/watchers/gravitee-io/gravitee-groovy-policy.svg?style=social&maxAge=2592000)["Github", link="https://github.com/gravitee-io/gravitee-policy-groovy"]
 image:https://ci.gravitee.io/buildStatus/icon?job=gravitee-io/gravitee-policy-groovy/master["Build status", link="https://ci.gravitee.io/job/gravitee-io/job/gravitee-policy-groovy/"]
+image:https://badges.gitter.im/Join Chat.svg["Gitter", "https://gitter.im/gravitee-io/gravitee-groovy-policy?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge"]
 
 == Phase
 
@@ -42,12 +43,13 @@ Some variables are automatically bind to the Groovy script to let user to use th
 
 | *request* | Inbound HTTP request
 | *response* | Outbound HTTP response
-| *context* | `PolicyContext` used to access external component such as services, resources, ...
+| *context* | `PolicyContext` used to access external components such as services, resources, ...
 | *result* | Result of the groovy script
 
 |===
 
-You can also break request processing by setting the result to `FAILURE` and by providing an HTTP status code and a message.
+You can also break request or response processing by setting the result to `FAILURE` and by providing an HTTP status
+code and a message (not mandatory, status is equals to 500 (internal server error) by default).
 
 [source, groovy]
 ----
