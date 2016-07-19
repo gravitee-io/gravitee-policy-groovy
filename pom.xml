@@ -22,7 +22,7 @@
 
     <groupId>io.gravitee.policy</groupId>
     <artifactId>gravitee-policy-groovy</artifactId>
-    <version>0.2.0-SNAPSHOT</version>
+    <version>0.2.0</version>
 
     <name>Gravitee IO - Policy - Groovy</name>
     <description>Description of the Groovy Gravitee Policy</description>
@@ -34,7 +34,7 @@
     </parent>
 
     <properties>
-        <gravitee-gateway-api.version>0.11.0</gravitee-gateway-api.version>
+        <gravitee-gateway-api.version>0.13.0</gravitee-gateway-api.version>
         <gravitee-policy-api.version>0.9.0</gravitee-policy-api.version>
         <gravitee-common.version>0.10.0</gravitee-common.version>
 
