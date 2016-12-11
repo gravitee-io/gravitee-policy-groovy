@@ -24,7 +24,7 @@
     <artifactId>gravitee-policy-groovy</artifactId>
     <version>1.1.0-SNAPSHOT</version>
 
-    <name>Gravitee IO - Policy - Groovy</name>
+    <name>Gravitee.io APIM - Policy - Groovy</name>
     <description>Description of the Groovy Gravitee Policy</description>
 
     <parent>
