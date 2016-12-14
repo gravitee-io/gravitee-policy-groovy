@@ -33,8 +33,7 @@ response.headers.'X-Gravitee-Gateway-Version' = '0.14.0'
 
 You can attach a groovy script to all phases of the request processing.
 
-OnRequest / OnResponse
-^^^^^^^^^^^^^^^^^^^^^^
+=== OnRequest / OnResponse
 
 Some variables are automatically bind to the Groovy script to let user to use them and define the policy behavior.
 
@@ -64,14 +63,13 @@ if (request.headers.containsKey('X-Gravitee-Break')) {
 }
 ----
 
-OnResponseContent
-^^^^^^^^^^^^^^^^^
+=== OnResponseContent
 
 You can also transform response body content by using a groovy script during the _OnResponseContent_ phase.
 
 Following is an example to show you how to use _Groovy policy_ to transform a JSON content:
 
-===== Input body content
+==== Input body content
 [source, json]
 ----
 [
@@ -83,7 +81,7 @@ Following is an example to show you how to use _Groovy policy_ to transform a JS
 ]
 ----
 
-===== Groovy script
+==== Groovy script
 [source, groovy]
 ----
 import groovy.json.JsonSlurper
@@ -96,7 +94,7 @@ content[0].country = 'US'
 return JsonOutput.toJson(content)
 ----
 
-===== Output body content
+==== Output body content
 [source, json]
 ----
 [
