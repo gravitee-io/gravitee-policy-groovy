@@ -23,7 +23,7 @@ import io.gravitee.gateway.api.ExecutionContext;
 import io.gravitee.gateway.api.Request;
 import io.gravitee.gateway.api.Response;
 import io.gravitee.gateway.api.buffer.Buffer;
-import io.gravitee.gateway.api.http.stream.TransformableResponseStream;
+import io.gravitee.gateway.api.http.stream.TransformableResponseStreamBuilder;
 import io.gravitee.gateway.api.stream.ReadWriteStream;
 import io.gravitee.gateway.api.stream.exception.TransformationException;
 import io.gravitee.policy.api.PolicyChain;
@@ -37,7 +37,6 @@ import org.codehaus.groovy.runtime.InvokerHelper;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.function.Function;
 
 /**
  * @author David BRASSELY (david at gravitee.io)
@@ -70,34 +69,29 @@ public class GroovyPolicy {
         String script = groovyPolicyConfiguration.getOnResponseContentScript();
 
         if (script != null && !script.trim().isEmpty()) {
-            return new TransformableResponseStream(response) {
-                @Override
-                protected String to() {
-                    return null;
-                }
+            return TransformableResponseStreamBuilder
+                    .on(response)
+                    .transform(
+                            buffer -> {
+                                try {
+                                    // Get script class
+                                    Class<?> scriptClass = getOrCreate(groovyPolicyConfiguration.getOnResponseContentScript());
 
-                @Override
-                protected Function<Buffer, Buffer> transform() throws TransformationException {
-                    return buffer -> {
-                        try {
-                            // Get script class
-                            Class<?> scriptClass = getOrCreate(groovyPolicyConfiguration.getOnResponseContentScript());
+                                    // Prepare binding
+                                    Binding binding = new Binding();
+                                    binding.setVariable("response", buffer.toString());
 
-                            // Prepare binding
-                            Binding binding = new Binding();
-                            binding.setVariable("response", buffer.toString());
+                                    // And run script
+                                    Script gScript = InvokerHelper.createScript(scriptClass, binding);
+                                    String newContent = (String) gScript.run();
 
-                            // And run script
-                            Script gScript = InvokerHelper.createScript(scriptClass, binding);
-                            String newContent = (String) gScript.run();
+                                    return Buffer.buffer(newContent);
+                                } catch (CompilationFailedException cfe) {
+                                    throw new TransformationException("Unable to run Groovy script: " + cfe.getMessage(), cfe);
+                                }
 
-                            return Buffer.buffer(newContent);
-                        } catch (CompilationFailedException cfe) {
-                            throw new TransformationException("Unable to run Groovy script: " + cfe.getMessage(), cfe);
-                        }
-                    };
-                }
-            };
+                            }
+                    ).build();
         }
 
         return null;
