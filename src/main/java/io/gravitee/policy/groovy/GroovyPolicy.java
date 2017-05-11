@@ -23,11 +23,13 @@ import io.gravitee.gateway.api.ExecutionContext;
 import io.gravitee.gateway.api.Request;
 import io.gravitee.gateway.api.Response;
 import io.gravitee.gateway.api.buffer.Buffer;
+import io.gravitee.gateway.api.http.stream.TransformableRequestStreamBuilder;
 import io.gravitee.gateway.api.http.stream.TransformableResponseStreamBuilder;
 import io.gravitee.gateway.api.stream.ReadWriteStream;
 import io.gravitee.gateway.api.stream.exception.TransformationException;
 import io.gravitee.policy.api.PolicyChain;
 import io.gravitee.policy.api.annotations.OnRequest;
+import io.gravitee.policy.api.annotations.OnRequestContent;
 import io.gravitee.policy.api.annotations.OnResponse;
 import io.gravitee.policy.api.annotations.OnResponseContent;
 import io.gravitee.policy.groovy.configuration.GroovyPolicyConfiguration;
@@ -75,11 +77,44 @@ public class GroovyPolicy {
                             buffer -> {
                                 try {
                                     // Get script class
-                                    Class<?> scriptClass = getOrCreate(groovyPolicyConfiguration.getOnResponseContentScript());
+                                    Class<?> scriptClass = getOrCreate(script);
 
                                     // Prepare binding
                                     Binding binding = new Binding();
                                     binding.setVariable("response", buffer.toString());
+
+                                    // And run script
+                                    Script gScript = InvokerHelper.createScript(scriptClass, binding);
+                                    String newContent = (String) gScript.run();
+
+                                    return Buffer.buffer(newContent);
+                                } catch (CompilationFailedException cfe) {
+                                    throw new TransformationException("Unable to run Groovy script: " + cfe.getMessage(), cfe);
+                                }
+
+                            }
+                    ).build();
+        }
+
+        return null;
+    }
+
+    @OnRequestContent
+    public ReadWriteStream onRequestContent(Request request) {
+        String script = groovyPolicyConfiguration.getOnRequestContentScript();
+
+        if (script != null && !script.trim().isEmpty()) {
+            return TransformableRequestStreamBuilder
+                    .on(request)
+                    .transform(
+                            buffer -> {
+                                try {
+                                    // Get script class
+                                    Class<?> scriptClass = getOrCreate(script);
+
+                                    // Prepare binding
+                                    Binding binding = new Binding();
+                                    binding.setVariable("request", buffer.toString());
 
                                     // And run script
                                     Script gScript = InvokerHelper.createScript(scriptClass, binding);

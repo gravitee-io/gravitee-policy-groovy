@@ -9,8 +9,9 @@ endif::[]
 
 [cols="^2,^2,^2",options="header"]
 |===
-|onRequest|onResponse|onResponseContent
+|onRequest|onResponse|onRequestContent|onResponseContent
 
+|X
 |X
 |X
 |X
@@ -63,9 +64,10 @@ if (request.headers.containsKey('X-Gravitee-Break')) {
 }
 ----
 
-=== OnResponseContent
+=== OnRequestContent / OnResponseContent
 
-You can also transform response body content by using a groovy script during the _OnResponseContent_ phase.
+You can also transform request or response body content by applying a groovy script on
+the _OnRequestContent_ phase or the _OnResponseContent_ phase.
 
 Following is an example to show you how to use _Groovy policy_ to transform a JSON content:
 
@@ -113,6 +115,7 @@ return JsonOutput.toJson(content)
 "groovy": {
     "onRequestScript": "request.headers.'X-Gravitee-Gateway' = '0.14.0'",
     "onResponseScript": "response.headers.remove 'X-Powered-By'",
+    "onRequestContentScript": "" // Not executed if empty
     "onResponseContentScript": "" // Not executed if empty
 }
 

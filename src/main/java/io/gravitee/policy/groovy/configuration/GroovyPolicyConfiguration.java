@@ -29,6 +29,8 @@ public class GroovyPolicyConfiguration implements PolicyConfiguration {
 
     private String onResponseContentScript;
 
+    private String onRequestContentScript;
+
     public String getOnRequestScript() {
         return onRequestScript;
     }
@@ -51,5 +53,13 @@ public class GroovyPolicyConfiguration implements PolicyConfiguration {
 
     public void setOnResponseScript(String onResponseScript) {
         this.onResponseScript = onResponseScript;
+    }
+
+    public String getOnRequestContentScript() {
+        return onRequestContentScript;
+    }
+
+    public void setOnRequestContentScript(String onRequestContentScript) {
+        this.onRequestContentScript = onRequestContentScript;
     }
 }
