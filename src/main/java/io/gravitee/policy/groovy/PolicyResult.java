@@ -18,7 +18,7 @@ package io.gravitee.policy.groovy;
 import io.gravitee.common.http.HttpStatusCode;
 
 /**
- * @author David BRASSELY (david at gravitee.io)
+ * @author David BRASSELY (david.brassely at graviteesource.com)
  * @author GraviteeSource Team
  */
 public class PolicyResult {
