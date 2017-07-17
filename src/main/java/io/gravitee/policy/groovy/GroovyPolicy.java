@@ -33,6 +33,8 @@ import io.gravitee.policy.api.annotations.OnRequestContent;
 import io.gravitee.policy.api.annotations.OnResponse;
 import io.gravitee.policy.api.annotations.OnResponseContent;
 import io.gravitee.policy.groovy.configuration.GroovyPolicyConfiguration;
+import io.gravitee.policy.groovy.model.ContentAwareRequest;
+import io.gravitee.policy.groovy.model.ContentAwareResponse;
 import io.gravitee.policy.groovy.utils.Sha1;
 import org.codehaus.groovy.control.CompilationFailedException;
 import org.codehaus.groovy.runtime.InvokerHelper;
@@ -41,7 +43,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 /**
- * @author David BRASSELY (david at gravitee.io)
+ * @author David BRASSELY (david.brassely at graviteesource.com)
  * @author GraviteeSource Team
  */
 public class GroovyPolicy {
@@ -67,7 +69,7 @@ public class GroovyPolicy {
     }
 
     @OnResponseContent
-    public ReadWriteStream onResponseContent(Response response) {
+    public ReadWriteStream onResponseContent(Request request, Response response, ExecutionContext executionContext) {
         String script = groovyPolicyConfiguration.getOnResponseContentScript();
 
         if (script != null && !script.trim().isEmpty()) {
@@ -81,7 +83,9 @@ public class GroovyPolicy {
 
                                     // Prepare binding
                                     Binding binding = new Binding();
-                                    binding.setVariable("response", buffer.toString());
+                                    binding.setVariable("request", new ContentAwareRequest(request, null));
+                                    binding.setVariable("context", executionContext);
+                                    binding.setVariable("response", new ContentAwareResponse(response, buffer.toString()));
 
                                     // And run script
                                     Script gScript = InvokerHelper.createScript(scriptClass, binding);
@@ -100,7 +104,7 @@ public class GroovyPolicy {
     }
 
     @OnRequestContent
-    public ReadWriteStream onRequestContent(Request request) {
+    public ReadWriteStream onRequestContent(Request request, Response response, ExecutionContext executionContext) {
         String script = groovyPolicyConfiguration.getOnRequestContentScript();
 
         if (script != null && !script.trim().isEmpty()) {
@@ -114,7 +118,9 @@ public class GroovyPolicy {
 
                                     // Prepare binding
                                     Binding binding = new Binding();
-                                    binding.setVariable("request", buffer.toString());
+                                    binding.setVariable("request", new ContentAwareRequest(request, buffer.toString()));
+                                    binding.setVariable("response", new ContentAwareResponse(response, null));
+                                    binding.setVariable("context", executionContext);
 
                                     // And run script
                                     Script gScript = InvokerHelper.createScript(scriptClass, binding);
@@ -142,8 +148,8 @@ public class GroovyPolicy {
 
                 // Prepare binding
                 Binding binding = new Binding();
-                binding.setVariable("response", response);
-                binding.setVariable("request", request);
+                binding.setVariable("response", new ContentAwareResponse(response, null));
+                binding.setVariable("request", new ContentAwareRequest(request, null));
                 binding.setVariable("context", executionContext);
                 binding.setVariable("result", new PolicyResult());
 

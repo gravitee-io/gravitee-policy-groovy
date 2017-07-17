@@ -18,7 +18,7 @@ package io.gravitee.policy.groovy.utils;
 import java.security.MessageDigest;
 
 /**
- * @author David BRASSELY (david at gravitee.io)
+ * @author David BRASSELY (david.brassely at graviteesource.com)
  * @author GraviteeSource Team
  */
 public final class Sha1 {
