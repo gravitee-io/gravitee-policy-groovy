@@ -18,6 +18,7 @@ package io.gravitee.policy.groovy.model;
 import io.gravitee.common.http.HttpHeaders;
 import io.gravitee.common.http.HttpMethod;
 import io.gravitee.common.http.HttpVersion;
+import io.gravitee.common.util.MultiValueMap;
 import io.gravitee.gateway.api.Request;
 import io.gravitee.gateway.api.buffer.Buffer;
 import io.gravitee.gateway.api.handler.Handler;
@@ -25,7 +26,6 @@ import io.gravitee.gateway.api.stream.ReadStream;
 import io.gravitee.reporter.api.http.RequestMetrics;
 
 import java.time.Instant;
-import java.util.Map;
 
 /**
  * @author David BRASSELY (david.brassely at graviteesource.com)
@@ -104,11 +104,11 @@ public class ContentAwareRequest implements Request {
     }
 
     @Override
-    public Map<String, String> parameters() {
+    public MultiValueMap<String, String> parameters() {
         return request.parameters();
     }
 
-    public Map<String, String> getParameters() {
+    public MultiValueMap<String, String> getParameters() {
         return this.parameters();
     }
 
