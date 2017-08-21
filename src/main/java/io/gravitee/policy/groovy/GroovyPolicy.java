@@ -92,8 +92,8 @@ public class GroovyPolicy {
                                     String newContent = (String) gScript.run();
 
                                     return Buffer.buffer(newContent);
-                                } catch (CompilationFailedException cfe) {
-                                    throw new TransformationException("Unable to run Groovy script: " + cfe.getMessage(), cfe);
+                                } catch (Exception ex) {
+                                    throw new TransformationException("Unable to run Groovy script: " + ex.getMessage(), ex);
                                 }
 
                             }
@@ -127,8 +127,8 @@ public class GroovyPolicy {
                                     String newContent = (String) gScript.run();
 
                                     return Buffer.buffer(newContent);
-                                } catch (CompilationFailedException cfe) {
-                                    throw new TransformationException("Unable to run Groovy script: " + cfe.getMessage(), cfe);
+                                } catch (Exception ex) {
+                                    throw new TransformationException("Unable to run Groovy script: " + ex.getMessage(), ex);
                                 }
 
                             }
@@ -167,8 +167,8 @@ public class GroovyPolicy {
                             result.getError()
                     ));
                 }
-            } catch (CompilationFailedException cfe) {
-                policyChain.failWith(io.gravitee.policy.api.PolicyResult.failure(cfe.getMessage()));
+            } catch (Exception ex) {
+                policyChain.failWith(io.gravitee.policy.api.PolicyResult.failure(ex.getMessage()));
             }
         }
     }
