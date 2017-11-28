@@ -50,6 +50,11 @@ public class GroovyPolicy {
 
     private final GroovyPolicyConfiguration groovyPolicyConfiguration;
 
+    private final static String REQUEST_VARIABLE_NAME = "request";
+    private final static String RESPONSE_VARIABLE_NAME = "response";
+    private final static String CONTEXT_VARIABLE_NAME = "context";
+    private final static String RESULT_VARIABLE_NAME = "result";
+
     private static final GroovyShell GROOVY_SHELL = new GroovyShell();
 
     private static final ConcurrentMap<String, Class<?>> sources = new ConcurrentHashMap<>();
@@ -60,42 +65,39 @@ public class GroovyPolicy {
 
     @OnRequest
     public void onRequest(Request request, Response response, ExecutionContext executionContext, PolicyChain policyChain) {
-        executeScript(groovyPolicyConfiguration.getOnRequestScript(), request, response, executionContext, policyChain);
+        executeScript(request, response, executionContext, policyChain, groovyPolicyConfiguration.getOnRequestScript());
     }
 
     @OnResponse
     public void onResponse(Request request, Response response, ExecutionContext executionContext, PolicyChain policyChain) {
-        executeScript(groovyPolicyConfiguration.getOnResponseScript(), request, response, executionContext, policyChain);
+        executeScript(request, response, executionContext, policyChain, groovyPolicyConfiguration.getOnResponseScript());
     }
 
     @OnResponseContent
-    public ReadWriteStream onResponseContent(Request request, Response response, ExecutionContext executionContext) {
+    public ReadWriteStream onResponseContent(Request request, Response response, ExecutionContext executionContext,
+                                             PolicyChain policyChain) {
         String script = groovyPolicyConfiguration.getOnResponseContentScript();
 
         if (script != null && !script.trim().isEmpty()) {
             return TransformableResponseStreamBuilder
                     .on(response)
+                    .chain(policyChain)
                     .transform(
                             buffer -> {
                                 try {
-                                    // Get script class
-                                    Class<?> scriptClass = getOrCreate(script);
-
-                                    // Prepare binding
-                                    Binding binding = new Binding();
-                                    binding.setVariable("request", new ContentAwareRequest(request, null));
-                                    binding.setVariable("context", executionContext);
-                                    binding.setVariable("response", new ContentAwareResponse(response, buffer.toString()));
-
-                                    // And run script
-                                    Script gScript = InvokerHelper.createScript(scriptClass, binding);
-                                    String newContent = (String) gScript.run();
-
-                                    return Buffer.buffer(newContent);
-                                } catch (Exception ex) {
-                                    throw new TransformationException("Unable to run Groovy script: " + ex.getMessage(), ex);
+                                    final String content = executeStreamScript(
+                                            new ContentAwareRequest(request, null),
+                                            new ContentAwareResponse(response, buffer.toString()),
+                                            executionContext,
+                                            script);
+                                    return Buffer.buffer(content);
+                                } catch (PolicyFailureException ex) {
+                                    policyChain.streamFailWith(io.gravitee.policy.api.PolicyResult.failure(
+                                            ex.getResult().getCode(), ex.getResult().getError()));
+                                } catch (Throwable t) {
+                                    throw new TransformationException("Unable to run Groovy script: " + t.getMessage(), t);
                                 }
-
+                                return null;
                             }
                     ).build();
         }
@@ -104,33 +106,31 @@ public class GroovyPolicy {
     }
 
     @OnRequestContent
-    public ReadWriteStream onRequestContent(Request request, Response response, ExecutionContext executionContext) {
+    public ReadWriteStream onRequestContent(Request request, Response response, ExecutionContext executionContext,
+                                            PolicyChain policyChain) {
         String script = groovyPolicyConfiguration.getOnRequestContentScript();
 
         if (script != null && !script.trim().isEmpty()) {
             return TransformableRequestStreamBuilder
                     .on(request)
+                    .chain(policyChain)
                     .transform(
                             buffer -> {
                                 try {
-                                    // Get script class
-                                    Class<?> scriptClass = getOrCreate(script);
+                                    final String content = executeStreamScript(
+                                            new ContentAwareRequest(request, buffer.toString()),
+                                            new ContentAwareResponse(response, null),
+                                            executionContext,
+                                            script);
 
-                                    // Prepare binding
-                                    Binding binding = new Binding();
-                                    binding.setVariable("request", new ContentAwareRequest(request, buffer.toString()));
-                                    binding.setVariable("response", new ContentAwareResponse(response, null));
-                                    binding.setVariable("context", executionContext);
-
-                                    // And run script
-                                    Script gScript = InvokerHelper.createScript(scriptClass, binding);
-                                    String newContent = (String) gScript.run();
-
-                                    return Buffer.buffer(newContent);
-                                } catch (Exception ex) {
-                                    throw new TransformationException("Unable to run Groovy script: " + ex.getMessage(), ex);
+                                    return Buffer.buffer(content);
+                                } catch (PolicyFailureException ex) {
+                                    policyChain.streamFailWith(io.gravitee.policy.api.PolicyResult.failure(
+                                            ex.getResult().getCode(), ex.getResult().getError()));
+                                } catch (Throwable t) {
+                                    throw new TransformationException("Unable to run Groovy script: " + t.getMessage(), t);
                                 }
-
+                                return null;
                             }
                     ).build();
         }
@@ -138,7 +138,8 @@ public class GroovyPolicy {
         return null;
     }
 
-    private void executeScript(String script, Request request, Response response, ExecutionContext executionContext, PolicyChain policyChain) {
+    private String executeScript(Request request, Response response, ExecutionContext executionContext,
+                                 PolicyChain policyChain, String script) {
         if (script == null || script.trim().isEmpty()) {
             policyChain.doNext(request, response);
         } else {
@@ -148,16 +149,16 @@ public class GroovyPolicy {
 
                 // Prepare binding
                 Binding binding = new Binding();
-                binding.setVariable("response", new ContentAwareResponse(response, null));
-                binding.setVariable("request", new ContentAwareRequest(request, null));
-                binding.setVariable("context", executionContext);
-                binding.setVariable("result", new PolicyResult());
+                binding.setVariable(REQUEST_VARIABLE_NAME, request);
+                binding.setVariable(RESPONSE_VARIABLE_NAME, response);
+                binding.setVariable(CONTEXT_VARIABLE_NAME, executionContext);
+                binding.setVariable(RESULT_VARIABLE_NAME, new PolicyResult());
 
                 // And run script
                 Script gScript = InvokerHelper.createScript(scriptClass, binding);
                 gScript.run();
 
-                PolicyResult result = (PolicyResult) binding.getVariable("result");
+                PolicyResult result = (PolicyResult) binding.getVariable(RESULT_VARIABLE_NAME);
 
                 if (result.getState() == PolicyResult.State.SUCCESS) {
                     policyChain.doNext(request, response);
@@ -167,10 +168,36 @@ public class GroovyPolicy {
                             result.getError()
                     ));
                 }
-            } catch (Exception ex) {
-                policyChain.failWith(io.gravitee.policy.api.PolicyResult.failure(ex.getMessage()));
+            } catch (Throwable t) {
+                policyChain.failWith(io.gravitee.policy.api.PolicyResult.failure(t.getMessage()));
             }
         }
+
+        return null;
+    }
+
+    private String executeStreamScript(Request request, Response response, ExecutionContext executionContext,
+                                       String script) throws PolicyFailureException {
+        // Get script class
+        Class<?> scriptClass = getOrCreate(script);
+
+        // Prepare binding
+        Binding binding = new Binding();
+        binding.setVariable(REQUEST_VARIABLE_NAME, request);
+        binding.setVariable(RESPONSE_VARIABLE_NAME, response);
+        binding.setVariable(CONTEXT_VARIABLE_NAME, executionContext);
+        binding.setVariable(RESULT_VARIABLE_NAME, new PolicyResult());
+
+        // And run script
+        Script gScript = InvokerHelper.createScript(scriptClass, binding);
+        String content = (String) gScript.run();
+
+        PolicyResult result = (PolicyResult) binding.getVariable(RESULT_VARIABLE_NAME);
+        if (result.getState() == PolicyResult.State.FAILURE) {
+            throw new PolicyFailureException(result);
+        }
+
+        return content;
     }
 
     private Class<?> getOrCreate(String script) throws CompilationFailedException {
@@ -179,5 +206,18 @@ public class GroovyPolicy {
             GroovyCodeSource gcs = new GroovyCodeSource(script, key, GroovyShell.DEFAULT_CODE_BASE);
             return GROOVY_SHELL.getClassLoader().parseClass(gcs, true);
         });
+    }
+
+    private static class PolicyFailureException extends Exception {
+
+        private final PolicyResult result;
+
+        PolicyFailureException(PolicyResult result) {
+            this.result = result;
+        }
+
+        public PolicyResult getResult() {
+            return result;
+        }
     }
 }
