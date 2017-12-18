@@ -149,8 +149,8 @@ public class GroovyPolicy {
 
                 // Prepare binding
                 Binding binding = new Binding();
-                binding.setVariable(REQUEST_VARIABLE_NAME, request);
-                binding.setVariable(RESPONSE_VARIABLE_NAME, response);
+                binding.setVariable(REQUEST_VARIABLE_NAME, new ContentAwareRequest(request, null));
+                binding.setVariable(RESPONSE_VARIABLE_NAME, new ContentAwareResponse(response, null));
                 binding.setVariable(CONTEXT_VARIABLE_NAME, executionContext);
                 binding.setVariable(RESULT_VARIABLE_NAME, new PolicyResult());
 
