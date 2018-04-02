@@ -66,6 +66,17 @@ if (request.headers.containsKey('X-Gravitee-Break')) {
 }
 ----
 
+If you want to customize the error send by the policy:
+
+[source, groovy]
+----
+import io.gravitee.policy.groovy.PolicyResult.State
+result.state = State.FAILURE;
+result.code = 400
+result.error = '{"error":"My specific error message","code":"MY_ERROR_CODE"}'
+result.contentType = 'application/json'
+----
+
 === OnRequestContent / OnResponseContent
 
 You can also transform request or response body content by applying a groovy script on

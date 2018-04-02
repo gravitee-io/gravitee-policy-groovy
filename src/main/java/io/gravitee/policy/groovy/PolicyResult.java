@@ -29,6 +29,8 @@ public class PolicyResult {
 
     private int code = HttpStatusCode.INTERNAL_SERVER_ERROR_500;
 
+    private String contentType = null;
+
     public String getError() {
         return error;
     }
@@ -41,8 +43,16 @@ public class PolicyResult {
         return code;
     }
 
+    public String getContentType() {
+        return contentType;
+    }
+
     public void setCode(int code) {
         this.code = code;
+    }
+
+    public void setContentType(String contentType) {
+        this.contentType = contentType;
     }
 
     public State getState() {
