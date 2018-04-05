@@ -49,7 +49,7 @@ mvn clean install
 git push origin issue/#<issue-id>-my-fix-branch
 ```
 
-* In GitHub, send a pull request to `<gravitee-io/gravitee-policy-ratelimit>:master`.
+* In GitHub, send a pull request to `<gravitee-io/gravitee-policy-groovy>:master`.
 
 * If we suggest changes then:
   ** Make the required updates.
