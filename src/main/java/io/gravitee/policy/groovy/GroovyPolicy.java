@@ -27,11 +27,9 @@ import io.gravitee.gateway.api.http.stream.TransformableRequestStreamBuilder;
 import io.gravitee.gateway.api.http.stream.TransformableResponseStreamBuilder;
 import io.gravitee.gateway.api.stream.ReadWriteStream;
 import io.gravitee.gateway.api.stream.exception.TransformationException;
+import io.gravitee.policy.api.ChainScope;
 import io.gravitee.policy.api.PolicyChain;
-import io.gravitee.policy.api.annotations.OnRequest;
-import io.gravitee.policy.api.annotations.OnRequestContent;
-import io.gravitee.policy.api.annotations.OnResponse;
-import io.gravitee.policy.api.annotations.OnResponseContent;
+import io.gravitee.policy.api.annotations.*;
 import io.gravitee.policy.groovy.configuration.GroovyPolicyConfiguration;
 import io.gravitee.policy.groovy.model.ContentAwareRequest;
 import io.gravitee.policy.groovy.model.ContentAwareResponse;
@@ -46,6 +44,10 @@ import java.util.concurrent.ConcurrentMap;
  * @author David BRASSELY (david.brassely at graviteesource.com)
  * @author GraviteeSource Team
  */
+@Policy(
+        category = @Category(io.gravitee.policy.api.Category.TRANSFORMATION),
+        scope = @Scope(ChainScope.API)
+)
 public class GroovyPolicy {
 
     private final GroovyPolicyConfiguration groovyPolicyConfiguration;
