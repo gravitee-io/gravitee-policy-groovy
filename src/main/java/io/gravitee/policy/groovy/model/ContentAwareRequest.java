@@ -25,7 +25,7 @@ import io.gravitee.gateway.api.handler.Handler;
 import io.gravitee.gateway.api.stream.ReadStream;
 import io.gravitee.reporter.api.http.Metrics;
 
-import java.time.Instant;
+import javax.net.ssl.SSLSession;
 
 /**
  * @author David BRASSELY (david.brassely at graviteesource.com)
@@ -63,7 +63,7 @@ public class ContentAwareRequest implements Request {
         return request.transactionId();
     }
 
-    public String getYransactionId() {
+    public String getTransactionId() {
         return this.transactionId();
     }
 
@@ -140,11 +140,11 @@ public class ContentAwareRequest implements Request {
     }
 
     @Override
-    public Instant timestamp() {
+    public long timestamp() {
         return request.timestamp();
     }
 
-    public Instant getTimestamp() {
+    public long getTimestamp() {
         return this.timestamp();
     }
 
@@ -164,6 +164,33 @@ public class ContentAwareRequest implements Request {
 
     public String getLocalAddress() {
         return this.localAddress();
+    }
+
+    @Override
+    public String scheme() {
+        return request.localAddress();
+    }
+
+    public String getScheme() {
+        return this.scheme();
+    }
+
+    @Override
+    public String rawMethod() {
+        return request.rawMethod();
+    }
+
+    public String getRawMethod() {
+        return request.rawMethod();
+    }
+
+    @Override
+    public SSLSession sslSession() {
+        return request.sslSession();
+    }
+
+    public SSLSession getSslSession() {
+        return this.sslSession();
     }
 
     @Override
