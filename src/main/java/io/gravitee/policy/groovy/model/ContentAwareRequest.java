@@ -207,4 +207,9 @@ public class ContentAwareRequest implements Request {
     public ReadStream<Buffer> endHandler(Handler<Void> endHandler) {
         return request.endHandler(endHandler);
     }
+
+    @Override
+    public boolean ended() {
+        return request.ended();
+    }
 }
