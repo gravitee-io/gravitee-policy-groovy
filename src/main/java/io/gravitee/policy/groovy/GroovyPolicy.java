@@ -35,6 +35,7 @@ import io.gravitee.policy.api.annotations.OnResponseContent;
 import io.gravitee.policy.groovy.configuration.GroovyPolicyConfiguration;
 import io.gravitee.policy.groovy.model.ContentAwareRequest;
 import io.gravitee.policy.groovy.model.ContentAwareResponse;
+import io.gravitee.policy.groovy.utils.AttributesBasedExecutionContext;
 import io.gravitee.policy.groovy.utils.Sha1;
 import org.codehaus.groovy.control.CompilationFailedException;
 import org.codehaus.groovy.runtime.InvokerHelper;
@@ -161,7 +162,7 @@ public class GroovyPolicy {
                 Binding binding = new Binding();
                 binding.setVariable(REQUEST_VARIABLE_NAME, new ContentAwareRequest(request, null));
                 binding.setVariable(RESPONSE_VARIABLE_NAME, new ContentAwareResponse(response, null));
-                binding.setVariable(CONTEXT_VARIABLE_NAME, executionContext);
+                binding.setVariable(CONTEXT_VARIABLE_NAME, new AttributesBasedExecutionContext(executionContext));
                 binding.setVariable(RESULT_VARIABLE_NAME, new PolicyResult());
 
                 // And run script
@@ -201,7 +202,7 @@ public class GroovyPolicy {
         Binding binding = new Binding();
         binding.setVariable(REQUEST_VARIABLE_NAME, request);
         binding.setVariable(RESPONSE_VARIABLE_NAME, response);
-        binding.setVariable(CONTEXT_VARIABLE_NAME, executionContext);
+        binding.setVariable(CONTEXT_VARIABLE_NAME, new AttributesBasedExecutionContext(executionContext));
         binding.setVariable(RESULT_VARIABLE_NAME, new PolicyResult());
 
         // And run script
