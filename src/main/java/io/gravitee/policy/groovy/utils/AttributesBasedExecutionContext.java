@@ -15,20 +15,22 @@
  */
 package io.gravitee.policy.groovy.utils;
 
+import io.gravitee.el.TemplateEngine;
 import io.gravitee.gateway.api.ExecutionContext;
+import io.gravitee.gateway.api.Request;
+import io.gravitee.gateway.api.Response;
 
-import java.util.HashMap;
+import java.util.Enumeration;
 import java.util.Map;
 
 /**
  * @author David BRASSELY (david.brassely at graviteesource.com)
  * @author GraviteeSource Team
  */
-public class AttributesBasedExecutionContext {
+public class AttributesBasedExecutionContext implements ExecutionContext {
 
     private final static String CONTEXT_DICTIONARIES_VARIABLE = "dictionaries";
     private final ExecutionContext context;
-    private final Map<String, Object> attributes = new AttributeMap();
 
     public AttributesBasedExecutionContext(final ExecutionContext context) {
         this.context = context;
@@ -39,18 +41,48 @@ public class AttributesBasedExecutionContext {
                 this.context.getTemplateEngine().getTemplateContext().lookupVariable(CONTEXT_DICTIONARIES_VARIABLE);
     }
 
-    public Object getAttributes() {
-        return attributes;
+    @Override
+    public Request request() {
+        return context.request();
     }
 
-    private class AttributeMap extends HashMap<String, Object> {
-
-        AttributeMap() { }
-
-        @Override
-        public Object get(Object key) {
-            return context.getAttribute((String) key);
-        }
+    @Override
+    public Response response() {
+        return context.response();
     }
 
+    @Override
+    public <T> T getComponent(Class<T> aClass) {
+        return context.getComponent(aClass);
+    }
+
+    @Override
+    public void setAttribute(String s, Object o) {
+        context.setAttribute(s, o);
+    }
+
+    @Override
+    public void removeAttribute(String s) {
+        context.removeAttribute(s);
+    }
+
+    @Override
+    public Object getAttribute(String s) {
+        return context.getAttribute(s);
+    }
+
+    @Override
+    public Enumeration<String> getAttributeNames() {
+        return context.getAttributeNames();
+    }
+
+    @Override
+    public Map<String, Object> getAttributes() {
+        return context.getAttributes();
+    }
+
+    @Override
+    public TemplateEngine getTemplateEngine() {
+        return context.getTemplateEngine();
+    }
 }
