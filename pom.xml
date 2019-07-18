@@ -38,7 +38,7 @@
         <gravitee-policy-api.version>1.5.0</gravitee-policy-api.version>
         <gravitee-common.version>1.15.0</gravitee-common.version>
 
-        <groovy-all.version>2.4.7</groovy-all.version>
+        <groovy-all.version>2.5.7</groovy-all.version>
         <maven-assembly-plugin.version>2.5.5</maven-assembly-plugin.version>
     </properties>
 
@@ -69,6 +69,7 @@
             <groupId>org.codehaus.groovy</groupId>
             <artifactId>groovy-all</artifactId>
             <version>${groovy-all.version}</version>
+            <type>pom</type>
         </dependency>
 
         <dependency>
