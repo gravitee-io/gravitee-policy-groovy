@@ -20,6 +20,8 @@ import io.gravitee.common.http.HttpStatusCode;
 import io.gravitee.gateway.api.ExecutionContext;
 import io.gravitee.gateway.api.Request;
 import io.gravitee.gateway.api.Response;
+import io.gravitee.gateway.api.buffer.Buffer;
+import io.gravitee.gateway.api.stream.ReadWriteStream;
 import io.gravitee.policy.api.PolicyChain;
 import io.gravitee.policy.api.PolicyResult;
 import io.gravitee.policy.groovy.configuration.GroovyPolicyConfiguration;
@@ -131,6 +133,20 @@ public class GroovyPolicyTest {
                 result ->
                         result.statusCode() == HttpStatusCode.INTERNAL_SERVER_ERROR_500 &&
                                 result.message().equals("Stop request processing due to X-Gravitee-Break header")));
+    }
+
+    @Test
+    public void shouldReadJson() throws Exception {
+        HttpHeaders headers = spy(new HttpHeaders());
+        when(request.headers()).thenReturn(headers);
+
+        when(configuration.getOnRequestContentScript()).thenReturn(loadResource("read_json.groovy"));
+        String content = loadResource("read_json.json");
+
+        ReadWriteStream stream = new GroovyPolicy(configuration).onRequestContent(request, response, executionContext, policyChain);
+        stream.end(Buffer.buffer(content));
+
+        verify(policyChain, never()).doNext(any(), any());
     }
 
     private String loadResource(String resource) throws IOException {

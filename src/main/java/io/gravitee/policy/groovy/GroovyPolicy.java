@@ -37,6 +37,7 @@ import io.gravitee.policy.groovy.model.ContentAwareRequest;
 import io.gravitee.policy.groovy.model.ContentAwareResponse;
 import io.gravitee.policy.groovy.utils.AttributesBasedExecutionContext;
 import io.gravitee.policy.groovy.utils.Sha1;
+import org.apache.groovy.json.internal.FastStringUtils;
 import org.codehaus.groovy.control.CompilationFailedException;
 import org.codehaus.groovy.runtime.InvokerHelper;
 
@@ -59,6 +60,15 @@ public class GroovyPolicy {
     private static final GroovyShell GROOVY_SHELL = new GroovyShell();
 
     private static final ConcurrentMap<String, Class<?>> sources = new ConcurrentHashMap<>();
+
+    static {
+        // Do not change this block of code which is required to work with groovy 2.5 and the classloader used
+        // to load services
+        ClassLoader loader = Thread.currentThread().getContextClassLoader();
+        Thread.currentThread().setContextClassLoader(GroovyPolicy.class.getClassLoader());
+        FastStringUtils.toCharArray("hack");
+        Thread.currentThread().setContextClassLoader(loader);
+    }
 
     public GroovyPolicy(GroovyPolicyConfiguration groovyPolicyConfiguration) {
         this.groovyPolicyConfiguration = groovyPolicyConfiguration;
