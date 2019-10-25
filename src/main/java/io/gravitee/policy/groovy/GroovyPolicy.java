@@ -231,7 +231,7 @@ public class GroovyPolicy {
         String key = Sha1.sha1(script);
         return sources.computeIfAbsent(key, s -> {
             GroovyCodeSource gcs = new GroovyCodeSource(script, key, GroovyShell.DEFAULT_CODE_BASE);
-            return GROOVY_SHELL.getClassLoader().parseClass(gcs, true);
+            return GROOVY_SHELL.getClassLoader().parseClass(gcs, false);
         });
     }
 

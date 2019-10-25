@@ -45,16 +45,12 @@ public class GroovyPolicyTest {
 
     @Mock
     private ExecutionContext executionContext;
-
     @Mock
     private Request request;
-
     @Mock
     private Response response;
-
     @Mock
     private PolicyChain policyChain;
-
     @Mock
     private GroovyPolicyConfiguration configuration;
 
@@ -165,6 +161,4 @@ public class GroovyPolicyTest {
 
         return builder.toString();
     }
-
-
 }
