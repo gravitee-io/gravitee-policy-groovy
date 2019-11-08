@@ -44,6 +44,16 @@ public class ContentAwareResponse implements Response {
         return response.status();
     }
 
+    @Override
+    public String reason() {
+        return response.reason();
+    }
+
+    @Override
+    public Response reason(String message) {
+        return response.reason(message);
+    }
+
     public int getStatus() {
         return this.status();
     }
@@ -51,6 +61,11 @@ public class ContentAwareResponse implements Response {
     @Override
     public HttpHeaders headers() {
         return response.headers();
+    }
+
+    @Override
+    public boolean ended() {
+        return response.ended();
     }
 
     public HttpHeaders getHeaders() {

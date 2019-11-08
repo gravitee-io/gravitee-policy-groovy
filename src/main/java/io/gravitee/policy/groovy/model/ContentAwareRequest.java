@@ -23,6 +23,7 @@ import io.gravitee.gateway.api.Request;
 import io.gravitee.gateway.api.buffer.Buffer;
 import io.gravitee.gateway.api.handler.Handler;
 import io.gravitee.gateway.api.stream.ReadStream;
+import io.gravitee.gateway.api.ws.WebSocket;
 import io.gravitee.reporter.api.http.Metrics;
 
 import javax.net.ssl.SSLSession;
@@ -211,5 +212,25 @@ public class ContentAwareRequest implements Request {
     @Override
     public boolean ended() {
         return request.ended();
+    }
+
+    @Override
+    public Request timeoutHandler(Handler<Long> timeoutHandler) {
+        return request.timeoutHandler(timeoutHandler);
+    }
+
+    @Override
+    public Handler<Long> timeoutHandler() {
+        return request.timeoutHandler();
+    }
+
+    @Override
+    public boolean isWebSocket() {
+        return request.isWebSocket();
+    }
+
+    @Override
+    public WebSocket websocket() {
+        return request.websocket();
     }
 }
