@@ -30,15 +30,16 @@
     <parent>
         <groupId>io.gravitee</groupId>
         <artifactId>gravitee-parent</artifactId>
-        <version>16</version>
+        <version>17</version>
     </parent>
 
     <properties>
         <gravitee-gateway-api.version>1.15.3</gravitee-gateway-api.version>
+        <gravitee-gateway-buffer.version>1.18.3</gravitee-gateway-buffer.version>
         <gravitee-policy-api.version>1.5.0</gravitee-policy-api.version>
         <gravitee-common.version>1.15.1</gravitee-common.version>
 
-        <groovy-all.version>2.5.7</groovy-all.version>
+        <groovy.version>2.5.7</groovy.version>
         <maven-assembly-plugin.version>2.5.5</maven-assembly-plugin.version>
     </properties>
 
@@ -67,9 +68,14 @@
 
         <dependency>
             <groupId>org.codehaus.groovy</groupId>
-            <artifactId>groovy-all</artifactId>
-            <version>${groovy-all.version}</version>
-            <type>pom</type>
+            <artifactId>groovy</artifactId>
+            <version>${groovy.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.codehaus.groovy</groupId>
+            <artifactId>groovy-json</artifactId>
+            <version>${groovy.version}</version>
         </dependency>
 
         <dependency>
@@ -96,6 +102,13 @@
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>io.gravitee.gateway</groupId>
+            <artifactId>gravitee-gateway-buffer</artifactId>
+            <version>${gravitee-gateway-buffer.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
