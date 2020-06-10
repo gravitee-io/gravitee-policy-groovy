@@ -16,9 +16,6 @@
 package io.gravitee.policy.groovy;
 
 import groovy.lang.Binding;
-import groovy.lang.GroovyCodeSource;
-import groovy.lang.GroovyShell;
-import groovy.lang.Script;
 import io.gravitee.gateway.api.ExecutionContext;
 import io.gravitee.gateway.api.Request;
 import io.gravitee.gateway.api.Response;
@@ -35,20 +32,18 @@ import io.gravitee.policy.api.annotations.OnResponseContent;
 import io.gravitee.policy.groovy.configuration.GroovyPolicyConfiguration;
 import io.gravitee.policy.groovy.model.ContentAwareRequest;
 import io.gravitee.policy.groovy.model.ContentAwareResponse;
+import io.gravitee.policy.groovy.sandbox.SecuredGroovyShell;
 import io.gravitee.policy.groovy.utils.AttributesBasedExecutionContext;
-import io.gravitee.policy.groovy.utils.Sha1;
-import org.apache.groovy.json.internal.FastStringUtils;
-import org.codehaus.groovy.control.CompilationFailedException;
-import org.codehaus.groovy.runtime.InvokerHelper;
-
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author David BRASSELY (david.brassely at graviteesource.com)
  * @author GraviteeSource Team
  */
 public class GroovyPolicy {
+
+    private static final Logger logger = LoggerFactory.getLogger(GroovyPolicy.class);
 
     private final GroovyPolicyConfiguration groovyPolicyConfiguration;
 
@@ -57,18 +52,7 @@ public class GroovyPolicy {
     private final static String CONTEXT_VARIABLE_NAME = "context";
     private final static String RESULT_VARIABLE_NAME = "result";
 
-    private static final GroovyShell GROOVY_SHELL = new GroovyShell();
-
-    private static final ConcurrentMap<String, Class<?>> sources = new ConcurrentHashMap<>();
-
-    static {
-        // Do not change this block of code which is required to work with groovy 2.5 and the classloader used
-        // to load services
-        ClassLoader loader = Thread.currentThread().getContextClassLoader();
-        Thread.currentThread().setContextClassLoader(GroovyPolicy.class.getClassLoader());
-        FastStringUtils.toCharArray("hack");
-        Thread.currentThread().setContextClassLoader(loader);
-    }
+    private static final SecuredGroovyShell GROOVY_SHELL = new SecuredGroovyShell();
 
     public GroovyPolicy(GroovyPolicyConfiguration groovyPolicyConfiguration) {
         this.groovyPolicyConfiguration = groovyPolicyConfiguration;
@@ -111,6 +95,7 @@ public class GroovyPolicy {
                                                 ex.getResult().getCode(), ex.getResult().getError()));
                                     }
                                 } catch (Throwable t) {
+                                    logger.error("Unable to run Groovy script", t);
                                     throw new TransformationException("Unable to run Groovy script: " + t.getMessage(), t);
                                 }
                                 return null;
@@ -149,6 +134,7 @@ public class GroovyPolicy {
                                                 ex.getResult().getCode(), ex.getResult().getError()));
                                     }
                                 } catch (Throwable t) {
+                                    logger.error("Unable to run Groovy script", t);
                                     throw new TransformationException("Unable to run Groovy script: " + t.getMessage(), t);
                                 }
                                 return null;
@@ -165,9 +151,6 @@ public class GroovyPolicy {
             policyChain.doNext(request, response);
         } else {
             try {
-                // Get script class
-                Class<?> scriptClass = getOrCreate(script);
-
                 // Prepare binding
                 Binding binding = new Binding();
                 binding.setVariable(REQUEST_VARIABLE_NAME, new ContentAwareRequest(request, null));
@@ -176,8 +159,7 @@ public class GroovyPolicy {
                 binding.setVariable(RESULT_VARIABLE_NAME, new PolicyResult());
 
                 // And run script
-                Script gScript = InvokerHelper.createScript(scriptClass, binding);
-                gScript.run();
+                GROOVY_SHELL.evaluate(script, binding);
 
                 PolicyResult result = (PolicyResult) binding.getVariable(RESULT_VARIABLE_NAME);
 
@@ -196,6 +178,7 @@ public class GroovyPolicy {
                     }
                 }
             } catch (Throwable t) {
+                logger.error("Unable to run Groovy script", t);
                 policyChain.failWith(io.gravitee.policy.api.PolicyResult.failure(t.getMessage()));
             }
         }
@@ -205,9 +188,6 @@ public class GroovyPolicy {
 
     private String executeStreamScript(Request request, Response response, ExecutionContext executionContext,
                                        String script) throws PolicyFailureException {
-        // Get script class
-        Class<?> scriptClass = getOrCreate(script);
-
         // Prepare binding
         Binding binding = new Binding();
         binding.setVariable(REQUEST_VARIABLE_NAME, request);
@@ -216,8 +196,7 @@ public class GroovyPolicy {
         binding.setVariable(RESULT_VARIABLE_NAME, new PolicyResult());
 
         // And run script
-        Script gScript = InvokerHelper.createScript(scriptClass, binding);
-        String content = (String) gScript.run();
+        String content = GROOVY_SHELL.evaluate(script, binding);
 
         PolicyResult result = (PolicyResult) binding.getVariable(RESULT_VARIABLE_NAME);
         if (result.getState() == PolicyResult.State.FAILURE) {
@@ -225,14 +204,6 @@ public class GroovyPolicy {
         }
 
         return content;
-    }
-
-    private Class<?> getOrCreate(String script) throws CompilationFailedException {
-        String key = Sha1.sha1(script);
-        return sources.computeIfAbsent(key, s -> {
-            GroovyCodeSource gcs = new GroovyCodeSource(script, key, GroovyShell.DEFAULT_CODE_BASE);
-            return GROOVY_SHELL.getClassLoader().parseClass(gcs, true);
-        });
     }
 
     private static class PolicyFailureException extends Exception {

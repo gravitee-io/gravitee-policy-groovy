@@ -111,12 +111,45 @@ return JsonOutput.toJson(content)
         "age": 32,
         "firstname": "Hacked John",
         "lastname": "Doe",
-        "country": "US
+        "country": "US"
     }
 ]
 ----
 
 == Configuration
+
+=== Sandbox
+
+Groovy policy comes with a native sandbox feature allowing to safely run Groovy scripts. The sandbox is based on a
+predefined list of allowed methods, fields, constructors, and annotations.
+
+The complete whitelist can be found here : https://raw.githubusercontent.com/gravitee-io/gravitee-policy-groovy/master/src/main/resources/groovy-whitelist[gravitee groovy whitelist]
+
+This whitelist should be enough for almost all possible use cases. If you have specific needs which are not allowed by the built-in whitelist, you can extend (or even replace) the list with your own declarations.
+For that, you can configure the gravitee.yml by specifying:
+
+ * `groovy.whitelist.mode`: `append` or `replace`. This allows you to just append some new whitelisted definitions to the built-in list or completely replace it. We recommend you to always choose `append` unless you absolutely know what you are doing.
+ * `groovy.whitelist.list`: allows declaring other methods, constructors, fields or annotations to the whitelist.
+ ** start with `method` to allow a specific method (complete signature).
+ ** start with `class` to allow a complete class. All methods, constructors and fields of the class will then be accessible.
+ ** start with `new` to allow a specific constructor (complete signature).
+ ** start with `field` to allow access to a specific field of a class.
+ ** start with `annotation` to allow use of a specific annotation.
+
+Example:
+[source, yaml]
+groovy:
+  whitelist:
+    mode: append
+    list:
+        - method java.time.format.DateTimeFormatter ofLocalizedDate java.time.format.FormatStyle
+        - class java.time.format.DateTimeFormatter
+
+*Note*: the `DateTimeFormatter` class is already part of the build-in whitelist.
+
+*WARNING*: be care when you allow use of classes or methods. In some cases, giving access to all methods of a classes may allow access by transitivity to unwanted methods and may open security breaches.
+
+=== Policy configuration
 [source, json]
 .Configuration example
 "groovy": {
