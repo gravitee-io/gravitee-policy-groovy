@@ -146,6 +146,8 @@ public class GroovyPolicyTest {
         ReadWriteStream stream = new GroovyPolicy(configuration).onRequestContent(request, response, executionContext, policyChain);
         stream.end(Buffer.buffer(content));
 
+        verify(policyChain, never()).failWith(any(PolicyResult.class));
+        verify(policyChain, never()).streamFailWith(any(PolicyResult.class));
         verify(policyChain, never()).doNext(any(), any());
     }
 
@@ -165,6 +167,4 @@ public class GroovyPolicyTest {
 
         return builder.toString();
     }
-
-
 }

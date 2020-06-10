@@ -30,16 +30,17 @@
     <parent>
         <groupId>io.gravitee</groupId>
         <artifactId>gravitee-parent</artifactId>
-        <version>17</version>
+        <version>19</version>
     </parent>
 
     <properties>
         <gravitee-gateway-api.version>1.20.0</gravitee-gateway-api.version>
         <gravitee-gateway-buffer.version>1.18.3</gravitee-gateway-buffer.version>
-        <gravitee-policy-api.version>1.6.0</gravitee-policy-api.version>
-        <gravitee-common.version>1.17.0</gravitee-common.version>
-
-        <groovy.version>2.5.7</groovy.version>
+        <gravitee-policy-api.version>1.8.0-SNAPSHOT</gravitee-policy-api.version>
+        <gravitee-common.version>1.17.1</gravitee-common.version>
+        <groovy.version>2.5.12</groovy.version>
+        <groovy-sandbox.version>1.26</groovy-sandbox.version>
+        <commons-lang3.version>3.10</commons-lang3.version>
         <maven-assembly-plugin.version>2.5.5</maven-assembly-plugin.version>
     </properties>
 
@@ -79,6 +80,18 @@
         </dependency>
 
         <dependency>
+            <groupId>org.kohsuke</groupId>
+            <artifactId>groovy-sandbox</artifactId>
+            <version>${groovy-sandbox.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>${commons-lang3.version}</version>
+        </dependency>
+
+        <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
             <version>${slf4j.version}</version>
@@ -109,6 +122,19 @@
             <groupId>io.gravitee.gateway</groupId>
             <artifactId>gravitee-gateway-buffer</artifactId>
             <version>${gravitee-gateway-buffer.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-test</artifactId>
+            <version>${spring.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -143,4 +169,12 @@
         </plugins>
     </build>
 
+    <!-- This repository is necessary to fetch groovy-sandbox -->
+    <repositories>
+        <repository>
+            <id>jenkins-releases</id>
+            <name>Jenkins Releases</name>
+            <url>https://repo.jenkins-ci.org/releases/</url>
+        </repository>
+    </repositories>
 </project>
