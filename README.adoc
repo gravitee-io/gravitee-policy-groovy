@@ -1,4 +1,4 @@
-= Groovy Policy
+= Groovy policy
 
 ifdef::env-github[]
 image:https://ci.gravitee.io/buildStatus/icon?job=gravitee-io/gravitee-policy-groovy/master["Build status", link="https://ci.gravitee.io/job/gravitee-io/job/gravitee-policy-groovy/"]
@@ -13,10 +13,10 @@ endif::[]
 |===
 
 == Description
-The http://www.groovy-lang.org/[Groovy] policy lets the user (ie. API publisher) to run groovy scripts during all the
-stages of the request processing through the gateway.
 
-The following groovy script is an example executed during the _OnResponse_ phase to change HTTP headers:
+You can use the http://www.groovy-lang.org/[Groovy^] policy to run Groovy scripts at any stage of request processing through the gateway.
+
+The following example Groovy script is executed during the OnResponse phase to change HTTP headers:
 
 [source, groovy]
 ----
@@ -24,28 +24,36 @@ response.headers.remove 'X-Powered-By'
 response.headers.'X-Gravitee-Gateway-Version' = '0.14.0'
 ----
 
-== Usage
+== Configuration
 
-You can attach a groovy script to all phases of the request processing.
+[source, json]
+"groovy": {
+    "onRequestScript": "request.headers.'X-Gravitee-Gateway' = '0.14.0'",
+    "onResponseScript": "response.headers.remove 'X-Powered-By'",
+    "onRequestContentScript": "" // Not executed if empty
+    "onResponseContentScript": "" // Not executed if empty
+}
 
-=== OnRequest / OnResponse
+== Usage and examples
 
-Some variables are automatically bind to the Groovy script to let user to use them and define the policy behavior.
+=== onRequest / onResponse
+
+Some variables are automatically bound to the Groovy script to allow users to use them and define the policy behavior.
 
 [width="100%",cols="2,10",options="header"]
 .List of groovy script variables
 |===
 | Name | Description
 
-| *request* | Inbound HTTP request
-| *response* | Outbound HTTP response
-| *context* | `PolicyContext` used to access external components such as services, resources, ...
-| *result* | Result of the groovy script
+| `request` | Inbound HTTP request
+| `response` | Outbound HTTP response
+| `context` | `PolicyContext` used to access external components such as services and resources
+| `result` | Groovy script result
 
 |===
 
-You can also break request or response processing by setting the result's state to `FAILURE`, providing an HTTP
-status code and a message (not mandatory, status is equals to 500 (internal server error) by default).
+You can interrupt request or response processing by setting the result state to `FAILURE`, providing an HTTP
+status code and a message (this is not mandatory, as the default status is `500 - internal server error`).
 
 [source, groovy]
 ----
@@ -60,7 +68,7 @@ if (request.headers.containsKey('X-Gravitee-Break')) {
 }
 ----
 
-If you want to customize the error send by the policy:
+To customize the error sent by the policy:
 
 [source, groovy]
 ----
@@ -73,10 +81,10 @@ result.contentType = 'application/json'
 
 === OnRequestContent / OnResponseContent
 
-You can also transform request or response body content by applying a groovy script on
-the _OnRequestContent_ phase or the _OnResponseContent_ phase.
+You can also transform request or response body content by applying a Groovy script on
+the `OnRequestContent` phase or the `OnResponseContent` phase.
 
-Following is an example to show you how to use _Groovy policy_ to transform a JSON content:
+The following example shows you how to use the Groovy policy to transform JSON content:
 
 ==== Input body content
 [source, json]
@@ -116,23 +124,14 @@ return JsonOutput.toJson(content)
 ]
 ----
 
-== Configuration
-[source, json]
-.Configuration example
-"groovy": {
-    "onRequestScript": "request.headers.'X-Gravitee-Gateway' = '0.14.0'",
-    "onResponseScript": "response.headers.remove 'X-Powered-By'",
-    "onRequestContentScript": "" // Not executed if empty
-    "onResponseContentScript": "" // Not executed if empty
-}
+== Errors
 
-== Http Status Code
+== HTTP status code
 
 |===
 |Code |Message
 
 | ```500```
-| The groovy script can not be parsed / compiled or executed (mainly due to a syntax error)
+| The Groovy script cannot be parsed/compiled or executed (mainly due to a syntax error)
 
 |===
-
