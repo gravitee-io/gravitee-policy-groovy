@@ -126,7 +126,7 @@ return JsonOutput.toJson(content)
 
 == Errors
 
-== HTTP status code
+=== HTTP status code
 
 |===
 |Code |Message
