@@ -16,6 +16,7 @@
 package io.gravitee.policy.groovy.sandbox;
 
 import groovy.lang.Binding;
+import groovy.lang.GroovyShell;
 import io.gravitee.el.TemplateEngine;
 import org.codehaus.groovy.control.MultipleCompilationErrorsException;
 import org.junit.Before;
@@ -295,6 +296,49 @@ public class SecuredGroovyShellTest {
                 "\n" +
                 "assert numbers instanceof List  \n" +
                 "assert numbers.size() == 3";
+
+        securedGroovyShell.evaluate(script, new Binding());
+    }
+
+    @Test
+    public void listGetAt() {
+
+        String script = "def numbers = [1, 2, 3] \n" +
+                "\n" +
+                "assert numbers.getAt(1) == 2";
+
+        securedGroovyShell.evaluate(script, new Binding());
+    }
+
+    @Test
+    public void listPutAt() {
+
+        String script = "def numbers = [1, 2, 3] \n" +
+                "\n" +
+                "numbers.putAt(1, 42) \n" +
+                "\n" +
+                "assert numbers.getAt(1) == 42";
+
+        securedGroovyShell.evaluate(script, new Binding());
+    }
+
+    @Test
+    public void arrayGetAt() {
+
+        String script = "String s = \"this is a string\".split(\" \").getAt(2) \n" +
+                "\n" +
+                "assert s == \"a\";";
+
+        securedGroovyShell.evaluate(script, new Binding());
+    }
+
+    @Test
+    public void arrayPutAt() {
+
+        String script = "String[] array = new String[3]; \n" +
+                "array.putAt(1, \"test\") \n" +
+                "\n" +
+                "assert array[1] == \"test\";";
 
         securedGroovyShell.evaluate(script, new Binding());
     }
