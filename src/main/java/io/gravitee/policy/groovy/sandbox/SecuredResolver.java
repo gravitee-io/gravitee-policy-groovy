@@ -81,6 +81,8 @@ public class SecuredResolver {
             DateGroovyMethods.class,
     };
 
+    private static final List<String> ALLOWED_ARRAY_NATIVE_METHODS = Arrays.asList("getAt", "putAt");
+
     private static SecuredResolver INSTANCE;
     private static Map<Class<?>, List<Method>> methodsByType;
     private static Map<Class<?>, List<Field>> fieldsByType;
@@ -280,6 +282,13 @@ public class SecuredResolver {
         Class<?>[] selfArgs = new Class[argumentClasses.length + 1];
         selfArgs[0] = clazz;
         System.arraycopy(argumentClasses, 0, selfArgs, 1, argumentClasses.length);
+
+        if(clazz.isArray() && ALLOWED_ARRAY_NATIVE_METHODS.contains(methodName)) {
+            // Groovy allows to call getAt(int) on an array (not a list which is handled by DGM classes).
+            // array.getAt(0) is equivalent to array[0], so we mut allow the call.
+            // Ex: "a b c".split(" ").getAt(2) -> split call return an array !
+            return true;
+        }
 
         // Try to find allowed method from default groovy methods.
         for (Class<?> dgmClass : DGM_CLASSES) {
