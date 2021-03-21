@@ -40,7 +40,7 @@
         <gravitee-common.version>1.17.2</gravitee-common.version>
         <groovy.version>2.5.14</groovy.version>
         <groovy-sandbox.version>1.26</groovy-sandbox.version>
-        <commons-lang3.version>3.11</commons-lang3.version>
+        <commons-lang3.version>3.12.0</commons-lang3.version>
         <maven-assembly-plugin.version>2.5.5</maven-assembly-plugin.version>
     </properties>
 
