@@ -24,6 +24,10 @@ response.headers.remove 'X-Powered-By'
 response.headers.'X-Gravitee-Gateway-Version' = '0.14.0'
 ----
 
+=== Policy identifier
+
+You can enable or disable the policy with policy identifier `groovy`.
+
 == Configuration
 
 [source, json]
