@@ -17,13 +17,12 @@ package io.gravitee.policy.groovy.sandbox;
 
 import groovy.lang.Script;
 import io.gravitee.common.util.MultiValueMap;
-import org.kohsuke.groovy.sandbox.GroovyInterceptor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.kohsuke.groovy.sandbox.GroovyInterceptor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Jeoffrey HAEYAERT (jeoffrey.haeyaert at graviteesource.com)
@@ -31,13 +30,15 @@ import java.util.stream.Collectors;
  */
 public class SecuredInterceptor extends GroovyInterceptor {
 
-
     @Override
     public Object onMethodCall(Invoker invoker, Object receiver, String method, Object... args) throws Throwable {
-
         // Special case to handle HttpHeaders.set(Object, Object). Fallback to original method if generic 'set' method is not allowed (or found).
-        if (receiver instanceof MultiValueMap && method.equals("put") && args.length == 2
-                && SecuredResolver.getInstance().isMethodAllowed(receiver, "set", args)) {
+        if (
+            receiver instanceof MultiValueMap &&
+            method.equals("put") &&
+            args.length == 2 &&
+            SecuredResolver.getInstance().isMethodAllowed(receiver, "set", args)
+        ) {
             return super.onMethodCall(invoker, receiver, "set", args);
         }
 
@@ -50,7 +51,6 @@ public class SecuredInterceptor extends GroovyInterceptor {
 
     @Override
     public Object onStaticCall(Invoker invoker, Class receiver, String method, Object... args) throws Throwable {
-
         if (SecuredResolver.getInstance().isMethodAllowed(receiver, method, args)) {
             return super.onStaticCall(invoker, receiver, method, args);
         }
@@ -60,7 +60,6 @@ public class SecuredInterceptor extends GroovyInterceptor {
 
     @Override
     public Object onNewInstance(Invoker invoker, Class receiver, Object... args) throws Throwable {
-
         if (SecuredResolver.getInstance().isConstructorAllowed(receiver, args)) {
             return super.onNewInstance(invoker, receiver, args);
         }
@@ -70,7 +69,6 @@ public class SecuredInterceptor extends GroovyInterceptor {
 
     @Override
     public Object onSuperCall(Invoker invoker, Class senderType, Object receiver, String method, Object... args) throws Throwable {
-
         if (SecuredResolver.getInstance().isMethodAllowed(receiver, method, args)) {
             return super.onSuperCall(invoker, senderType, receiver, method, args);
         }
@@ -80,17 +78,15 @@ public class SecuredInterceptor extends GroovyInterceptor {
 
     @Override
     public void onSuperConstructor(Invoker invoker, Class receiver, Object... args) throws Throwable {
-
         if (SecuredResolver.getInstance().isConstructorAllowed(receiver, args)) {
             super.onSuperConstructor(invoker, receiver, args);
-        }else {
+        } else {
             throw new SecurityException("Failed to resolve constructor [" + prettyPrint(receiver, "<init>", args) + "]");
         }
     }
 
     @Override
     public Object onGetProperty(Invoker invoker, Object receiver, String property) throws Throwable {
-
         if (receiver instanceof Script && !property.equals("binding") && !property.equals("metaClass")) {
             return super.onGetProperty(invoker, receiver, property);
         }
@@ -104,7 +100,6 @@ public class SecuredInterceptor extends GroovyInterceptor {
 
     @Override
     public Object onSetProperty(Invoker invoker, Object receiver, String property, Object value) throws Throwable {
-
         if (receiver instanceof Script && !property.equals("binding") && !property.equals("metaClass")) {
             return super.onSetProperty(invoker, receiver, property, value);
         }
@@ -118,7 +113,6 @@ public class SecuredInterceptor extends GroovyInterceptor {
 
     @Override
     public Object onGetAttribute(Invoker invoker, Object receiver, String attribute) throws Throwable {
-
         if (SecuredResolver.getInstance().isGetPropertyAllowed(receiver, attribute)) {
             return super.onGetAttribute(invoker, receiver, attribute);
         }
@@ -128,7 +122,6 @@ public class SecuredInterceptor extends GroovyInterceptor {
 
     @Override
     public Object onSetAttribute(Invoker invoker, Object receiver, String attribute, Object value) throws Throwable {
-
         if (SecuredResolver.getInstance().isSetPropertyAllowed(receiver, attribute, value)) {
             return super.onSetAttribute(invoker, receiver, attribute, value);
         }
@@ -138,7 +131,6 @@ public class SecuredInterceptor extends GroovyInterceptor {
 
     @Override
     public Object onGetArray(Invoker invoker, Object receiver, Object index) throws Throwable {
-
         if (isArrayAccess(receiver, index)) {
             return super.onGetArray(invoker, receiver, index);
         }
@@ -148,7 +140,6 @@ public class SecuredInterceptor extends GroovyInterceptor {
 
     @Override
     public Object onSetArray(Invoker invoker, Object receiver, Object index, Object value) throws Throwable {
-
         if (isArrayAccess(receiver, index)) {
             return super.onSetArray(invoker, receiver, index, value);
         }
@@ -157,12 +148,20 @@ public class SecuredInterceptor extends GroovyInterceptor {
     }
 
     private String prettyPrint(Object receiver, String method, Object... args) {
-
-        return (receiver instanceof Class<?> ? receiver : receiver.getClass()) + " " + method + " " + Arrays.asList(args).stream().map(arg -> arg == null ? Object.class.getCanonicalName() : arg.getClass().getCanonicalName()).collect(Collectors.joining(" "));
+        return (
+            (receiver instanceof Class<?> ? receiver : receiver.getClass()) +
+            " " +
+            method +
+            " " +
+            Arrays
+                .asList(args)
+                .stream()
+                .map(arg -> arg == null ? Object.class.getCanonicalName() : arg.getClass().getCanonicalName())
+                .collect(Collectors.joining(" "))
+        );
     }
 
     private boolean isArrayAccess(Object receiver, Object index) {
-
         return (receiver.getClass().isArray() || List.class.isAssignableFrom(receiver.getClass())) && index instanceof Integer;
     }
 }

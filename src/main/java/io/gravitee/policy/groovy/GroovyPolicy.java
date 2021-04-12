@@ -47,10 +47,10 @@ public class GroovyPolicy {
 
     private final GroovyPolicyConfiguration groovyPolicyConfiguration;
 
-    private final static String REQUEST_VARIABLE_NAME = "request";
-    private final static String RESPONSE_VARIABLE_NAME = "response";
-    private final static String CONTEXT_VARIABLE_NAME = "context";
-    private final static String RESULT_VARIABLE_NAME = "result";
+    private static final String REQUEST_VARIABLE_NAME = "request";
+    private static final String RESPONSE_VARIABLE_NAME = "response";
+    private static final String CONTEXT_VARIABLE_NAME = "context";
+    private static final String RESULT_VARIABLE_NAME = "result";
 
     private static final SecuredGroovyShell GROOVY_SHELL = new SecuredGroovyShell();
 
@@ -69,84 +69,113 @@ public class GroovyPolicy {
     }
 
     @OnResponseContent
-    public ReadWriteStream onResponseContent(Request request, Response response, ExecutionContext executionContext,
-                                             PolicyChain policyChain) {
+    public ReadWriteStream onResponseContent(
+        Request request,
+        Response response,
+        ExecutionContext executionContext,
+        PolicyChain policyChain
+    ) {
         String script = groovyPolicyConfiguration.getOnResponseContentScript();
 
         if (script != null && !script.trim().isEmpty()) {
             return TransformableResponseStreamBuilder
-                    .on(response)
-                    .chain(policyChain)
-                    .transform(
-                            buffer -> {
-                                try {
-                                    final String content = executeStreamScript(
-                                            new ContentAwareRequest(request, null),
-                                            new ContentAwareResponse(response, buffer.toString()),
-                                            executionContext,
-                                            script);
-                                    return Buffer.buffer(content);
-                                } catch (PolicyFailureException ex) {
-                                    if (ex.getResult().getContentType() != null) {
-                                        policyChain.streamFailWith(io.gravitee.policy.api.PolicyResult.failure(
-                                                ex.getResult().getCode(), ex.getResult().getError(),ex.getResult().getContentType()));
-                                    } else {
-                                        policyChain.streamFailWith(io.gravitee.policy.api.PolicyResult.failure(
-                                                ex.getResult().getCode(), ex.getResult().getError()));
-                                    }
-                                } catch (Throwable t) {
-                                    logger.error("Unable to run Groovy script", t);
-                                    throw new TransformationException("Unable to run Groovy script: " + t.getMessage(), t);
-                                }
-                                return null;
+                .on(response)
+                .chain(policyChain)
+                .transform(
+                    buffer -> {
+                        try {
+                            final String content = executeStreamScript(
+                                new ContentAwareRequest(request, null),
+                                new ContentAwareResponse(response, buffer.toString()),
+                                executionContext,
+                                script
+                            );
+                            return Buffer.buffer(content);
+                        } catch (PolicyFailureException ex) {
+                            if (ex.getResult().getContentType() != null) {
+                                policyChain.streamFailWith(
+                                    io.gravitee.policy.api.PolicyResult.failure(
+                                        ex.getResult().getCode(),
+                                        ex.getResult().getError(),
+                                        ex.getResult().getContentType()
+                                    )
+                                );
+                            } else {
+                                policyChain.streamFailWith(
+                                    io.gravitee.policy.api.PolicyResult.failure(ex.getResult().getCode(), ex.getResult().getError())
+                                );
                             }
-                    ).build();
+                        } catch (Throwable t) {
+                            logger.error("Unable to run Groovy script", t);
+                            throw new TransformationException("Unable to run Groovy script: " + t.getMessage(), t);
+                        }
+                        return null;
+                    }
+                )
+                .build();
         }
 
         return null;
     }
 
     @OnRequestContent
-    public ReadWriteStream onRequestContent(Request request, Response response, ExecutionContext executionContext,
-                                            PolicyChain policyChain) {
+    public ReadWriteStream onRequestContent(
+        Request request,
+        Response response,
+        ExecutionContext executionContext,
+        PolicyChain policyChain
+    ) {
         String script = groovyPolicyConfiguration.getOnRequestContentScript();
 
         if (script != null && !script.trim().isEmpty()) {
             return TransformableRequestStreamBuilder
-                    .on(request)
-                    .chain(policyChain)
-                    .transform(
-                            buffer -> {
-                                try {
-                                    final String content = executeStreamScript(
-                                            new ContentAwareRequest(request, buffer.toString()),
-                                            new ContentAwareResponse(response, null),
-                                            executionContext,
-                                            script);
+                .on(request)
+                .chain(policyChain)
+                .transform(
+                    buffer -> {
+                        try {
+                            final String content = executeStreamScript(
+                                new ContentAwareRequest(request, buffer.toString()),
+                                new ContentAwareResponse(response, null),
+                                executionContext,
+                                script
+                            );
 
-                                    return Buffer.buffer(content);
-                                } catch (PolicyFailureException ex) {
-                                    if (ex.getResult().getContentType() != null) {
-                                        policyChain.streamFailWith(io.gravitee.policy.api.PolicyResult.failure(
-                                                ex.getResult().getCode(), ex.getResult().getError(),ex.getResult().getContentType()));
-                                    } else {
-                                        policyChain.streamFailWith(io.gravitee.policy.api.PolicyResult.failure(
-                                                ex.getResult().getCode(), ex.getResult().getError()));
-                                    }
-                                } catch (Throwable t) {
-                                    logger.error("Unable to run Groovy script", t);
-                                    throw new TransformationException("Unable to run Groovy script: " + t.getMessage(), t);
-                                }
-                                return null;
+                            return Buffer.buffer(content);
+                        } catch (PolicyFailureException ex) {
+                            if (ex.getResult().getContentType() != null) {
+                                policyChain.streamFailWith(
+                                    io.gravitee.policy.api.PolicyResult.failure(
+                                        ex.getResult().getCode(),
+                                        ex.getResult().getError(),
+                                        ex.getResult().getContentType()
+                                    )
+                                );
+                            } else {
+                                policyChain.streamFailWith(
+                                    io.gravitee.policy.api.PolicyResult.failure(ex.getResult().getCode(), ex.getResult().getError())
+                                );
                             }
-                    ).build();
+                        } catch (Throwable t) {
+                            logger.error("Unable to run Groovy script", t);
+                            throw new TransformationException("Unable to run Groovy script: " + t.getMessage(), t);
+                        }
+                        return null;
+                    }
+                )
+                .build();
         }
 
         return null;
     }
 
-    private String executeScript(Request request, Response response, ExecutionContext executionContext,
-                                 PolicyChain policyChain, String script) {
+    private String executeScript(
+        Request request,
+        Response response,
+        ExecutionContext executionContext,
+        PolicyChain policyChain,
+        String script
+    ) {
         if (script == null || script.trim().isEmpty()) {
             policyChain.doNext(request, response);
         } else {
@@ -167,14 +196,11 @@ public class GroovyPolicy {
                     policyChain.doNext(request, response);
                 } else {
                     if (result.getContentType() != null) {
-                        policyChain.failWith(io.gravitee.policy.api.PolicyResult.failure(
-                                result.getCode(),
-                                result.getError(),
-                                result.getContentType()));
+                        policyChain.failWith(
+                            io.gravitee.policy.api.PolicyResult.failure(result.getCode(), result.getError(), result.getContentType())
+                        );
                     } else {
-                        policyChain.failWith(io.gravitee.policy.api.PolicyResult.failure(
-                                result.getCode(),
-                                result.getError()));
+                        policyChain.failWith(io.gravitee.policy.api.PolicyResult.failure(result.getCode(), result.getError()));
                     }
                 }
             } catch (Throwable t) {
@@ -186,8 +212,8 @@ public class GroovyPolicy {
         return null;
     }
 
-    private String executeStreamScript(Request request, Response response, ExecutionContext executionContext,
-                                       String script) throws PolicyFailureException {
+    private String executeStreamScript(Request request, Response response, ExecutionContext executionContext, String script)
+        throws PolicyFailureException {
         // Prepare binding
         Binding binding = new Binding();
         binding.setVariable(REQUEST_VARIABLE_NAME, request);
