@@ -15,6 +15,9 @@
  */
 package io.gravitee.policy.groovy.sandbox;
 
+import static org.codehaus.groovy.ast.tools.GeneralUtils.classX;
+import static org.codehaus.groovy.ast.tools.GeneralUtils.propX;
+
 import groovy.lang.Binding;
 import groovy.lang.GroovyCodeSource;
 import groovy.lang.GroovyShell;
@@ -23,6 +26,9 @@ import groovy.transform.ThreadInterrupt;
 import groovy.transform.TimedInterrupt;
 import io.gravitee.policy.groovy.GroovyPolicy;
 import io.gravitee.policy.groovy.utils.Sha1;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.TimeUnit;
 import org.apache.groovy.json.internal.FastStringUtils;
 import org.apache.groovy.util.Maps;
 import org.codehaus.groovy.control.CompilationFailedException;
@@ -33,19 +39,11 @@ import org.codehaus.groovy.runtime.InvokerHelper;
 import org.kohsuke.groovy.sandbox.GroovyInterceptor;
 import org.kohsuke.groovy.sandbox.SandboxTransformer;
 
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.TimeUnit;
-
-import static org.codehaus.groovy.ast.tools.GeneralUtils.classX;
-import static org.codehaus.groovy.ast.tools.GeneralUtils.propX;
-
 /**
  * @author Jeoffrey HAEYAERT (jeoffrey.haeyaert at graviteesource.com)
  * @author GraviteeSource Team
  */
 public class SecuredGroovyShell {
-
     static {
         // Do not change this block of code which is required to work with groovy 2.5 and the classloader used
         // to load services
@@ -60,7 +58,6 @@ public class SecuredGroovyShell {
     private GroovyInterceptor groovyInterceptor;
 
     public SecuredGroovyShell() {
-
         CompilerConfiguration conf = new CompilerConfiguration();
 
         // Add Kohsuke's sandbox transformer which will delegate calls to SecuredInterceptor.
@@ -86,7 +83,6 @@ public class SecuredGroovyShell {
     }
 
     public <T> T evaluate(String script, Binding binding) {
-
         try {
             this.groovyInterceptor.register();
 
@@ -103,12 +99,14 @@ public class SecuredGroovyShell {
     }
 
     private Class<?> getOrCreate(String script) throws CompilationFailedException {
-
         String key = Sha1.sha1(script);
 
-        return sources.computeIfAbsent(key, s -> {
-            GroovyCodeSource gcs = new GroovyCodeSource(script, key, GroovyShell.DEFAULT_CODE_BASE);
-            return groovyShell.getClassLoader().parseClass(gcs, true);
-        });
+        return sources.computeIfAbsent(
+            key,
+            s -> {
+                GroovyCodeSource gcs = new GroovyCodeSource(script, key, GroovyShell.DEFAULT_CODE_BASE);
+                return groovyShell.getClassLoader().parseClass(gcs, true);
+            }
+        );
     }
 }

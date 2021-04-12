@@ -19,7 +19,6 @@ import io.gravitee.el.TemplateEngine;
 import io.gravitee.gateway.api.ExecutionContext;
 import io.gravitee.gateway.api.Request;
 import io.gravitee.gateway.api.Response;
-
 import java.util.Enumeration;
 import java.util.Map;
 
@@ -29,7 +28,7 @@ import java.util.Map;
  */
 public class AttributesBasedExecutionContext implements ExecutionContext {
 
-    private final static String CONTEXT_DICTIONARIES_VARIABLE = "dictionaries";
+    private static final String CONTEXT_DICTIONARIES_VARIABLE = "dictionaries";
     private final ExecutionContext context;
 
     public AttributesBasedExecutionContext(final ExecutionContext context) {
@@ -37,8 +36,9 @@ public class AttributesBasedExecutionContext implements ExecutionContext {
     }
 
     public Map<String, Map<String, String>> getDictionaries() {
-        return (Map<String, Map<String, String>>)
-                this.context.getTemplateEngine().getTemplateContext().lookupVariable(CONTEXT_DICTIONARIES_VARIABLE);
+        return (Map<String, Map<String, String>>) this.context.getTemplateEngine()
+            .getTemplateContext()
+            .lookupVariable(CONTEXT_DICTIONARIES_VARIABLE);
     }
 
     @Override

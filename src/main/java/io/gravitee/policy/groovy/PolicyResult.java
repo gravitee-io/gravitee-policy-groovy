@@ -65,6 +65,6 @@ public class PolicyResult {
 
     public enum State {
         SUCCESS,
-        FAILURE
+        FAILURE,
     }
 }

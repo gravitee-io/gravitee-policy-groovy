@@ -42,6 +42,7 @@ public class SecuredAnnotationCustomizer extends CompilationCustomizer {
     }
 
     private static class RejectAnnotationVisitor extends ClassCodeVisitorSupport {
+
         private SourceUnit source;
 
         public RejectAnnotationVisitor(SourceUnit source) {
@@ -55,9 +56,8 @@ public class SecuredAnnotationCustomizer extends CompilationCustomizer {
 
         @Override
         public void visitAnnotations(AnnotatedNode node) {
-
             for (AnnotationNode an : node.getAnnotations()) {
-                if(!SecuredResolver.getInstance().isAnnotationAllowed(an.getClassNode().getName())) {
+                if (!SecuredResolver.getInstance().isAnnotationAllowed(an.getClassNode().getName())) {
                     throw new SecurityException("Annotation " + an.getClassNode().getName() + " cannot be used in the sandbox.");
                 }
             }
