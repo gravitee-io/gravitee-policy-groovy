@@ -31,19 +31,16 @@ public class GroovyInitializer implements PolicyContext, PolicyContextProviderAw
 
     @Override
     public void onActivation() throws Exception {
-
         SecuredResolver.initialize(this.environment);
     }
 
     @Override
     public void onDeactivation() throws Exception {
-
         SecuredResolver.destroy();
     }
 
     @Override
     public void setPolicyContextProvider(PolicyContextProvider policyContextProvider) {
-
         this.environment = policyContextProvider.getComponent(Environment.class);
     }
 }

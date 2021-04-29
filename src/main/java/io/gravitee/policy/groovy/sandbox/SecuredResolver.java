@@ -15,10 +15,23 @@
  */
 package io.gravitee.policy.groovy.sandbox;
 
+import static java.util.Collections.emptyList;
+
 import groovy.lang.GString;
 import groovy.lang.GroovyClassLoader;
 import groovy.lang.Script;
 import io.gravitee.common.util.EnvironmentUtils;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.reflect.ConstructorUtils;
 import org.apache.commons.lang3.reflect.FieldUtils;
@@ -33,20 +46,6 @@ import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.Environment;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import static java.util.Collections.emptyList;
 
 /**
  * The {@link SecuredResolver} is a thread-safe singleton class which can be used by any {@link org.kohsuke.groovy.sandbox.GroovyInterceptor} to determine if a method, field, constructor, ... is allowed.
@@ -71,14 +70,30 @@ public class SecuredResolver {
     static final String WHITELIST_ANNOTATION_PREFIX = "annotation ";
 
     // Specific groovy methods on numbers.
-    private static final Set<String> NUMBER_MATH_METHOD_NAMES = new HashSet<>(Arrays.asList("plus", "minus", "multiply", "div", "compareTo", "or", "and", "xor", "intdiv", "mod", "leftShift", "rightShift", "rightShiftUnsigned"));
+    private static final Set<String> NUMBER_MATH_METHOD_NAMES = new HashSet<>(
+        Arrays.asList(
+            "plus",
+            "minus",
+            "multiply",
+            "div",
+            "compareTo",
+            "or",
+            "and",
+            "xor",
+            "intdiv",
+            "mod",
+            "leftShift",
+            "rightShift",
+            "rightShiftUnsigned"
+        )
+    );
 
     // Default groovy method classes.
     private static final Class<?>[] DGM_CLASSES = {
-            DefaultGroovyMethods.class,
-            StringGroovyMethods.class,
-            EncodingGroovyMethods.class,
-            DateGroovyMethods.class,
+        DefaultGroovyMethods.class,
+        StringGroovyMethods.class,
+        EncodingGroovyMethods.class,
+        DateGroovyMethods.class,
     };
 
     private static final List<String> ALLOWED_ARRAY_NATIVE_METHODS = Arrays.asList("getAt", "putAt");
@@ -93,14 +108,12 @@ public class SecuredResolver {
     private final Map<String, Boolean> resolved;
 
     public static void initialize(@Nullable Environment environment) {
-
         loadWhitelist(environment);
         INSTANCE = new SecuredResolver();
     }
 
     public static void destroy() {
-
-        if(INSTANCE != null) {
+        if (INSTANCE != null) {
             methodsByType.clear();
             fieldsByType.clear();
             constructorsByType.clear();
@@ -110,7 +123,6 @@ public class SecuredResolver {
     }
 
     public static SecuredResolver getInstance() {
-
         if (INSTANCE == null) {
             initialize(null);
         }
@@ -119,23 +131,24 @@ public class SecuredResolver {
     }
 
     private SecuredResolver() {
-
         resolved = new ConcurrentHashMap<>();
         methodsByTypeAndSuperTypes = new ConcurrentHashMap<>();
     }
 
     public boolean isAnnotationAllowed(String name) {
-
         // We only have an annotation name. Just try to find corresponding annotation testing all combinations.
-        return annotations.stream()
-                .anyMatch(aClass -> aClass.getCanonicalName().equals(name)
-                        || aClass.getName().equals(name)
-                        || aClass.getSimpleName().equals(name)
-                        || aClass.getTypeName().equals(name));
+        return annotations
+            .stream()
+            .anyMatch(
+                aClass ->
+                    aClass.getCanonicalName().equals(name) ||
+                    aClass.getName().equals(name) ||
+                    aClass.getSimpleName().equals(name) ||
+                    aClass.getTypeName().equals(name)
+            );
     }
 
     public boolean isConstructorAllowed(Class<?> clazz, Object... constructorArgs) {
-
         String key = getKey(clazz, "<init>", constructorArgs);
 
         if (resolved.containsKey(key)) {
@@ -157,7 +170,6 @@ public class SecuredResolver {
     }
 
     public boolean isGetPropertyAllowed(Object object, String propertyName) {
-
         Class<?> objectClass = object instanceof Class ? (Class<?>) object : object.getClass();
         String key = getKey(object, propertyName, new Object[0]);
 
@@ -171,7 +183,7 @@ public class SecuredResolver {
         }
 
         // Try to find 'get' or 'is' method.
-        String[] getPrefixes = {"get", "is"};
+        String[] getPrefixes = { "get", "is" };
 
         for (String prefix : getPrefixes) {
             String getter = prefix + StringUtils.capitalize(propertyName);
@@ -193,7 +205,6 @@ public class SecuredResolver {
     }
 
     public boolean isSetPropertyAllowed(Object object, String propertyName, Object propertyValue) {
-
         Class<?> objectClass = object instanceof Class ? (Class<?>) object : object.getClass();
         String key = getKey(object, propertyName, new Object[0]);
 
@@ -226,7 +237,6 @@ public class SecuredResolver {
     }
 
     public boolean isMethodAllowed(Object object, String methodName, Object... methodArgs) {
-
         Class<?> objectClass = object instanceof Class ? (Class<?>) object : object.getClass();
         String key = getKey(objectClass, methodName, methodArgs);
 
@@ -242,14 +252,14 @@ public class SecuredResolver {
 
         Class<?>[] argumentClasses = getClasses(methodArgs);
 
-        boolean methodAllowed = isMethodAllowed(objectClass, methodName, argumentClasses) || isDGMAllowed(objectClass, methodName, argumentClasses);
+        boolean methodAllowed =
+            isMethodAllowed(objectClass, methodName, argumentClasses) || isDGMAllowed(objectClass, methodName, argumentClasses);
         resolved.put(key, methodAllowed);
 
         return methodAllowed;
     }
 
     private boolean isMethodAllowed(Class<?> clazz, String methodName, Class<?>[] argumentClasses) {
-
         if (clazz == null) {
             return false;
         }
@@ -278,12 +288,11 @@ public class SecuredResolver {
     }
 
     private boolean isDGMAllowed(Class<?> clazz, String methodName, Class<?>[] argumentClasses) {
-
         Class<?>[] selfArgs = new Class[argumentClasses.length + 1];
         selfArgs[0] = clazz;
         System.arraycopy(argumentClasses, 0, selfArgs, 1, argumentClasses.length);
 
-        if(clazz.isArray() && ALLOWED_ARRAY_NATIVE_METHODS.contains(methodName)) {
+        if (clazz.isArray() && ALLOWED_ARRAY_NATIVE_METHODS.contains(methodName)) {
             // Groovy allows to call getAt(int) on an array (not a list which is handled by DGM classes).
             // array.getAt(0) is equivalent to array[0], so we mut allow the call.
             // Ex: "a b c".split(" ").getAt(2) -> split call return an array !
@@ -319,7 +328,6 @@ public class SecuredResolver {
      * @return <code>true</code> if the class has been declared in a Groovy script, <code>false</code> else.
      */
     private boolean isGroovyScriptDefinedClass(Class<?> clazz) {
-
         return clazz.getClassLoader() instanceof GroovyClassLoader && !Script.class.isAssignableFrom(clazz);
     }
 
@@ -339,7 +347,6 @@ public class SecuredResolver {
      * @return <code>true</code> if the method has been declared in a Groovy script, <code>false</code> else.
      */
     private boolean isGroovyScriptDefinedMethod(Method method) {
-
         Class<?> clazz = method.getDeclaringClass();
         return clazz.getClassLoader() instanceof GroovyClassLoader && clazz != Script.class;
     }
@@ -351,7 +358,6 @@ public class SecuredResolver {
      * @return the list of all allowed methods for the specified class. If no method is allowed, an empty list will be returned.
      */
     private List<Method> getAllowedMethods(Class<?> clazz) {
-
         if (methodsByTypeAndSuperTypes.containsKey(clazz)) {
             return methodsByTypeAndSuperTypes.get(clazz);
         }
@@ -378,12 +384,10 @@ public class SecuredResolver {
      * @return the list of all allowed fields for the specified class. If no field is allowed, an empty list will be returned.
      */
     private List<Field> getAllowedFields(Class<?> clazz) {
-
         return fieldsByType.getOrDefault(clazz, emptyList());
     }
 
     private String getKey(Object object, String methodName, Object[] methodArgs) {
-
         Class<?>[] argumentClasses = getClasses(methodArgs);
 
         return (object instanceof Class<?> ? object : object.getClass()) + "#" + methodName + Arrays.toString(argumentClasses);
@@ -397,11 +401,9 @@ public class SecuredResolver {
      * @return the array of corresponding classes.
      */
     private Class<?>[] getClasses(Object[] objects) {
-
         Class<?>[] argumentClasses = new Class<?>[objects.length];
 
         for (int i = 0; i < objects.length; i++) {
-
             if (objects[i] instanceof GString) {
                 // Groovy String must be considered as String to resolve methods and handle automatic Groovy cast to String.class.
                 argumentClasses[i] = String.class;
@@ -414,7 +416,6 @@ public class SecuredResolver {
     }
 
     private static void loadWhitelist(Environment environment) {
-
         List<Method> methods = new ArrayList<>();
         List<Field> fields = new ArrayList<>();
         List<Constructor<?>> constructors = new ArrayList<>();
@@ -426,7 +427,9 @@ public class SecuredResolver {
             // Built-in groovy-whitelist will not be loaded if mode is not 'append' (ie: set to 'replace').
             loadBuiltInWhitelist = WHITELIST_MODE.equals(environment.getProperty(WHITELIST_MODE_KEY, WHITELIST_MODE));
 
-            Collection<Object> configWhitelist = EnvironmentUtils.getPropertiesStartingWith((ConfigurableEnvironment) environment, WHITELIST_LIST_KEY).values();
+            Collection<Object> configWhitelist = EnvironmentUtils
+                .getPropertiesStartingWith((ConfigurableEnvironment) environment, WHITELIST_LIST_KEY)
+                .values();
 
             for (Object declaration : configWhitelist) {
                 parseDeclaration(String.valueOf(declaration), methods, fields, constructors, annotationClasses);
@@ -449,20 +452,22 @@ public class SecuredResolver {
             }
         }
 
-        methodsByType = methods.stream()
-                .collect(Collectors.groupingBy(Method::getDeclaringClass));
+        methodsByType = methods.stream().collect(Collectors.groupingBy(Method::getDeclaringClass));
 
-        fieldsByType = fields.stream()
-                .collect(Collectors.groupingBy(Field::getDeclaringClass));
+        fieldsByType = fields.stream().collect(Collectors.groupingBy(Field::getDeclaringClass));
 
-        constructorsByType = constructors.stream()
-                .collect(Collectors.groupingBy(Constructor::getDeclaringClass));
+        constructorsByType = constructors.stream().collect(Collectors.groupingBy(Constructor::getDeclaringClass));
 
         annotations = new HashSet<>(annotationClasses);
     }
 
-    private static void parseDeclaration(String declaration, List<Method> methods, List<Field> fields, List<Constructor<?>> constructors, List<Class<?>> annotations) {
-
+    private static void parseDeclaration(
+        String declaration,
+        List<Method> methods,
+        List<Field> fields,
+        List<Constructor<?>> constructors,
+        List<Class<?>> annotations
+    ) {
         try {
             if (declaration.startsWith(WHITELIST_METHOD_PREFIX)) {
                 methods.add(parseMethod(declaration));
@@ -483,7 +488,6 @@ public class SecuredResolver {
     }
 
     private static Method parseMethod(String declaration) throws Exception {
-
         String[] split = declaration.split(" ");
         String clazzName = split[1];
         String methodName = split[2];
@@ -505,7 +509,6 @@ public class SecuredResolver {
     }
 
     private static List<Method> parseAllMethods(String declaration) throws Exception {
-
         String[] split = declaration.split(" ");
         String clazzName = split[1];
         Class<?> clazz = ClassUtils.forName(clazzName, SecuredResolver.class.getClassLoader());
@@ -514,7 +517,6 @@ public class SecuredResolver {
     }
 
     private static Field parseField(String declaration) throws Exception {
-
         String[] split = declaration.split(" ");
         String clazzName = split[1];
         String fieldName = split[2];
@@ -524,7 +526,6 @@ public class SecuredResolver {
     }
 
     private static List<Field> parseAllFields(String declaration) throws Exception {
-
         String[] split = declaration.split(" ");
         String clazzName = split[1];
         Class<?> clazz = ClassUtils.forName(clazzName, SecuredResolver.class.getClassLoader());
@@ -533,7 +534,6 @@ public class SecuredResolver {
     }
 
     private static Constructor parseConstructor(String declaration) throws Exception {
-
         String[] split = declaration.split(" ");
         String clazzName = split[1];
         String[] methodArgs = {};
@@ -554,7 +554,6 @@ public class SecuredResolver {
     }
 
     private static List<Constructor<?>> parseAllConstructors(String declaration) throws Exception {
-
         String[] split = declaration.split(" ");
         String clazzName = split[1];
         Class<?> clazz = ClassUtils.forName(clazzName, SecuredResolver.class.getClassLoader());
@@ -563,7 +562,6 @@ public class SecuredResolver {
     }
 
     private static Class<?> parseAnnotation(String declaration) throws Exception {
-
         String[] split = declaration.split(" ");
         String clazzName = split[1];
 

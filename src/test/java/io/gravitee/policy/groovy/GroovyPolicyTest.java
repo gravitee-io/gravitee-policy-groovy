@@ -15,6 +15,9 @@
  */
 package io.gravitee.policy.groovy;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
+
 import io.gravitee.common.http.HttpHeaders;
 import io.gravitee.common.http.HttpStatusCode;
 import io.gravitee.gateway.api.ExecutionContext;
@@ -26,16 +29,12 @@ import io.gravitee.policy.api.PolicyChain;
 import io.gravitee.policy.api.PolicyResult;
 import io.gravitee.policy.groovy.configuration.GroovyPolicyConfiguration;
 import io.gravitee.reporter.api.http.Metrics;
+import java.io.*;
+import java.nio.charset.Charset;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-
-import java.io.*;
-import java.nio.charset.Charset;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
 
 /**
  * @author David BRASSELY (david.brassely at graviteesource.com)
@@ -129,10 +128,14 @@ public class GroovyPolicyTest {
         headers.set("X-Gravitee-Break", "value");
         new GroovyPolicy(configuration).onRequest(request, response, executionContext, policyChain);
 
-        verify(policyChain, times(1)).failWith(argThat(
-                result ->
+        verify(policyChain, times(1))
+            .failWith(
+                argThat(
+                    result ->
                         result.statusCode() == HttpStatusCode.INTERNAL_SERVER_ERROR_500 &&
-                                result.message().equals("Stop request processing due to X-Gravitee-Break header")));
+                        result.message().equals("Stop request processing due to X-Gravitee-Break header")
+                )
+            );
     }
 
     @Test
