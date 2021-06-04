@@ -353,7 +353,6 @@ workflows:
           maven_profile_id: << pipeline.parameters.maven_profile_id >>
           s3_bucket_name: << pipeline.parameters.s3_bucket_name >>
 
-
   # ---
   # Nighlty for all CE repositories :
   # builds the SNAPSHOT, and deploys

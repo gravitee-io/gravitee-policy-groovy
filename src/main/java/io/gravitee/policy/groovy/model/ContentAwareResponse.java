@@ -68,6 +68,11 @@ public class ContentAwareResponse implements Response {
         return response.ended();
     }
 
+    @Override
+    public HttpHeaders trailers() {
+        return response.trailers();
+    }
+
     public HttpHeaders getHeaders() {
         return this.headers();
     }
