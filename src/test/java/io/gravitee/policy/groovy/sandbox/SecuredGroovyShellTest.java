@@ -307,6 +307,13 @@ public class SecuredGroovyShellTest {
     }
 
     @Test
+    public void arrayLength() {
+        String script = "String[] array = new String[3]; \n" + "\n" + "assert array.length == 3;";
+
+        securedGroovyShell.evaluate(script, new Binding());
+    }
+
+    @Test
     public void listOperators() {
         String script =
             "def letters = ['a', 'b', 'c', 'd']\n" +
@@ -888,5 +895,12 @@ public class SecuredGroovyShellTest {
 
         String script = "assert java.lang.Math.abs(60) == 60";
         securedGroovyShell.evaluate(script, new Binding());
+    }
+
+    @Test(expected = SecurityException.class)
+    public void shouldNotAllowExecute() {
+        String script = "\"ls -l\".execute().text";
+
+        System.out.println((String) securedGroovyShell.evaluate(script, new Binding()));
     }
 }

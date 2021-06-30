@@ -96,7 +96,7 @@ public class SecuredResolver {
         DateGroovyMethods.class,
     };
 
-    private static final List<String> ALLOWED_ARRAY_NATIVE_METHODS = Arrays.asList("getAt", "putAt");
+    private static final List<String> ALLOWED_ARRAY_NATIVE_METHODS = Arrays.asList("getAt", "putAt", "getLength");
 
     private static SecuredResolver INSTANCE;
     private static Map<Class<?>, List<Method>> methodsByType;
