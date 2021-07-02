@@ -22,6 +22,7 @@ import io.gravitee.common.util.MultiValueMap;
 import io.gravitee.gateway.api.Request;
 import io.gravitee.gateway.api.buffer.Buffer;
 import io.gravitee.gateway.api.handler.Handler;
+import io.gravitee.gateway.api.http2.HttpFrame;
 import io.gravitee.gateway.api.stream.ReadStream;
 import io.gravitee.gateway.api.ws.WebSocket;
 import io.gravitee.reporter.api.http.Metrics;
@@ -108,6 +109,11 @@ public class ContentAwareRequest implements Request {
         return request.parameters();
     }
 
+    @Override
+    public MultiValueMap<String, String> pathParameters() {
+        return request.pathParameters();
+    }
+
     public MultiValueMap<String, String> getParameters() {
         return this.parameters();
     }
@@ -176,15 +182,6 @@ public class ContentAwareRequest implements Request {
     }
 
     @Override
-    public String rawMethod() {
-        return request.rawMethod();
-    }
-
-    public String getRawMethod() {
-        return request.rawMethod();
-    }
-
-    @Override
     public SSLSession sslSession() {
         return request.sslSession();
     }
@@ -231,5 +228,10 @@ public class ContentAwareRequest implements Request {
     @Override
     public WebSocket websocket() {
         return request.websocket();
+    }
+
+    @Override
+    public Request customFrameHandler(Handler<HttpFrame> frameHandler) {
+        return request.customFrameHandler(frameHandler);
     }
 }
