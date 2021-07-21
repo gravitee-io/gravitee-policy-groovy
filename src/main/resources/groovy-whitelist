@@ -28,6 +28,9 @@ class io.gravitee.am.model.uma.PermissionRequest
 class groovy.json.JsonOutput
 class groovy.json.JsonSlurper
 class groovy.json.JsonParserType
+class groovy.util.XmlSlurper
+class groovy.util.slurpersupport.NodeChild
+class groovy.util.slurpersupport.Node
 class java.lang.Math
 class java.lang.String
 class java.lang.Integer
