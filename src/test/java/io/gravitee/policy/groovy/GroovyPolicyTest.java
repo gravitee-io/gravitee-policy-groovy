@@ -154,6 +154,22 @@ public class GroovyPolicyTest {
         verify(policyChain, never()).doNext(any(), any());
     }
 
+    @Test
+    public void shouldReadXml() throws Exception {
+        HttpHeaders headers = spy(new HttpHeaders());
+        when(request.headers()).thenReturn(headers);
+
+        when(configuration.getOnRequestContentScript()).thenReturn(loadResource("read_xml.groovy"));
+        String content = loadResource("read_xml.xml");
+
+        ReadWriteStream stream = new GroovyPolicy(configuration).onRequestContent(request, response, executionContext, policyChain);
+        stream.end(Buffer.buffer(content));
+
+        verify(policyChain, never()).failWith(any(PolicyResult.class));
+        verify(policyChain, never()).streamFailWith(any(PolicyResult.class));
+        verify(policyChain, never()).doNext(any(), any());
+    }
+
     private String loadResource(String resource) throws IOException {
         InputStream stream = GroovyPolicy.class.getResourceAsStream(resource);
         return readInputStreamToString(stream, Charset.defaultCharset());
