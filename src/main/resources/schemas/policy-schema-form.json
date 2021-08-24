@@ -2,6 +2,15 @@
   "type" : "object",
   "id" : "urn:jsonschema:io:gravitee:policy:groovy:configuration:GroovyPolicyConfiguration",
   "properties" : {
+    "scope" : {
+      "title": "Scope",
+      "type" : "string",
+      "default": "REQUEST",
+      "enum" : [ "REQUEST", "RESPONSE"],
+      "x-schema-form": {
+        "hidden": true
+      }
+    },
     "onRequestScript" : {
       "title": "On-request script",
       "description": "Groovy script to evaluate during the OnRequest phase.",
@@ -15,7 +24,14 @@
           "allowDropFileTypes": true,
           "autoCloseTags": true,
           "mode": "groovy"
-        }
+        },
+        "hidden": [
+          {
+            "$eq": {
+              "scope": "RESPONSE"
+            }
+          }
+        ]
       }
     },
     "onResponseScript" : {
@@ -31,7 +47,14 @@
           "allowDropFileTypes": true,
           "autoCloseTags": true,
           "mode": "groovy"
-        }
+        },
+        "hidden": [
+          {
+            "$eq": {
+              "scope": "REQUEST"
+            }
+          }
+        ]
       }
     },
     "onRequestContentScript" : {
@@ -47,7 +70,14 @@
           "allowDropFileTypes": true,
           "autoCloseTags": true,
           "mode": "groovy"
-        }
+        },
+        "hidden": [
+          {
+            "$eq": {
+              "scope": "RESPONSE"
+            }
+          }
+        ]
       }
     },
     "onResponseContentScript" : {
@@ -63,7 +93,14 @@
           "allowDropFileTypes": true,
           "autoCloseTags": true,
           "mode": "groovy"
-        }
+        },
+        "hidden": [
+          {
+            "$eq": {
+              "scope": "REQUEST"
+            }
+          }
+        ]
       }
     }
   }
