@@ -15,25 +15,17 @@
  */
 package io.gravitee.policy.groovy.sandbox;
 
-import static org.codehaus.groovy.ast.tools.GeneralUtils.classX;
-import static org.codehaus.groovy.ast.tools.GeneralUtils.propX;
-
 import groovy.lang.Binding;
 import groovy.lang.GroovyCodeSource;
 import groovy.lang.GroovyShell;
 import groovy.lang.Script;
-import groovy.transform.ThreadInterrupt;
-import groovy.transform.TimedInterrupt;
 import io.gravitee.policy.groovy.GroovyPolicy;
 import io.gravitee.policy.groovy.utils.Sha1;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.TimeUnit;
 import org.apache.groovy.json.internal.FastStringUtils;
-import org.apache.groovy.util.Maps;
 import org.codehaus.groovy.control.CompilationFailedException;
 import org.codehaus.groovy.control.CompilerConfiguration;
-import org.codehaus.groovy.control.customizers.ASTTransformationCustomizer;
 import org.codehaus.groovy.control.customizers.SecureASTCustomizer;
 import org.codehaus.groovy.runtime.InvokerHelper;
 import org.kohsuke.groovy.sandbox.GroovyInterceptor;

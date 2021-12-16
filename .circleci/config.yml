@@ -68,7 +68,7 @@ workflows:
           # nexus_snapshots_server_id: 'sonatype-nexus-snapshots'
           # container_gun_image_org: 'circleci'
           # container_gun_image_name: 'openjdk'
-          # container_gun_image_tag: '11.0.3-jdk-stretch'
+          # container_gun_image_tag: '17.0.1'
           container_size: 'medium'
           # filters:
             # branches:
@@ -95,7 +95,7 @@ workflows:
           s3_bucket_name: << pipeline.parameters.s3_bucket_name >>
           # container_gun_image_org: 'circleci'
           # container_gun_image_name: 'openjdk'
-          # container_gun_image_tag: '11.0.3-jdk-stretch'
+          # container_gun_image_tag: '17.0.1'
           container_size: 'large'
 
   release_dry_run:
@@ -116,7 +116,7 @@ workflows:
           s3_bucket_name: << pipeline.parameters.s3_bucket_name >>
           # container_gun_image_org: 'circleci'
           # container_gun_image_name: 'openjdk'
-          # container_gun_image_tag: '11.0.3-jdk-stretch'
+          # container_gun_image_tag: '17.0.1'
           container_size: 'large'
   # ---
   # CICD Workflow For APIM Orchestrated Nexus Staging, Container-based : Circle CI Docker Executor
@@ -139,7 +139,7 @@ workflows:
           s3_bucket_name: << pipeline.parameters.s3_bucket_name >>
           # container_gun_image_org: 'circleci'
           # container_gun_image_name: 'openjdk'
-          # container_gun_image_tag: '11.0.3-jdk-stretch'
+          # container_gun_image_tag: '17.0.1'
           container_size: 'large'
   # ---
   # The 6 Workflows Below are there to perform a "Standalone Release" and "replay" a "Standalone Release" :
@@ -163,7 +163,7 @@ workflows:
           s3_bucket_name: << pipeline.parameters.s3_bucket_name >>
           # container_gun_image_org: 'circleci'
           # container_gun_image_name: 'openjdk'
-          # container_gun_image_tag: '11.0.3-jdk-stretch'
+          # container_gun_image_tag: '17.0.1'
           container_size: 'large'
 
   standalone_release_dry_run:
@@ -184,7 +184,7 @@ workflows:
           s3_bucket_name: << pipeline.parameters.s3_bucket_name >>
           # container_gun_image_org: 'circleci'
           # container_gun_image_name: 'openjdk'
-          # container_gun_image_tag: '11.0.3-jdk-stretch'
+          # container_gun_image_tag: '17.0.1'
           container_size: 'large'
 
   standalone_nexus_staging:
@@ -224,7 +224,7 @@ workflows:
           s3_bucket_name: << pipeline.parameters.s3_bucket_name >>
           # container_gun_image_org: 'circleci'
           # container_gun_image_name: 'openjdk'
-          # container_gun_image_tag: '11.0.3-jdk-stretch'
+          # container_gun_image_tag: '17.0.1'
           container_size: 'large'
       - gravitee/d_standalone_nexus_staging:
           name: standalone_nexus_staging
@@ -237,7 +237,7 @@ workflows:
           s3_bucket_name: << pipeline.parameters.s3_bucket_name >>
           # container_gun_image_org: 'circleci'
           # container_gun_image_name: 'openjdk'
-          # container_gun_image_tag: '11.0.3-jdk-stretch'
+          # container_gun_image_tag: '17.0.1'
           container_size: 'large'
 
   standalone_release_replay:
@@ -259,7 +259,7 @@ workflows:
           gio_release_version: << pipeline.parameters.replayed_release >>
           # container_gun_image_org: 'circleci'
           # container_gun_image_name: 'openjdk'
-          # container_gun_image_tag: '11.0.3-jdk-stretch'
+          # container_gun_image_tag: '17.0.1'
           container_size: 'large'
 
   standalone_release_replay_dry_run:
@@ -281,7 +281,7 @@ workflows:
           gio_release_version: << pipeline.parameters.replayed_release >>
           # container_gun_image_org: 'circleci'
           # container_gun_image_name: 'openjdk'
-          # container_gun_image_tag: '11.0.3-jdk-stretch'
+          # container_gun_image_tag: '17.0.1'
           container_size: 'large'
 
   standalone_nexus_staging_replay:
@@ -322,7 +322,7 @@ workflows:
           gio_release_version: << pipeline.parameters.replayed_release >>
           # container_gun_image_org: 'circleci'
           # container_gun_image_name: 'openjdk'
-          # container_gun_image_tag: '11.0.3-jdk-stretch'
+          # container_gun_image_tag: '17.0.1'
           container_size: 'large'
       - gravitee/d_standalone_nexus_staging_replay:
           name: standalone_nexus_staging_replay
@@ -336,7 +336,7 @@ workflows:
           gio_release_version: << pipeline.parameters.replayed_release >>
           # container_gun_image_org: 'circleci'
           # container_gun_image_name: 'openjdk'
-          # container_gun_image_tag: '11.0.3-jdk-stretch'
+          # container_gun_image_tag: '17.0.1'
           container_size: 'large'
 
 

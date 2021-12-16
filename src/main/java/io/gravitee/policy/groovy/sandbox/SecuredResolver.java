@@ -250,6 +250,12 @@ public class SecuredResolver {
             return true;
         }
 
+        if (object instanceof String && "plus".equals(methodName)) {
+            // String.plus(String).
+            resolved.put(key, true);
+            return true;
+        }
+
         Class<?>[] argumentClasses = getClasses(methodArgs);
 
         boolean methodAllowed =
