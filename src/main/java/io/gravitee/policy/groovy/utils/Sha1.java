@@ -41,13 +41,12 @@ public final class Sha1 {
     public static String sha1(String text) {
         try {
             MessageDigest md = MessageDigest.getInstance("SHA-1");
-            byte[] sha1hash = new byte[40];
+            byte[] sha1hash;
             md.update(text.getBytes("UTF-8"), 0, text.length());
             sha1hash = md.digest();
             return convertToHex(sha1hash);
         } catch (Exception ex) {
-            ex.printStackTrace();
-            return null;
+            throw new RuntimeException(ex);
         }
     }
 }

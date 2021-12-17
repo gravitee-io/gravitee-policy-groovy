@@ -107,13 +107,19 @@ public class SecuredResolver {
     private final Map<Class<?>, List<Method>> methodsByTypeAndSuperTypes;
     private final Map<String, Boolean> resolved;
 
-    public static void initialize(@Nullable Environment environment) {
-        loadWhitelist(environment);
-        INSTANCE = new SecuredResolver();
+    public static synchronized void initialize(@Nullable Environment environment) {
+        if (!isInitialized()) {
+            loadWhitelist(environment);
+            INSTANCE = new SecuredResolver();
+        }
     }
 
-    public static void destroy() {
-        if (INSTANCE != null) {
+    public static synchronized boolean isInitialized() {
+        return INSTANCE != null;
+    }
+
+    public static synchronized void destroy() {
+        if (isInitialized()) {
             methodsByType.clear();
             fieldsByType.clear();
             constructorsByType.clear();
@@ -123,7 +129,7 @@ public class SecuredResolver {
     }
 
     public static SecuredResolver getInstance() {
-        if (INSTANCE == null) {
+        if (!isInitialized()) {
             initialize(null);
         }
 

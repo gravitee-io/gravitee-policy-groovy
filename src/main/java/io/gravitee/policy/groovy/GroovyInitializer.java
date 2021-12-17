@@ -28,19 +28,25 @@ import org.springframework.core.env.Environment;
 public class GroovyInitializer implements PolicyContext, PolicyContextProviderAware {
 
     private Environment environment;
+    private boolean classLoaderLegacyMode = true;
 
     @Override
     public void onActivation() throws Exception {
-        SecuredResolver.initialize(this.environment);
+        if (classLoaderLegacyMode || !SecuredResolver.isInitialized()) {
+            SecuredResolver.initialize(this.environment);
+        }
     }
 
     @Override
     public void onDeactivation() throws Exception {
-        SecuredResolver.destroy();
+        if (classLoaderLegacyMode) {
+            SecuredResolver.destroy();
+        }
     }
 
     @Override
     public void setPolicyContextProvider(PolicyContextProvider policyContextProvider) {
         this.environment = policyContextProvider.getComponent(Environment.class);
+        this.classLoaderLegacyMode = environment.getProperty("classloader.legacy.enabled", Boolean.class, true);
     }
 }
