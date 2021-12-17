@@ -15,25 +15,18 @@
  */
 package io.gravitee.policy.groovy.sandbox;
 
-import static org.codehaus.groovy.ast.tools.GeneralUtils.classX;
-import static org.codehaus.groovy.ast.tools.GeneralUtils.propX;
-
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import groovy.lang.Binding;
 import groovy.lang.GroovyCodeSource;
 import groovy.lang.GroovyShell;
 import groovy.lang.Script;
-import groovy.transform.ThreadInterrupt;
-import groovy.transform.TimedInterrupt;
 import io.gravitee.policy.groovy.GroovyPolicy;
 import io.gravitee.policy.groovy.utils.Sha1;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.TimeUnit;
+import java.time.Duration;
 import org.apache.groovy.json.internal.FastStringUtils;
-import org.apache.groovy.util.Maps;
 import org.codehaus.groovy.control.CompilationFailedException;
 import org.codehaus.groovy.control.CompilerConfiguration;
-import org.codehaus.groovy.control.customizers.ASTTransformationCustomizer;
 import org.codehaus.groovy.control.customizers.SecureASTCustomizer;
 import org.codehaus.groovy.runtime.InvokerHelper;
 import org.kohsuke.groovy.sandbox.GroovyInterceptor;
@@ -44,6 +37,12 @@ import org.kohsuke.groovy.sandbox.SandboxTransformer;
  * @author GraviteeSource Team
  */
 public class SecuredGroovyShell {
+
+    /**
+     * Number of hours to keep compiled script in cache after the last time it was accessed.
+     */
+    private static final int CODE_CACHE_EXPIRATION_HOURS = 1;
+
     static {
         // Do not change this block of code which is required to work with groovy 2.5 and the classloader used
         // to load services
@@ -53,11 +52,13 @@ public class SecuredGroovyShell {
         Thread.currentThread().setContextClassLoader(loader);
     }
 
-    private GroovyShell groovyShell;
-    private ConcurrentMap<String, Class<?>> sources = new ConcurrentHashMap<>();
-    private GroovyInterceptor groovyInterceptor;
+    private final GroovyShell groovyShell;
+    private final Cache<String, Class<?>> sources;
+    private final GroovyInterceptor groovyInterceptor;
 
     public SecuredGroovyShell() {
+        this.sources = CacheBuilder.newBuilder().expireAfterAccess(Duration.ofHours(CODE_CACHE_EXPIRATION_HOURS)).build();
+
         CompilerConfiguration conf = new CompilerConfiguration();
 
         // Add Kohsuke's sandbox transformer which will delegate calls to SecuredInterceptor.
@@ -101,12 +102,22 @@ public class SecuredGroovyShell {
     private Class<?> getOrCreate(String script) throws CompilationFailedException {
         String key = Sha1.sha1(script);
 
-        return sources.computeIfAbsent(
-            key,
-            s -> {
-                GroovyCodeSource gcs = new GroovyCodeSource(script, key, GroovyShell.DEFAULT_CODE_BASE);
-                return groovyShell.getClassLoader().parseClass(gcs, true);
+        try {
+            return sources.get(
+                key,
+                () -> {
+                    GroovyCodeSource gcs = new GroovyCodeSource(script, key, GroovyShell.DEFAULT_CODE_BASE);
+                    return groovyShell.getClassLoader().parseClass(gcs, true);
+                }
+            );
+        } catch (Exception e) {
+            final Throwable cause = e.getCause();
+            if (cause instanceof CompilationFailedException) {
+                throw (CompilationFailedException) cause;
+            } else if (cause instanceof SecurityException) {
+                throw (SecurityException) cause;
             }
-        );
+            throw new RuntimeException("Unable to compile script", e);
+        }
     }
 }
