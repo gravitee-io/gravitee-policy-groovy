@@ -21,9 +21,9 @@ class io.gravitee.common.util.LinkedMultiValueMap
 class io.gravitee.common.util.ListReverser
 class io.gravitee.common.util.Maps
 class io.gravitee.common.util.URIUtils
-class io.gravitee.am.gateway.handler.context.provider.UserProperties
-class io.gravitee.am.gateway.handler.context.provider.DomainProperties
-class io.gravitee.am.gateway.handler.context.provider.ClientProperties
+class io.gravitee.am.model.safe.UserProperties
+class io.gravitee.am.model.safe.DomainProperties
+class io.gravitee.am.model.safe.ClientProperties
 class io.gravitee.am.model.uma.PermissionRequest
 class groovy.json.JsonOutput
 class groovy.json.JsonSlurper
