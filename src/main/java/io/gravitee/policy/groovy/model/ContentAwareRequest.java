@@ -15,13 +15,13 @@
  */
 package io.gravitee.policy.groovy.model;
 
-import io.gravitee.common.http.HttpHeaders;
 import io.gravitee.common.http.HttpMethod;
 import io.gravitee.common.http.HttpVersion;
 import io.gravitee.common.util.MultiValueMap;
 import io.gravitee.gateway.api.Request;
 import io.gravitee.gateway.api.buffer.Buffer;
 import io.gravitee.gateway.api.handler.Handler;
+import io.gravitee.gateway.api.http.HttpHeaders;
 import io.gravitee.gateway.api.http2.HttpFrame;
 import io.gravitee.gateway.api.stream.ReadStream;
 import io.gravitee.gateway.api.ws.WebSocket;
@@ -123,8 +123,8 @@ public class ContentAwareRequest implements Request {
         return request.headers();
     }
 
-    public HttpHeaders getHeaders() {
-        return this.headers();
+    public HeaderMapAdapter getHeaders() {
+        return new HeaderMapAdapter(this.headers());
     }
 
     @Override
@@ -233,5 +233,10 @@ public class ContentAwareRequest implements Request {
     @Override
     public Request customFrameHandler(Handler<HttpFrame> frameHandler) {
         return request.customFrameHandler(frameHandler);
+    }
+
+    @Override
+    public String host() {
+        return request.host();
     }
 }

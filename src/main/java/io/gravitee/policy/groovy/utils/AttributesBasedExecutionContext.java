@@ -19,6 +19,7 @@ import io.gravitee.el.TemplateEngine;
 import io.gravitee.gateway.api.ExecutionContext;
 import io.gravitee.gateway.api.Request;
 import io.gravitee.gateway.api.Response;
+import io.gravitee.tracing.api.Tracer;
 import java.util.Enumeration;
 import java.util.Map;
 
@@ -84,5 +85,10 @@ public class AttributesBasedExecutionContext implements ExecutionContext {
     @Override
     public TemplateEngine getTemplateEngine() {
         return context.getTemplateEngine();
+    }
+
+    @Override
+    public Tracer getTracer() {
+        return context.getTracer();
     }
 }
