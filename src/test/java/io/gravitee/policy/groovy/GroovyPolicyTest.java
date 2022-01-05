@@ -18,12 +18,12 @@ package io.gravitee.policy.groovy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-import io.gravitee.common.http.HttpHeaders;
 import io.gravitee.common.http.HttpStatusCode;
 import io.gravitee.gateway.api.ExecutionContext;
 import io.gravitee.gateway.api.Request;
 import io.gravitee.gateway.api.Response;
 import io.gravitee.gateway.api.buffer.Buffer;
+import io.gravitee.gateway.api.http.HttpHeaders;
 import io.gravitee.gateway.api.stream.ReadWriteStream;
 import io.gravitee.policy.api.PolicyChain;
 import io.gravitee.policy.api.PolicyResult;
@@ -76,7 +76,7 @@ public class GroovyPolicyTest {
      */
     @Test
     public void shouldModifyResponseHeaders() throws Exception {
-        HttpHeaders headers = spy(new HttpHeaders());
+        HttpHeaders headers = spy(HttpHeaders.create());
         when(response.headers()).thenReturn(headers);
         when(configuration.getOnRequestScript()).thenReturn(loadResource("modify_response_headers.groovy"));
         new GroovyPolicy(configuration).onRequest(request, response, executionContext, policyChain);
@@ -104,7 +104,7 @@ public class GroovyPolicyTest {
      */
     @Test
     public void shouldNotBreakRequest() throws Exception {
-        HttpHeaders headers = spy(new HttpHeaders());
+        HttpHeaders headers = spy(HttpHeaders.create());
         when(request.headers()).thenReturn(headers);
 
         when(configuration.getOnRequestScript()).thenReturn(loadResource("break_request.groovy"));
@@ -120,7 +120,7 @@ public class GroovyPolicyTest {
      */
     @Test
     public void shouldBreakRequest() throws Exception {
-        HttpHeaders headers = spy(new HttpHeaders());
+        HttpHeaders headers = spy(HttpHeaders.create());
         when(request.headers()).thenReturn(headers);
 
         when(configuration.getOnRequestScript()).thenReturn(loadResource("break_request.groovy"));
@@ -140,7 +140,7 @@ public class GroovyPolicyTest {
 
     @Test
     public void shouldReadJson() throws Exception {
-        HttpHeaders headers = spy(new HttpHeaders());
+        HttpHeaders headers = spy(HttpHeaders.create());
         when(request.headers()).thenReturn(headers);
 
         when(configuration.getOnRequestContentScript()).thenReturn(loadResource("read_json.groovy"));
@@ -156,7 +156,7 @@ public class GroovyPolicyTest {
 
     @Test
     public void shouldReadXml() throws Exception {
-        HttpHeaders headers = spy(new HttpHeaders());
+        HttpHeaders headers = spy(HttpHeaders.create());
         when(request.headers()).thenReturn(headers);
 
         when(configuration.getOnRequestContentScript()).thenReturn(loadResource("read_xml.groovy"));
