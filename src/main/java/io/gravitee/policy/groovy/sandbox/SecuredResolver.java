@@ -25,9 +25,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
+import java.lang.reflect.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
@@ -270,7 +268,7 @@ public class SecuredResolver {
             return false;
         }
 
-        Method method = MethodUtils.getMatchingAccessibleMethod(clazz, methodName, argumentClasses);
+        Method method = getMatchingAccessibleMethod(clazz, methodName, argumentClasses);
 
         if (method != null && (isGroovyScriptDefinedMethod(method) || getAllowedMethods(clazz).contains(method))) {
             // Allow method if directly defined in the script or if the method is explicitly allowed.
@@ -293,6 +291,25 @@ public class SecuredResolver {
         return false;
     }
 
+    private Method getMatchingAccessibleMethod(Class<?> clazz, String methodName, Class<?>[] argumentClasses) {
+        try {
+            return MethodUtils.getMatchingAccessibleMethod(clazz, methodName, argumentClasses);
+        } catch (InaccessibleObjectException e) {
+            Class<?> superclass = clazz.getSuperclass();
+            if (!superclass.equals(Object.class)) {
+                return getMatchingAccessibleMethod(superclass, methodName, argumentClasses);
+            }
+            Optional<Method> method = Arrays
+                .stream(clazz.getInterfaces())
+                .map(parent -> getMatchingAccessibleMethod(parent, methodName, argumentClasses))
+                .findFirst();
+            if (method.isPresent()) {
+                return method.get();
+            }
+            throw e;
+        }
+    }
+
     private boolean isDGMAllowed(Class<?> clazz, String methodName, Class<?>[] argumentClasses) {
         Class<?>[] selfArgs = new Class[argumentClasses.length + 1];
         selfArgs[0] = clazz;
@@ -307,7 +324,7 @@ public class SecuredResolver {
 
         // Try to find allowed method from default groovy methods.
         for (Class<?> dgmClass : DGM_CLASSES) {
-            Method method = MethodUtils.getMatchingAccessibleMethod(dgmClass, methodName, selfArgs);
+            Method method = getMatchingAccessibleMethod(dgmClass, methodName, selfArgs);
 
             if (method != null && getAllowedMethods(dgmClass).contains(method)) {
                 return true;
