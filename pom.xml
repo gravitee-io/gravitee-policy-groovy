@@ -39,9 +39,9 @@
         <gravitee-gateway-buffer.version>1.18.3</gravitee-gateway-buffer.version>
         <gravitee-policy-api.version>1.9.0</gravitee-policy-api.version>
         <gravitee-common.version>1.17.2</gravitee-common.version>
-        <groovy.version>3.0.9</groovy.version>
+        <groovy.version>3.0.10</groovy.version>
         <groovy-sandbox.version>1.27</groovy-sandbox.version>
-        <commons-lang3.version>3.11</commons-lang3.version>
+        <commons-lang3.version>3.12.0</commons-lang3.version>
         <guava.version>30.1.1-jre</guava.version>
         <maven-assembly-plugin.version>2.5.5</maven-assembly-plugin.version>
         <!-- Property used by the publication job in CI-->
@@ -251,6 +251,15 @@
                         <exclude>**/*.adoc</exclude>
                         <exclude>**/org/kohsuke/groovy/sandbox/**</exclude>
                     </excludes>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>3.0.0</version>
+                <configuration>
+                    <mainClass>io.gravitee.policy.groovy.sandbox.GroovyWhitelistGenerator</mainClass>
+                    <classpathScope>test</classpathScope>
                 </configuration>
             </plugin>
         </plugins>

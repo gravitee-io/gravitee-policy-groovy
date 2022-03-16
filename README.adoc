@@ -135,6 +135,7 @@ Groovy policy comes with a native sandbox feature allowing to safely run Groovy 
 predefined list of allowed methods, fields, constructors, and annotations.
 
 The complete whitelist can be found here : https://raw.githubusercontent.com/gravitee-io/gravitee-policy-groovy/master/src/main/resources/groovy-whitelist[gravitee groovy whitelist]
+The whitelist is generated with an executable `src/test/java/io/gravitee/policy/groovy/exec/GroovyWhitelistGenerator.java`, we can launch `mvn exec:java` to regenerate.
 
 This whitelist should be enough for almost all possible use cases. If you have specific needs which are not allowed by the built-in whitelist, you can extend (or even replace) the list with your own declarations.
 For that, you can configure the gravitee.yml by specifying:

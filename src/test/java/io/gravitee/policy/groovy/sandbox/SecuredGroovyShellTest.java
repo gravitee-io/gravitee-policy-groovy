@@ -903,4 +903,18 @@ public class SecuredGroovyShellTest {
 
         System.out.println((String) securedGroovyShell.evaluate(script, new Binding()));
     }
+
+    @Test
+    public void shoudlAllowEncodeBase64() {
+        String script = "\"string\".bytes.encodeBase64().toString()";
+
+        securedGroovyShell.evaluate(script, new Binding());
+    }
+
+    @Test
+    public void shoudlAllowDecodeBase64() {
+        String script = "new String(\"string\".bytes.encodeBase64().toString().decodeBase64())";
+
+        securedGroovyShell.evaluate(script, new Binding());
+    }
 }
