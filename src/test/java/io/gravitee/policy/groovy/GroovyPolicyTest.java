@@ -186,6 +186,21 @@ public class GroovyPolicyTest {
         verify(policyChain, never()).doNext(any(), any());
     }
 
+    @Test
+    public void shouldPlayWithStrings() throws Exception {
+        HttpHeaders headers = spy(HttpHeaders.create());
+        when(request.headers()).thenReturn(headers);
+
+        when(configuration.getOnRequestContentScript()).thenReturn(loadResource("play_with_strings.groovy"));
+
+        ReadWriteStream stream = new GroovyPolicy(configuration).onRequestContent(request, response, executionContext, policyChain);
+        stream.end(Buffer.buffer());
+
+        verify(policyChain, never()).failWith(any(PolicyResult.class));
+        verify(policyChain, never()).streamFailWith(any(PolicyResult.class));
+        verify(policyChain, never()).doNext(any(), any());
+    }
+
     private String loadResource(String resource) throws IOException {
         InputStream stream = GroovyPolicy.class.getResourceAsStream(resource);
         return readInputStreamToString(stream, Charset.defaultCharset());
