@@ -57,43 +57,187 @@ class java.util.Queue
 class java.util.Random
 
 # Allows method signatures
+method groovy.json.JsonSlurper getMaxSizeForInMemory
+method groovy.json.JsonSlurper getType
+method groovy.json.JsonSlurper isCheckDates
+method groovy.json.JsonSlurper isChop
+method groovy.json.JsonSlurper isLazyChop
+method groovy.json.JsonSlurper parse byte[]
+method groovy.json.JsonSlurper parse byte[] java.lang.String
+method groovy.json.JsonSlurper parse char[]
+method groovy.json.JsonSlurper parse java.io.File
+method groovy.json.JsonSlurper parse java.io.File java.lang.String
+method groovy.json.JsonSlurper parse java.io.InputStream
+method groovy.json.JsonSlurper parse java.io.InputStream java.lang.String
+method groovy.json.JsonSlurper parse java.io.Reader
+method groovy.json.JsonSlurper parse java.net.URL
+method groovy.json.JsonSlurper parse java.net.URL java.lang.String
+method groovy.json.JsonSlurper parse java.net.URL java.util.Map
+method groovy.json.JsonSlurper parse java.net.URL java.util.Map java.lang.String
+method groovy.json.JsonSlurper parse java.nio.file.Path
+method groovy.json.JsonSlurper parse java.nio.file.Path java.lang.String
+method groovy.json.JsonSlurper parse java.util.Map java.net.URL
+method groovy.json.JsonSlurper parse java.util.Map java.net.URL java.lang.String
 method groovy.json.JsonSlurper parseText java.lang.String
+method groovy.json.JsonSlurper setCheckDates boolean
+method groovy.json.JsonSlurper setChop boolean
+method groovy.json.JsonSlurper setLazyChop boolean
+method groovy.json.JsonSlurper setMaxSizeForInMemory int
+method groovy.json.JsonSlurper setType groovy.json.JsonParserType
+method groovy.lang.Closure andThen groovy.lang.Closure
+method groovy.lang.Closure andThenSelf
+method groovy.lang.Closure andThenSelf int
+method groovy.lang.Closure asWritable
 method groovy.lang.Closure call
 method groovy.lang.Closure call java.lang.Object
-method groovy.lang.Closure call java.lang.Object[]
+method groovy.lang.Closure clone
+method groovy.lang.Closure compose groovy.lang.Closure
+method groovy.lang.Closure composeSelf
+method groovy.lang.Closure composeSelf int
 method groovy.lang.Closure curry java.lang.Object
-method groovy.lang.Closure curry java.lang.Object[]
+method groovy.lang.Closure dehydrate
 method groovy.lang.Closure getDelegate
+method groovy.lang.Closure getDirective
+method groovy.lang.Closure getMaximumNumberOfParameters
+method groovy.lang.Closure getOwner
+method groovy.lang.Closure getParameterTypes
+method groovy.lang.Closure getProperty java.lang.String
 method groovy.lang.Closure getResolveStrategy
+method groovy.lang.Closure getThisObject
+method groovy.lang.Closure isCase java.lang.Object
+method groovy.lang.Closure leftShift groovy.lang.Closure
+method groovy.lang.Closure leftShift java.lang.Object
 method groovy.lang.Closure memoize
 method groovy.lang.Closure memoizeAtLeast int
 method groovy.lang.Closure memoizeAtMost int
 method groovy.lang.Closure memoizeBetween int int
 method groovy.lang.Closure ncurry int java.lang.Object
-method groovy.lang.Closure ncurry int java.lang.Object[]
+method groovy.lang.Closure rcurry java.lang.Object
+method groovy.lang.Closure rehydrate java.lang.Object java.lang.Object java.lang.Object
+method groovy.lang.Closure rightShift groovy.lang.Closure
 method groovy.lang.Closure setDelegate java.lang.Object
+method groovy.lang.Closure setDirective int
+method groovy.lang.Closure setProperty java.lang.String java.lang.Object
 method groovy.lang.Closure setResolveStrategy int
+method groovy.lang.Closure trampoline
+method groovy.lang.GString build groovy.lang.GroovyObject
+method groovy.lang.GString charAt int
+method groovy.lang.GString compareTo java.lang.Object
+method groovy.lang.GString equals groovy.lang.GString
+method groovy.lang.GString equals java.lang.Object
+method groovy.lang.GString getBytes
+method groovy.lang.GString getBytes java.lang.String
+method groovy.lang.GString getStrings
+method groovy.lang.GString getValue int
+method groovy.lang.GString getValueCount
+method groovy.lang.GString getValues
+method groovy.lang.GString hashCode
+method groovy.lang.GString length
+method groovy.lang.GString negate
+method groovy.lang.GString plus groovy.lang.GString
 method groovy.lang.GString plus java.lang.String
+method groovy.lang.GString subSequence int int
+method groovy.lang.GString toString
+method groovy.lang.GString writeTo java.io.Writer
+method groovy.lang.Range containsWithinBounds java.lang.Object
 method groovy.lang.Range getFrom
 method groovy.lang.Range getTo
+method groovy.lang.Range inspect
+method groovy.lang.Range isReverse
 method groovy.lang.Range step int
 method groovy.lang.Range step int groovy.lang.Closure
 method java.lang.Comparable compareTo java.lang.Object
+method java.lang.Enum compareTo java.lang.Enum
+method java.lang.Enum compareTo java.lang.Object
+method java.lang.Enum describeConstable
+method java.lang.Enum equals java.lang.Object
+method java.lang.Enum getDeclaringClass
+method java.lang.Enum hashCode
 method java.lang.Enum name
 method java.lang.Enum ordinal
-method java.lang.Object clone
+method java.lang.Enum toString
+method java.lang.Enum valueOf java.lang.Class java.lang.String
 method java.lang.Object equals java.lang.Object
 method java.lang.Object hashCode
 method java.lang.Object toString
 method java.lang.System currentTimeMillis
 method java.lang.System nanoTime
+method java.lang.Throwable addSuppressed java.lang.Throwable
+method java.lang.Throwable fillInStackTrace
 method java.lang.Throwable getCause
+method java.lang.Throwable getLocalizedMessage
 method java.lang.Throwable getMessage
+method java.lang.Throwable getStackTrace
+method java.lang.Throwable getSuppressed
+method java.lang.Throwable initCause java.lang.Throwable
+method java.lang.Throwable setStackTrace java.lang.StackTraceElement[]
+method java.lang.Throwable toString
 method java.util.Comparator compare java.lang.Object java.lang.Object
-method java.util.Map$Entry getKey
-method java.util.Map$Entry getValue
+method java.util.Comparator comparing java.util.function.Function
+method java.util.Comparator comparing java.util.function.Function java.util.Comparator
+method java.util.Comparator comparingDouble java.util.function.ToDoubleFunction
+method java.util.Comparator comparingInt java.util.function.ToIntFunction
+method java.util.Comparator comparingLong java.util.function.ToLongFunction
+method java.util.Comparator equals java.lang.Object
+method java.util.Comparator naturalOrder
+method java.util.Comparator nullsFirst java.util.Comparator
+method java.util.Comparator nullsLast java.util.Comparator
+method java.util.Comparator reversed
+method java.util.Comparator reverseOrder
+method java.util.Comparator thenComparing java.util.Comparator
+method java.util.Comparator thenComparing java.util.function.Function
+method java.util.Comparator thenComparing java.util.function.Function java.util.Comparator
+method java.util.Comparator thenComparingDouble java.util.function.ToDoubleFunction
+method java.util.Comparator thenComparingInt java.util.function.ToIntFunction
+method java.util.Comparator thenComparingLong java.util.function.ToLongFunction
+method java.util.Map.Entry comparingByKey
+method java.util.Map.Entry comparingByKey java.util.Comparator
+method java.util.Map.Entry comparingByValue
+method java.util.Map.Entry comparingByValue java.util.Comparator
+method java.util.Map.Entry copyOf java.util.Map.Entry
+method java.util.Map.Entry equals java.lang.Object
+method java.util.Map.Entry getKey
+method java.util.Map.Entry getValue
+method java.util.Map.Entry hashCode
+method java.util.Map.Entry setValue java.lang.Object
+method java.util.TimeZone clone
+method java.util.TimeZone getAvailableIDs
+method java.util.TimeZone getAvailableIDs int
+method java.util.TimeZone getDefault
+method java.util.TimeZone getDisplayName
+method java.util.TimeZone getDisplayName boolean int
+method java.util.TimeZone getDisplayName boolean int java.util.Locale
+method java.util.TimeZone getDisplayName java.util.Locale
+method java.util.TimeZone getDSTSavings
+method java.util.TimeZone getID
+method java.util.TimeZone getOffset int int int int int int
+method java.util.TimeZone getOffset long
+method java.util.TimeZone getRawOffset
 method java.util.TimeZone getTimeZone java.lang.String
+method java.util.TimeZone getTimeZone java.time.ZoneId
+method java.util.TimeZone hasSameRules java.util.TimeZone
+method java.util.TimeZone inDaylightTime java.util.Date
+method java.util.TimeZone observesDaylightTime
+method java.util.TimeZone setDefault java.util.TimeZone
+method java.util.TimeZone setID java.lang.String
+method java.util.TimeZone setRawOffset int
+method java.util.TimeZone toZoneId
+method java.util.TimeZone useDaylightTime
+method java.util.UUID clockSequence
+method java.util.UUID compareTo java.lang.Object
+method java.util.UUID compareTo java.util.UUID
+method java.util.UUID equals java.lang.Object
+method java.util.UUID fromString java.lang.String
+method java.util.UUID getLeastSignificantBits
+method java.util.UUID getMostSignificantBits
+method java.util.UUID hashCode
+method java.util.UUID nameUUIDFromBytes byte[]
+method java.util.UUID node
 method java.util.UUID randomUUID
+method java.util.UUID timestamp
+method java.util.UUID toString
+method java.util.UUID variant
+method java.util.UUID version
 method org.codehaus.groovy.runtime.DefaultGroovyMethods abs java.lang.Double
 method org.codehaus.groovy.runtime.DefaultGroovyMethods abs java.lang.Float
 method org.codehaus.groovy.runtime.DefaultGroovyMethods abs java.lang.Long
@@ -102,7 +246,7 @@ method org.codehaus.groovy.runtime.DefaultGroovyMethods addAll java.util.Collect
 method org.codehaus.groovy.runtime.DefaultGroovyMethods addAll java.util.Collection java.lang.Object[]
 method org.codehaus.groovy.runtime.DefaultGroovyMethods addAll java.util.Collection java.util.Iterator
 method org.codehaus.groovy.runtime.DefaultGroovyMethods addAll java.util.List int java.lang.Object[]
-method org.codehaus.groovy.runtime.DefaultGroovyMethods addEntry java.util.Map java.lang.Object
+method org.codehaus.groovy.runtime.DefaultGroovyMethods addShutdownHook java.lang.Object groovy.lang.Closure
 method org.codehaus.groovy.runtime.DefaultGroovyMethods and java.lang.Boolean java.lang.Boolean
 method org.codehaus.groovy.runtime.DefaultGroovyMethods and java.lang.Number java.lang.Number
 method org.codehaus.groovy.runtime.DefaultGroovyMethods and java.util.BitSet java.util.BitSet
@@ -112,7 +256,6 @@ method org.codehaus.groovy.runtime.DefaultGroovyMethods any java.lang.Object gro
 method org.codehaus.groovy.runtime.DefaultGroovyMethods any java.lang.Object[] groovy.lang.Closure
 method org.codehaus.groovy.runtime.DefaultGroovyMethods any java.util.Iterator groovy.lang.Closure
 method org.codehaus.groovy.runtime.DefaultGroovyMethods any java.util.Map groovy.lang.Closure
-method org.codehaus.groovy.runtime.DefaultGroovyMethods asArrayType java.lang.Object java.lang.Class
 method org.codehaus.groovy.runtime.DefaultGroovyMethods asBoolean boolean[]
 method org.codehaus.groovy.runtime.DefaultGroovyMethods asBoolean byte[]
 method org.codehaus.groovy.runtime.DefaultGroovyMethods asBoolean char[]
@@ -161,13 +304,23 @@ method org.codehaus.groovy.runtime.DefaultGroovyMethods asUnmodifiable java.util
 method org.codehaus.groovy.runtime.DefaultGroovyMethods asUnmodifiable java.util.Set
 method org.codehaus.groovy.runtime.DefaultGroovyMethods asUnmodifiable java.util.SortedMap
 method org.codehaus.groovy.runtime.DefaultGroovyMethods asUnmodifiable java.util.SortedSet
+method org.codehaus.groovy.runtime.DefaultGroovyMethods average byte[]
+method org.codehaus.groovy.runtime.DefaultGroovyMethods average double[]
+method org.codehaus.groovy.runtime.DefaultGroovyMethods average float[]
+method org.codehaus.groovy.runtime.DefaultGroovyMethods average int[]
+method org.codehaus.groovy.runtime.DefaultGroovyMethods average java.lang.Iterable
+method org.codehaus.groovy.runtime.DefaultGroovyMethods average java.lang.Iterable groovy.lang.Closure
+method org.codehaus.groovy.runtime.DefaultGroovyMethods average java.lang.Object[]
+method org.codehaus.groovy.runtime.DefaultGroovyMethods average java.lang.Object[] groovy.lang.Closure
+method org.codehaus.groovy.runtime.DefaultGroovyMethods average java.util.Iterator
+method org.codehaus.groovy.runtime.DefaultGroovyMethods average java.util.Iterator groovy.lang.Closure
+method org.codehaus.groovy.runtime.DefaultGroovyMethods average long[]
+method org.codehaus.groovy.runtime.DefaultGroovyMethods average short[]
 method org.codehaus.groovy.runtime.DefaultGroovyMethods bitwiseNegate java.lang.Number
 method org.codehaus.groovy.runtime.DefaultGroovyMethods bitwiseNegate java.util.BitSet
-method org.codehaus.groovy.runtime.DefaultGroovyMethods chop java.lang.Iterable int[]
-method org.codehaus.groovy.runtime.DefaultGroovyMethods chop java.lang.Object[] int[]
-method org.codehaus.groovy.runtime.DefaultGroovyMethods chop java.util.Iterator int[]
-method org.codehaus.groovy.runtime.DefaultGroovyMethods coercedEquals java.lang.Object java.lang.Object
-method org.codehaus.groovy.runtime.DefaultGroovyMethods coercedEquals java.lang.Object[] java.util.List
+method org.codehaus.groovy.runtime.DefaultGroovyMethods buffered java.util.Iterator
+method org.codehaus.groovy.runtime.DefaultGroovyMethods bufferedIterator java.lang.Iterable
+method org.codehaus.groovy.runtime.DefaultGroovyMethods bufferedIterator java.util.List
 method org.codehaus.groovy.runtime.DefaultGroovyMethods collate java.lang.Iterable int
 method org.codehaus.groovy.runtime.DefaultGroovyMethods collate java.lang.Iterable int boolean
 method org.codehaus.groovy.runtime.DefaultGroovyMethods collate java.lang.Iterable int int
@@ -266,7 +419,6 @@ method org.codehaus.groovy.runtime.DefaultGroovyMethods count java.util.Iterator
 method org.codehaus.groovy.runtime.DefaultGroovyMethods count java.util.Map groovy.lang.Closure
 method org.codehaus.groovy.runtime.DefaultGroovyMethods count long[] java.lang.Object
 method org.codehaus.groovy.runtime.DefaultGroovyMethods count short[] java.lang.Object
-method org.codehaus.groovy.runtime.DefaultGroovyMethods countAnswer java.util.Map java.lang.Object
 method org.codehaus.groovy.runtime.DefaultGroovyMethods countBy java.lang.Iterable groovy.lang.Closure
 method org.codehaus.groovy.runtime.DefaultGroovyMethods countBy java.lang.Object[] groovy.lang.Closure
 method org.codehaus.groovy.runtime.DefaultGroovyMethods countBy java.util.Collection groovy.lang.Closure
@@ -303,6 +455,7 @@ method org.codehaus.groovy.runtime.DefaultGroovyMethods dropWhile java.util.Iter
 method org.codehaus.groovy.runtime.DefaultGroovyMethods dropWhile java.util.List groovy.lang.Closure
 method org.codehaus.groovy.runtime.DefaultGroovyMethods dropWhile java.util.Map groovy.lang.Closure
 method org.codehaus.groovy.runtime.DefaultGroovyMethods dropWhile java.util.SortedSet groovy.lang.Closure
+method org.codehaus.groovy.runtime.DefaultGroovyMethods dump java.lang.Object
 method org.codehaus.groovy.runtime.DefaultGroovyMethods each java.lang.Iterable groovy.lang.Closure
 method org.codehaus.groovy.runtime.DefaultGroovyMethods each java.lang.Object groovy.lang.Closure
 method org.codehaus.groovy.runtime.DefaultGroovyMethods each java.lang.Object[] groovy.lang.Closure
@@ -332,6 +485,8 @@ method org.codehaus.groovy.runtime.DefaultGroovyMethods equals java.util.List ja
 method org.codehaus.groovy.runtime.DefaultGroovyMethods equals java.util.List java.util.List
 method org.codehaus.groovy.runtime.DefaultGroovyMethods equals java.util.Map java.util.Map
 method org.codehaus.groovy.runtime.DefaultGroovyMethods equals java.util.Set java.util.Set
+method org.codehaus.groovy.runtime.DefaultGroovyMethods equalsIgnoreZeroSign java.lang.Double java.lang.Object
+method org.codehaus.groovy.runtime.DefaultGroovyMethods equalsIgnoreZeroSign java.lang.Float java.lang.Object
 method org.codehaus.groovy.runtime.DefaultGroovyMethods every java.lang.Iterable groovy.lang.Closure
 method org.codehaus.groovy.runtime.DefaultGroovyMethods every java.lang.Object
 method org.codehaus.groovy.runtime.DefaultGroovyMethods every java.lang.Object groovy.lang.Closure
@@ -344,7 +499,6 @@ method org.codehaus.groovy.runtime.DefaultGroovyMethods find java.lang.Object[] 
 method org.codehaus.groovy.runtime.DefaultGroovyMethods find java.util.Collection
 method org.codehaus.groovy.runtime.DefaultGroovyMethods find java.util.Collection groovy.lang.Closure
 method org.codehaus.groovy.runtime.DefaultGroovyMethods find java.util.Map groovy.lang.Closure
-method org.codehaus.groovy.runtime.DefaultGroovyMethods findAll groovy.lang.Closure java.util.Collection java.util.Iterator
 method org.codehaus.groovy.runtime.DefaultGroovyMethods findAll java.lang.Object
 method org.codehaus.groovy.runtime.DefaultGroovyMethods findAll java.lang.Object groovy.lang.Closure
 method org.codehaus.groovy.runtime.DefaultGroovyMethods findAll java.lang.Object[]
@@ -408,8 +562,6 @@ method org.codehaus.groovy.runtime.DefaultGroovyMethods flatten float[]
 method org.codehaus.groovy.runtime.DefaultGroovyMethods flatten int[]
 method org.codehaus.groovy.runtime.DefaultGroovyMethods flatten java.lang.Iterable
 method org.codehaus.groovy.runtime.DefaultGroovyMethods flatten java.lang.Iterable groovy.lang.Closure
-method org.codehaus.groovy.runtime.DefaultGroovyMethods flatten java.lang.Iterable java.util.Collection
-method org.codehaus.groovy.runtime.DefaultGroovyMethods flatten java.lang.Iterable java.util.Collection groovy.lang.Closure
 method org.codehaus.groovy.runtime.DefaultGroovyMethods flatten java.lang.Object[]
 method org.codehaus.groovy.runtime.DefaultGroovyMethods flatten java.util.Collection
 method org.codehaus.groovy.runtime.DefaultGroovyMethods flatten java.util.Collection groovy.lang.Closure
@@ -471,8 +623,7 @@ method org.codehaus.groovy.runtime.DefaultGroovyMethods getAt short[] groovy.lan
 method org.codehaus.groovy.runtime.DefaultGroovyMethods getAt short[] groovy.lang.ObjectRange
 method org.codehaus.groovy.runtime.DefaultGroovyMethods getAt short[] groovy.lang.Range
 method org.codehaus.groovy.runtime.DefaultGroovyMethods getAt short[] java.util.Collection
-method org.codehaus.groovy.runtime.DefaultGroovyMethods getAtImpl java.lang.Object[] int
-method org.codehaus.groovy.runtime.DefaultGroovyMethods getAtIterable java.lang.Iterable java.lang.String java.util.List
+method org.codehaus.groovy.runtime.DefaultGroovyMethods getGroovydoc java.lang.reflect.AnnotatedElement
 method org.codehaus.groovy.runtime.DefaultGroovyMethods getIndices boolean[]
 method org.codehaus.groovy.runtime.DefaultGroovyMethods getIndices byte[]
 method org.codehaus.groovy.runtime.DefaultGroovyMethods getIndices char[]
@@ -484,7 +635,8 @@ method org.codehaus.groovy.runtime.DefaultGroovyMethods getIndices java.util.Col
 method org.codehaus.groovy.runtime.DefaultGroovyMethods getIndices long[]
 method org.codehaus.groovy.runtime.DefaultGroovyMethods getIndices short[]
 method org.codehaus.groovy.runtime.DefaultGroovyMethods getLocation java.lang.Class
-method org.codehaus.groovy.runtime.DefaultGroovyMethods getSubList java.util.List java.util.List
+method org.codehaus.groovy.runtime.DefaultGroovyMethods getMetaPropertyValues java.lang.Object
+method org.codehaus.groovy.runtime.DefaultGroovyMethods getRootLoader java.lang.ClassLoader
 method org.codehaus.groovy.runtime.DefaultGroovyMethods grep java.lang.Object
 method org.codehaus.groovy.runtime.DefaultGroovyMethods grep java.lang.Object java.lang.Object
 method org.codehaus.groovy.runtime.DefaultGroovyMethods grep java.lang.Object[]
@@ -495,20 +647,16 @@ method org.codehaus.groovy.runtime.DefaultGroovyMethods grep java.util.List
 method org.codehaus.groovy.runtime.DefaultGroovyMethods grep java.util.List java.lang.Object
 method org.codehaus.groovy.runtime.DefaultGroovyMethods grep java.util.Set
 method org.codehaus.groovy.runtime.DefaultGroovyMethods grep java.util.Set java.lang.Object
-method org.codehaus.groovy.runtime.DefaultGroovyMethods groupAnswer java.util.Map java.lang.Object java.lang.Object
 method org.codehaus.groovy.runtime.DefaultGroovyMethods groupBy java.lang.Iterable groovy.lang.Closure
-method org.codehaus.groovy.runtime.DefaultGroovyMethods groupBy java.lang.Iterable java.lang.Object[]
 method org.codehaus.groovy.runtime.DefaultGroovyMethods groupBy java.lang.Iterable java.util.List
 method org.codehaus.groovy.runtime.DefaultGroovyMethods groupBy java.lang.Object[] groovy.lang.Closure
-method org.codehaus.groovy.runtime.DefaultGroovyMethods groupBy java.lang.Object[] java.lang.Object[]
 method org.codehaus.groovy.runtime.DefaultGroovyMethods groupBy java.lang.Object[] java.util.List
 method org.codehaus.groovy.runtime.DefaultGroovyMethods groupBy java.util.Collection groovy.lang.Closure
-method org.codehaus.groovy.runtime.DefaultGroovyMethods groupBy java.util.Collection java.lang.Object[]
 method org.codehaus.groovy.runtime.DefaultGroovyMethods groupBy java.util.Collection java.util.List
 method org.codehaus.groovy.runtime.DefaultGroovyMethods groupBy java.util.Map groovy.lang.Closure
-method org.codehaus.groovy.runtime.DefaultGroovyMethods groupBy java.util.Map java.lang.Object[]
 method org.codehaus.groovy.runtime.DefaultGroovyMethods groupBy java.util.Map java.util.List
 method org.codehaus.groovy.runtime.DefaultGroovyMethods groupEntriesBy java.util.Map groovy.lang.Closure
+method org.codehaus.groovy.runtime.DefaultGroovyMethods hasProperty java.lang.Object java.lang.String
 method org.codehaus.groovy.runtime.DefaultGroovyMethods head java.lang.Iterable
 method org.codehaus.groovy.runtime.DefaultGroovyMethods head java.lang.Object[]
 method org.codehaus.groovy.runtime.DefaultGroovyMethods head java.util.List
@@ -538,6 +686,7 @@ method org.codehaus.groovy.runtime.DefaultGroovyMethods inject java.util.Collect
 method org.codehaus.groovy.runtime.DefaultGroovyMethods inject java.util.Collection java.lang.Object groovy.lang.Closure
 method org.codehaus.groovy.runtime.DefaultGroovyMethods inject java.util.Iterator java.lang.Object groovy.lang.Closure
 method org.codehaus.groovy.runtime.DefaultGroovyMethods inject java.util.Map java.lang.Object groovy.lang.Closure
+method org.codehaus.groovy.runtime.DefaultGroovyMethods inspect java.lang.Object
 method org.codehaus.groovy.runtime.DefaultGroovyMethods intdiv java.lang.Character java.lang.Character
 method org.codehaus.groovy.runtime.DefaultGroovyMethods intdiv java.lang.Character java.lang.Number
 method org.codehaus.groovy.runtime.DefaultGroovyMethods intdiv java.lang.Number java.lang.Character
@@ -554,6 +703,8 @@ method org.codehaus.groovy.runtime.DefaultGroovyMethods intersect java.util.Set 
 method org.codehaus.groovy.runtime.DefaultGroovyMethods intersect java.util.SortedSet java.lang.Iterable
 method org.codehaus.groovy.runtime.DefaultGroovyMethods intersect java.util.SortedSet java.lang.Iterable java.util.Comparator
 method org.codehaus.groovy.runtime.DefaultGroovyMethods is java.lang.Object java.lang.Object
+method org.codehaus.groovy.runtime.DefaultGroovyMethods isAtLeast java.math.BigDecimal java.lang.String
+method org.codehaus.groovy.runtime.DefaultGroovyMethods isAtLeast java.math.BigDecimal java.math.BigDecimal
 method org.codehaus.groovy.runtime.DefaultGroovyMethods isCase java.lang.Class java.lang.Object
 method org.codehaus.groovy.runtime.DefaultGroovyMethods isCase java.lang.Number java.lang.Number
 method org.codehaus.groovy.runtime.DefaultGroovyMethods isCase java.lang.Object java.lang.Object
@@ -610,6 +761,8 @@ method org.codehaus.groovy.runtime.DefaultGroovyMethods max java.util.Iterator g
 method org.codehaus.groovy.runtime.DefaultGroovyMethods max java.util.Iterator java.util.Comparator
 method org.codehaus.groovy.runtime.DefaultGroovyMethods max java.util.Map groovy.lang.Closure
 method org.codehaus.groovy.runtime.DefaultGroovyMethods max long[]
+method org.codehaus.groovy.runtime.DefaultGroovyMethods metaClass java.lang.Class groovy.lang.Closure
+method org.codehaus.groovy.runtime.DefaultGroovyMethods metaClass java.lang.Object groovy.lang.Closure
 method org.codehaus.groovy.runtime.DefaultGroovyMethods min double[]
 method org.codehaus.groovy.runtime.DefaultGroovyMethods min int[]
 method org.codehaus.groovy.runtime.DefaultGroovyMethods min java.lang.Iterable
@@ -645,6 +798,12 @@ method org.codehaus.groovy.runtime.DefaultGroovyMethods minus java.util.Set java
 method org.codehaus.groovy.runtime.DefaultGroovyMethods minus java.util.SortedSet java.lang.Iterable
 method org.codehaus.groovy.runtime.DefaultGroovyMethods minus java.util.SortedSet java.lang.Object
 method org.codehaus.groovy.runtime.DefaultGroovyMethods minus java.util.SortedSet java.util.Collection
+method org.codehaus.groovy.runtime.DefaultGroovyMethods mixin groovy.lang.MetaClass java.lang.Class
+method org.codehaus.groovy.runtime.DefaultGroovyMethods mixin groovy.lang.MetaClass java.lang.Class[]
+method org.codehaus.groovy.runtime.DefaultGroovyMethods mixin groovy.lang.MetaClass java.util.List
+method org.codehaus.groovy.runtime.DefaultGroovyMethods mixin java.lang.Class java.lang.Class
+method org.codehaus.groovy.runtime.DefaultGroovyMethods mixin java.lang.Class java.lang.Class[]
+method org.codehaus.groovy.runtime.DefaultGroovyMethods mixin java.lang.Class java.util.List
 method org.codehaus.groovy.runtime.DefaultGroovyMethods mod java.lang.Number java.lang.Number
 method org.codehaus.groovy.runtime.DefaultGroovyMethods multiply java.lang.Character java.lang.Character
 method org.codehaus.groovy.runtime.DefaultGroovyMethods multiply java.lang.Character java.lang.Number
@@ -698,10 +857,6 @@ method org.codehaus.groovy.runtime.DefaultGroovyMethods power java.math.BigInteg
 method org.codehaus.groovy.runtime.DefaultGroovyMethods power java.math.BigInteger java.math.BigInteger
 method org.codehaus.groovy.runtime.DefaultGroovyMethods previous java.lang.Character
 method org.codehaus.groovy.runtime.DefaultGroovyMethods previous java.lang.Number
-method org.codehaus.groovy.runtime.DefaultGroovyMethods primitiveArrayGet java.lang.Object groovy.lang.Range
-method org.codehaus.groovy.runtime.DefaultGroovyMethods primitiveArrayGet java.lang.Object int
-method org.codehaus.groovy.runtime.DefaultGroovyMethods primitiveArrayGet java.lang.Object java.util.Collection
-method org.codehaus.groovy.runtime.DefaultGroovyMethods primitiveArrayPut java.lang.Object int java.lang.Object
 method org.codehaus.groovy.runtime.DefaultGroovyMethods push java.util.List java.lang.Object
 method org.codehaus.groovy.runtime.DefaultGroovyMethods putAll java.util.Map java.util.Collection
 method org.codehaus.groovy.runtime.DefaultGroovyMethods putAt java.lang.Object java.lang.String java.lang.Object
@@ -722,7 +877,8 @@ method org.codehaus.groovy.runtime.DefaultGroovyMethods removeAll java.util.Map 
 method org.codehaus.groovy.runtime.DefaultGroovyMethods removeAt java.util.List int
 method org.codehaus.groovy.runtime.DefaultGroovyMethods removeElement java.util.Collection java.lang.Object
 method org.codehaus.groovy.runtime.DefaultGroovyMethods removeLast java.util.List
-method org.codehaus.groovy.runtime.DefaultGroovyMethods resizeListWithRangeAndGetSublist java.util.List groovy.lang.IntRange
+method org.codehaus.groovy.runtime.DefaultGroovyMethods respondsTo java.lang.Object java.lang.String
+method org.codehaus.groovy.runtime.DefaultGroovyMethods respondsTo java.lang.Object java.lang.String java.lang.Object[]
 method org.codehaus.groovy.runtime.DefaultGroovyMethods retainAll java.util.Collection groovy.lang.Closure
 method org.codehaus.groovy.runtime.DefaultGroovyMethods retainAll java.util.Collection java.lang.Object[]
 method org.codehaus.groovy.runtime.DefaultGroovyMethods retainAll java.util.Map groovy.lang.Closure
@@ -742,6 +898,17 @@ method org.codehaus.groovy.runtime.DefaultGroovyMethods round java.lang.Float
 method org.codehaus.groovy.runtime.DefaultGroovyMethods round java.lang.Float int
 method org.codehaus.groovy.runtime.DefaultGroovyMethods round java.math.BigDecimal
 method org.codehaus.groovy.runtime.DefaultGroovyMethods round java.math.BigDecimal int
+method org.codehaus.groovy.runtime.DefaultGroovyMethods setMetaClass groovy.lang.GroovyObject groovy.lang.MetaClass
+method org.codehaus.groovy.runtime.DefaultGroovyMethods setMetaClass java.lang.Class groovy.lang.MetaClass
+method org.codehaus.groovy.runtime.DefaultGroovyMethods setMetaClass java.lang.Object groovy.lang.MetaClass
+method org.codehaus.groovy.runtime.DefaultGroovyMethods shuffle java.lang.Object[]
+method org.codehaus.groovy.runtime.DefaultGroovyMethods shuffle java.lang.Object[] java.util.Random
+method org.codehaus.groovy.runtime.DefaultGroovyMethods shuffle java.util.List
+method org.codehaus.groovy.runtime.DefaultGroovyMethods shuffle java.util.List java.util.Random
+method org.codehaus.groovy.runtime.DefaultGroovyMethods shuffled java.lang.Object[]
+method org.codehaus.groovy.runtime.DefaultGroovyMethods shuffled java.lang.Object[] java.util.Random
+method org.codehaus.groovy.runtime.DefaultGroovyMethods shuffled java.util.List
+method org.codehaus.groovy.runtime.DefaultGroovyMethods shuffled java.util.List java.util.Random
 method org.codehaus.groovy.runtime.DefaultGroovyMethods size boolean[]
 method org.codehaus.groovy.runtime.DefaultGroovyMethods size byte[]
 method org.codehaus.groovy.runtime.DefaultGroovyMethods size char[]
@@ -772,13 +939,14 @@ method org.codehaus.groovy.runtime.DefaultGroovyMethods sort java.util.Map groov
 method org.codehaus.groovy.runtime.DefaultGroovyMethods sort java.util.Map java.util.Comparator
 method org.codehaus.groovy.runtime.DefaultGroovyMethods sort java.util.SortedMap
 method org.codehaus.groovy.runtime.DefaultGroovyMethods sort java.util.SortedSet
-method org.codehaus.groovy.runtime.DefaultGroovyMethods split groovy.lang.Closure java.util.Collection java.util.Collection java.util.Iterator
 method org.codehaus.groovy.runtime.DefaultGroovyMethods split java.lang.Object groovy.lang.Closure
 method org.codehaus.groovy.runtime.DefaultGroovyMethods split java.lang.Object[] groovy.lang.Closure
 method org.codehaus.groovy.runtime.DefaultGroovyMethods split java.util.Collection groovy.lang.Closure
 method org.codehaus.groovy.runtime.DefaultGroovyMethods split java.util.List groovy.lang.Closure
 method org.codehaus.groovy.runtime.DefaultGroovyMethods split java.util.Set groovy.lang.Closure
 method org.codehaus.groovy.runtime.DefaultGroovyMethods spread java.util.Map
+method org.codehaus.groovy.runtime.DefaultGroovyMethods sprintf java.lang.Object java.lang.String java.lang.Object
+method org.codehaus.groovy.runtime.DefaultGroovyMethods sprintf java.lang.Object java.lang.String java.lang.Object[]
 method org.codehaus.groovy.runtime.DefaultGroovyMethods step java.lang.Number java.lang.Number java.lang.Number groovy.lang.Closure
 method org.codehaus.groovy.runtime.DefaultGroovyMethods subMap java.util.Map java.lang.Object[]
 method org.codehaus.groovy.runtime.DefaultGroovyMethods subMap java.util.Map java.util.Collection
@@ -808,9 +976,7 @@ method org.codehaus.groovy.runtime.DefaultGroovyMethods sum java.util.Collection
 method org.codehaus.groovy.runtime.DefaultGroovyMethods sum java.util.Iterator
 method org.codehaus.groovy.runtime.DefaultGroovyMethods sum java.util.Iterator groovy.lang.Closure
 method org.codehaus.groovy.runtime.DefaultGroovyMethods sum java.util.Iterator java.lang.Object
-method org.codehaus.groovy.runtime.DefaultGroovyMethods sum java.util.Iterator java.lang.Object boolean
 method org.codehaus.groovy.runtime.DefaultGroovyMethods sum java.util.Iterator java.lang.Object groovy.lang.Closure
-method org.codehaus.groovy.runtime.DefaultGroovyMethods sum java.util.Iterator java.lang.Object groovy.lang.Closure boolean
 method org.codehaus.groovy.runtime.DefaultGroovyMethods sum long[]
 method org.codehaus.groovy.runtime.DefaultGroovyMethods sum long[] long
 method org.codehaus.groovy.runtime.DefaultGroovyMethods sum short[]
@@ -957,8 +1123,6 @@ method org.codehaus.groovy.runtime.DefaultGroovyMethods unique java.util.List bo
 method org.codehaus.groovy.runtime.DefaultGroovyMethods unique java.util.List boolean java.util.Comparator
 method org.codehaus.groovy.runtime.DefaultGroovyMethods unique java.util.List groovy.lang.Closure
 method org.codehaus.groovy.runtime.DefaultGroovyMethods unique java.util.List java.util.Comparator
-method org.codehaus.groovy.runtime.DefaultGroovyMethods uniqueItems java.lang.Iterable
-method org.codehaus.groovy.runtime.DefaultGroovyMethods uniqueItems java.lang.Iterable java.util.Comparator
 method org.codehaus.groovy.runtime.DefaultGroovyMethods upto double java.lang.Number groovy.lang.Closure
 method org.codehaus.groovy.runtime.DefaultGroovyMethods upto float java.lang.Number groovy.lang.Closure
 method org.codehaus.groovy.runtime.DefaultGroovyMethods upto java.lang.Double java.lang.Number groovy.lang.Closure
@@ -968,6 +1132,9 @@ method org.codehaus.groovy.runtime.DefaultGroovyMethods upto java.lang.Number ja
 method org.codehaus.groovy.runtime.DefaultGroovyMethods upto java.math.BigDecimal java.lang.Number groovy.lang.Closure
 method org.codehaus.groovy.runtime.DefaultGroovyMethods upto java.math.BigInteger java.lang.Number groovy.lang.Closure
 method org.codehaus.groovy.runtime.DefaultGroovyMethods upto long java.lang.Number groovy.lang.Closure
+method org.codehaus.groovy.runtime.DefaultGroovyMethods use java.lang.Object java.lang.Class groovy.lang.Closure
+method org.codehaus.groovy.runtime.DefaultGroovyMethods use java.lang.Object java.lang.Object[]
+method org.codehaus.groovy.runtime.DefaultGroovyMethods use java.lang.Object java.util.List groovy.lang.Closure
 method org.codehaus.groovy.runtime.DefaultGroovyMethods with java.lang.Object boolean groovy.lang.Closure
 method org.codehaus.groovy.runtime.DefaultGroovyMethods with java.lang.Object groovy.lang.Closure
 method org.codehaus.groovy.runtime.DefaultGroovyMethods withDefault java.util.List groovy.lang.Closure
@@ -981,26 +1148,31 @@ method org.codehaus.groovy.runtime.DefaultGroovyMethods withIndex java.util.Iter
 method org.codehaus.groovy.runtime.DefaultGroovyMethods withIndex java.util.Iterator int
 method org.codehaus.groovy.runtime.DefaultGroovyMethods withLazyDefault java.util.List groovy.lang.Closure
 method org.codehaus.groovy.runtime.DefaultGroovyMethods withLazyDefault java.util.List groovy.lang.Closure
-method org.codehaus.groovy.runtime.DefaultGroovyMethods withTraits java.lang.Object java.lang.Class[]
 method org.codehaus.groovy.runtime.DefaultGroovyMethods xor java.lang.Boolean java.lang.Boolean
 method org.codehaus.groovy.runtime.DefaultGroovyMethods xor java.lang.Number java.lang.Number
 method org.codehaus.groovy.runtime.DefaultGroovyMethods xor java.util.BitSet java.util.BitSet
 method org.codehaus.groovy.runtime.EncodingGroovyMethods decodeBase64 java.lang.String
-method org.codehaus.groovy.runtime.EncodingGroovyMethods decodeBase64 java.lang.String boolean
+method org.codehaus.groovy.runtime.EncodingGroovyMethods decodeBase64Url java.lang.String
 method org.codehaus.groovy.runtime.EncodingGroovyMethods decodeHex java.lang.String
 method org.codehaus.groovy.runtime.EncodingGroovyMethods digest byte[] java.lang.String
 method org.codehaus.groovy.runtime.EncodingGroovyMethods digest java.lang.CharSequence java.lang.String
 method org.codehaus.groovy.runtime.EncodingGroovyMethods encodeBase64 byte[]
 method org.codehaus.groovy.runtime.EncodingGroovyMethods encodeBase64 byte[] boolean
-method org.codehaus.groovy.runtime.EncodingGroovyMethods encodeBase64 byte[] boolean boolean boolean
 method org.codehaus.groovy.runtime.EncodingGroovyMethods encodeBase64 java.lang.Byte[]
 method org.codehaus.groovy.runtime.EncodingGroovyMethods encodeBase64 java.lang.Byte[] boolean
+method org.codehaus.groovy.runtime.EncodingGroovyMethods encodeBase64Url byte[]
+method org.codehaus.groovy.runtime.EncodingGroovyMethods encodeBase64Url byte[] boolean
+method org.codehaus.groovy.runtime.EncodingGroovyMethods encodeBase64Url java.lang.Byte[]
+method org.codehaus.groovy.runtime.EncodingGroovyMethods encodeBase64Url java.lang.Byte[] boolean
 method org.codehaus.groovy.runtime.EncodingGroovyMethods encodeHex byte[]
 method org.codehaus.groovy.runtime.EncodingGroovyMethods encodeHex java.lang.Byte[]
 method org.codehaus.groovy.runtime.EncodingGroovyMethods md5 byte[]
 method org.codehaus.groovy.runtime.EncodingGroovyMethods md5 java.lang.CharSequence
 method org.codehaus.groovy.runtime.EncodingGroovyMethods sha256 byte[]
 method org.codehaus.groovy.runtime.EncodingGroovyMethods sha256 java.lang.CharSequence
+method org.codehaus.groovy.runtime.GStringImpl codePointAt int
+method org.codehaus.groovy.runtime.GStringImpl codePointBefore int
+method org.codehaus.groovy.runtime.GStringImpl codePointCount int int
 method org.codehaus.groovy.runtime.GStringImpl compareTo java.lang.String
 method org.codehaus.groovy.runtime.GStringImpl compareToIgnoreCase java.lang.String
 method org.codehaus.groovy.runtime.GStringImpl concat java.lang.String
@@ -1009,18 +1181,23 @@ method org.codehaus.groovy.runtime.GStringImpl contentEquals java.lang.CharSeque
 method org.codehaus.groovy.runtime.GStringImpl contentEquals java.lang.StringBuffer
 method org.codehaus.groovy.runtime.GStringImpl endsWith java.lang.String
 method org.codehaus.groovy.runtime.GStringImpl equalsIgnoreCase java.lang.String
+method org.codehaus.groovy.runtime.GStringImpl getBytes java.nio.charset.Charset
 method org.codehaus.groovy.runtime.GStringImpl getChars int int char[] int
 method org.codehaus.groovy.runtime.GStringImpl getStrings
 method org.codehaus.groovy.runtime.GStringImpl indexOf int
 method org.codehaus.groovy.runtime.GStringImpl indexOf int int
 method org.codehaus.groovy.runtime.GStringImpl indexOf java.lang.String
 method org.codehaus.groovy.runtime.GStringImpl indexOf java.lang.String int
+method org.codehaus.groovy.runtime.GStringImpl intern
 method org.codehaus.groovy.runtime.GStringImpl isEmpty
 method org.codehaus.groovy.runtime.GStringImpl lastIndexOf int
 method org.codehaus.groovy.runtime.GStringImpl lastIndexOf int int
 method org.codehaus.groovy.runtime.GStringImpl lastIndexOf java.lang.String
 method org.codehaus.groovy.runtime.GStringImpl lastIndexOf java.lang.String int
 method org.codehaus.groovy.runtime.GStringImpl matches java.lang.String
+method org.codehaus.groovy.runtime.GStringImpl offsetByCodePoints int int
+method org.codehaus.groovy.runtime.GStringImpl regionMatches boolean int java.lang.String int int
+method org.codehaus.groovy.runtime.GStringImpl regionMatches int java.lang.String int int
 method org.codehaus.groovy.runtime.GStringImpl replace char char
 method org.codehaus.groovy.runtime.GStringImpl replace java.lang.CharSequence java.lang.CharSequence
 method org.codehaus.groovy.runtime.GStringImpl replaceAll java.lang.String java.lang.String
@@ -1033,10 +1210,60 @@ method org.codehaus.groovy.runtime.GStringImpl substring int
 method org.codehaus.groovy.runtime.GStringImpl substring int int
 method org.codehaus.groovy.runtime.GStringImpl toCharArray
 method org.codehaus.groovy.runtime.GStringImpl toLowerCase
+method org.codehaus.groovy.runtime.GStringImpl toLowerCase java.util.Locale
 method org.codehaus.groovy.runtime.GStringImpl toUpperCase
+method org.codehaus.groovy.runtime.GStringImpl toUpperCase java.util.Locale
 method org.codehaus.groovy.runtime.GStringImpl trim
+method org.codehaus.groovy.runtime.InvokerHelper append java.lang.Appendable java.lang.Object
+method org.codehaus.groovy.runtime.InvokerHelper asArray java.lang.Object
 method org.codehaus.groovy.runtime.InvokerHelper asIterator java.lang.Object
+method org.codehaus.groovy.runtime.InvokerHelper asList java.lang.Object
+method org.codehaus.groovy.runtime.InvokerHelper assertFailed java.lang.Object java.lang.Object
+method org.codehaus.groovy.runtime.InvokerHelper asUnwrappedArray java.lang.Object
+method org.codehaus.groovy.runtime.InvokerHelper bitwiseNegate java.lang.Object
+method org.codehaus.groovy.runtime.InvokerHelper createList java.lang.Object[]
+method org.codehaus.groovy.runtime.InvokerHelper createMap java.lang.Object[]
+method org.codehaus.groovy.runtime.InvokerHelper createRange java.lang.Object java.lang.Object boolean
+method org.codehaus.groovy.runtime.InvokerHelper createScript java.lang.Class groovy.lang.Binding
+method org.codehaus.groovy.runtime.InvokerHelper createTuple java.lang.Object[]
+method org.codehaus.groovy.runtime.InvokerHelper escapeBackslashes java.lang.String
+method org.codehaus.groovy.runtime.InvokerHelper findRegex java.lang.Object java.lang.Object
+method org.codehaus.groovy.runtime.InvokerHelper format java.lang.Object boolean int
+method org.codehaus.groovy.runtime.InvokerHelper format java.lang.Object boolean int boolean
+method org.codehaus.groovy.runtime.InvokerHelper getAttribute java.lang.Object java.lang.String
+method org.codehaus.groovy.runtime.InvokerHelper getGroovyObjectProperty groovy.lang.GroovyObject java.lang.String
+method org.codehaus.groovy.runtime.InvokerHelper getMetaRegistry
+method org.codehaus.groovy.runtime.InvokerHelper getMethodPointer java.lang.Object java.lang.String
+method org.codehaus.groovy.runtime.InvokerHelper getProperty java.lang.Object java.lang.String
+method org.codehaus.groovy.runtime.InvokerHelper getPropertySafe java.lang.Object java.lang.String
+method org.codehaus.groovy.runtime.InvokerHelper initialCapacity int
+method org.codehaus.groovy.runtime.InvokerHelper inspect java.lang.Object
+method org.codehaus.groovy.runtime.InvokerHelper matchRegex java.lang.Object java.lang.Object
+method org.codehaus.groovy.runtime.InvokerHelper removeClass java.lang.Class
+method org.codehaus.groovy.runtime.InvokerHelper setAttribute java.lang.Object java.lang.String java.lang.Object
+method org.codehaus.groovy.runtime.InvokerHelper setGroovyObjectProperty java.lang.Object groovy.lang.GroovyObject java.lang.String
+method org.codehaus.groovy.runtime.InvokerHelper setProperties java.lang.Object java.util.Map
+method org.codehaus.groovy.runtime.InvokerHelper setProperty java.lang.Object java.lang.String java.lang.Object
+method org.codehaus.groovy.runtime.InvokerHelper setProperty2 java.lang.Object java.lang.Object java.lang.String
+method org.codehaus.groovy.runtime.InvokerHelper setPropertySafe2 java.lang.Object java.lang.Object java.lang.String
+method org.codehaus.groovy.runtime.InvokerHelper spreadMap java.lang.Object
+method org.codehaus.groovy.runtime.InvokerHelper toArrayString java.lang.Object[]
+method org.codehaus.groovy.runtime.InvokerHelper toArrayString java.lang.Object[] int boolean
+method org.codehaus.groovy.runtime.InvokerHelper toListString java.util.Collection
+method org.codehaus.groovy.runtime.InvokerHelper toListString java.util.Collection int
+method org.codehaus.groovy.runtime.InvokerHelper toListString java.util.Collection int boolean
+method org.codehaus.groovy.runtime.InvokerHelper toMapString java.util.Map
+method org.codehaus.groovy.runtime.InvokerHelper toMapString java.util.Map int
+method org.codehaus.groovy.runtime.InvokerHelper toString java.lang.Object
+method org.codehaus.groovy.runtime.InvokerHelper toTypeString java.lang.Object[]
+method org.codehaus.groovy.runtime.InvokerHelper toTypeString java.lang.Object[] int
+method org.codehaus.groovy.runtime.InvokerHelper unaryMinus java.lang.Object
+method org.codehaus.groovy.runtime.InvokerHelper unaryPlus java.lang.Object
+method org.codehaus.groovy.runtime.InvokerHelper write java.io.Writer java.lang.Object
+method org.codehaus.groovy.runtime.ScriptBytecodeAdapter assertFailed java.lang.Object java.lang.Object
+method org.codehaus.groovy.runtime.ScriptBytecodeAdapter asType java.lang.Object java.lang.Class
 method org.codehaus.groovy.runtime.ScriptBytecodeAdapter bitwiseNegate java.lang.Object
+method org.codehaus.groovy.runtime.ScriptBytecodeAdapter castToType java.lang.Object java.lang.Class
 method org.codehaus.groovy.runtime.ScriptBytecodeAdapter compareEqual java.lang.Object java.lang.Object
 method org.codehaus.groovy.runtime.ScriptBytecodeAdapter compareGreaterThan java.lang.Object java.lang.Object
 method org.codehaus.groovy.runtime.ScriptBytecodeAdapter compareGreaterThanEqual java.lang.Object java.lang.Object
@@ -1046,43 +1273,99 @@ method org.codehaus.groovy.runtime.ScriptBytecodeAdapter compareLessThanEqual ja
 method org.codehaus.groovy.runtime.ScriptBytecodeAdapter compareNotEqual java.lang.Object java.lang.Object
 method org.codehaus.groovy.runtime.ScriptBytecodeAdapter compareNotIdentical java.lang.Object java.lang.Object
 method org.codehaus.groovy.runtime.ScriptBytecodeAdapter compareTo java.lang.Object java.lang.Object
+method org.codehaus.groovy.runtime.ScriptBytecodeAdapter createGroovyObjectWrapper groovy.lang.GroovyObject java.lang.Class
+method org.codehaus.groovy.runtime.ScriptBytecodeAdapter createList java.lang.Object[]
+method org.codehaus.groovy.runtime.ScriptBytecodeAdapter createMap java.lang.Object[]
+method org.codehaus.groovy.runtime.ScriptBytecodeAdapter createPojoWrapper java.lang.Object java.lang.Class
 method org.codehaus.groovy.runtime.ScriptBytecodeAdapter createRange java.lang.Object java.lang.Object boolean
+method org.codehaus.groovy.runtime.ScriptBytecodeAdapter createTuple java.lang.Object[]
+method org.codehaus.groovy.runtime.ScriptBytecodeAdapter despreadList java.lang.Object[] java.lang.Object[] int[]
 method org.codehaus.groovy.runtime.ScriptBytecodeAdapter findRegex java.lang.Object java.lang.Object
+method org.codehaus.groovy.runtime.ScriptBytecodeAdapter getField java.lang.Class java.lang.Object java.lang.String
+method org.codehaus.groovy.runtime.ScriptBytecodeAdapter getFieldOnSuper java.lang.Class java.lang.Object java.lang.String
+method org.codehaus.groovy.runtime.ScriptBytecodeAdapter getFieldOnSuperSafe java.lang.Class java.lang.Object java.lang.String
+method org.codehaus.groovy.runtime.ScriptBytecodeAdapter getFieldOnSuperSpreadSafe java.lang.Class java.lang.Object java.lang.String
+method org.codehaus.groovy.runtime.ScriptBytecodeAdapter getFieldSafe java.lang.Class java.lang.Object java.lang.String
+method org.codehaus.groovy.runtime.ScriptBytecodeAdapter getFieldSpreadSafe java.lang.Class java.lang.Object java.lang.String
+method org.codehaus.groovy.runtime.ScriptBytecodeAdapter getGroovyObjectField java.lang.Class groovy.lang.GroovyObject java.lang.String
+method org.codehaus.groovy.runtime.ScriptBytecodeAdapter getGroovyObjectFieldSafe java.lang.Class groovy.lang.GroovyObject java.lang.String
+method org.codehaus.groovy.runtime.ScriptBytecodeAdapter getGroovyObjectFieldSpreadSafe java.lang.Class groovy.lang.GroovyObject java.lang.String
+method org.codehaus.groovy.runtime.ScriptBytecodeAdapter getGroovyObjectProperty java.lang.Class groovy.lang.GroovyObject java.lang.String
+method org.codehaus.groovy.runtime.ScriptBytecodeAdapter getGroovyObjectPropertySafe java.lang.Class groovy.lang.GroovyObject java.lang.String
+method org.codehaus.groovy.runtime.ScriptBytecodeAdapter getGroovyObjectPropertySpreadSafe java.lang.Class groovy.lang.GroovyObject java.lang.String
+method org.codehaus.groovy.runtime.ScriptBytecodeAdapter getMethodPointer java.lang.Object java.lang.String
+method org.codehaus.groovy.runtime.ScriptBytecodeAdapter getProperty java.lang.Class java.lang.Object java.lang.String
+method org.codehaus.groovy.runtime.ScriptBytecodeAdapter getPropertyOnSuper java.lang.Class groovy.lang.GroovyObject java.lang.String
+method org.codehaus.groovy.runtime.ScriptBytecodeAdapter getPropertyOnSuperSafe java.lang.Class groovy.lang.GroovyObject java.lang.String
+method org.codehaus.groovy.runtime.ScriptBytecodeAdapter getPropertyOnSuperSpreadSafe java.lang.Class groovy.lang.GroovyObject java.lang.String
+method org.codehaus.groovy.runtime.ScriptBytecodeAdapter getPropertySafe java.lang.Class java.lang.Object java.lang.String
+method org.codehaus.groovy.runtime.ScriptBytecodeAdapter getPropertySpreadSafe java.lang.Class java.lang.Object java.lang.String
+method org.codehaus.groovy.runtime.ScriptBytecodeAdapter initMetaClass java.lang.Object
 method org.codehaus.groovy.runtime.ScriptBytecodeAdapter isCase java.lang.Object java.lang.Object
+method org.codehaus.groovy.runtime.ScriptBytecodeAdapter isNotCase java.lang.Object java.lang.Object
 method org.codehaus.groovy.runtime.ScriptBytecodeAdapter matchRegex java.lang.Object java.lang.Object
+method org.codehaus.groovy.runtime.ScriptBytecodeAdapter regexPattern java.lang.Object
+method org.codehaus.groovy.runtime.ScriptBytecodeAdapter selectConstructorAndTransformArguments java.lang.Object[] int java.lang.Class
+method org.codehaus.groovy.runtime.ScriptBytecodeAdapter setField java.lang.Object java.lang.Class java.lang.Object java.lang.String
+method org.codehaus.groovy.runtime.ScriptBytecodeAdapter setFieldOnSuper java.lang.Object java.lang.Class java.lang.Object java.lang.String
+method org.codehaus.groovy.runtime.ScriptBytecodeAdapter setFieldOnSuperSafe java.lang.Object java.lang.Class java.lang.Object java.lang.String
+method org.codehaus.groovy.runtime.ScriptBytecodeAdapter setFieldOnSuperSpreadSafe java.lang.Object java.lang.Class java.lang.Object java.lang.String
+method org.codehaus.groovy.runtime.ScriptBytecodeAdapter setFieldSafe java.lang.Object java.lang.Class java.lang.Object java.lang.String
+method org.codehaus.groovy.runtime.ScriptBytecodeAdapter setFieldSpreadSafe java.lang.Object java.lang.Class java.lang.Object java.lang.String
+method org.codehaus.groovy.runtime.ScriptBytecodeAdapter setGroovyObjectField java.lang.Object java.lang.Class groovy.lang.GroovyObject java.lang.String
+method org.codehaus.groovy.runtime.ScriptBytecodeAdapter setGroovyObjectFieldSafe java.lang.Object java.lang.Class groovy.lang.GroovyObject java.lang.String
+method org.codehaus.groovy.runtime.ScriptBytecodeAdapter setGroovyObjectFieldSpreadSafe java.lang.Object java.lang.Class groovy.lang.GroovyObject java.lang.String
+method org.codehaus.groovy.runtime.ScriptBytecodeAdapter setGroovyObjectProperty java.lang.Object java.lang.Class groovy.lang.GroovyObject java.lang.String
+method org.codehaus.groovy.runtime.ScriptBytecodeAdapter setGroovyObjectPropertySafe java.lang.Object java.lang.Class groovy.lang.GroovyObject java.lang.String
+method org.codehaus.groovy.runtime.ScriptBytecodeAdapter setGroovyObjectPropertySpreadSafe java.lang.Object java.lang.Class groovy.lang.GroovyObject java.lang.String
+method org.codehaus.groovy.runtime.ScriptBytecodeAdapter setProperty java.lang.Object java.lang.Class java.lang.Object java.lang.String
+method org.codehaus.groovy.runtime.ScriptBytecodeAdapter setPropertyOnSuper java.lang.Object java.lang.Class groovy.lang.GroovyObject java.lang.String
+method org.codehaus.groovy.runtime.ScriptBytecodeAdapter setPropertyOnSuperSafe java.lang.Object java.lang.Class groovy.lang.GroovyObject java.lang.String
+method org.codehaus.groovy.runtime.ScriptBytecodeAdapter setPropertyOnSuperSpreadSafe java.lang.Object java.lang.Class groovy.lang.GroovyObject java.lang.String
+method org.codehaus.groovy.runtime.ScriptBytecodeAdapter setPropertySafe java.lang.Object java.lang.Class java.lang.Object java.lang.String
+method org.codehaus.groovy.runtime.ScriptBytecodeAdapter setPropertySpreadSafe java.lang.Object java.lang.Class java.lang.Object java.lang.String
+method org.codehaus.groovy.runtime.ScriptBytecodeAdapter spreadMap java.lang.Object
+method org.codehaus.groovy.runtime.ScriptBytecodeAdapter unaryMinus java.lang.Object
+method org.codehaus.groovy.runtime.ScriptBytecodeAdapter unaryPlus java.lang.Object
+method org.codehaus.groovy.runtime.ScriptBytecodeAdapter unwrap groovy.lang.GroovyRuntimeException
+method org.codehaus.groovy.runtime.StringGroovyMethods append java.lang.StringBuilder org.codehaus.groovy.runtime.GStringImpl
+method org.codehaus.groovy.runtime.StringGroovyMethods asBoolean java.lang.CharSequence
+method org.codehaus.groovy.runtime.StringGroovyMethods asBoolean java.util.regex.Matcher
 method org.codehaus.groovy.runtime.StringGroovyMethods asType groovy.lang.GString java.lang.Class
 method org.codehaus.groovy.runtime.StringGroovyMethods asType java.lang.CharSequence java.lang.Class
 method org.codehaus.groovy.runtime.StringGroovyMethods asType java.lang.String java.lang.Class
-method org.codehaus.groovy.runtime.StringGroovyMethods capitalize java.lang.CharSequence
+method org.codehaus.groovy.runtime.StringGroovyMethods bitwiseNegate java.lang.CharSequence
 method org.codehaus.groovy.runtime.StringGroovyMethods capitalize java.lang.CharSequence
 method org.codehaus.groovy.runtime.StringGroovyMethods center java.lang.CharSequence java.lang.Number
 method org.codehaus.groovy.runtime.StringGroovyMethods center java.lang.CharSequence java.lang.Number java.lang.CharSequence
+method org.codehaus.groovy.runtime.StringGroovyMethods collectReplacements java.lang.String groovy.lang.Closure
+method org.codehaus.groovy.runtime.StringGroovyMethods collectReplacements java.lang.String java.util.List
 method org.codehaus.groovy.runtime.StringGroovyMethods contains java.lang.CharSequence java.lang.CharSequence
-method org.codehaus.groovy.runtime.StringGroovyMethods count java.lang.CharSequence java.lang.CharSequence
+method org.codehaus.groovy.runtime.StringGroovyMethods containsIgnoreCase java.lang.CharSequence java.lang.CharSequence
 method org.codehaus.groovy.runtime.StringGroovyMethods count java.lang.CharSequence java.lang.CharSequence
 method org.codehaus.groovy.runtime.StringGroovyMethods denormalize java.lang.CharSequence
 method org.codehaus.groovy.runtime.StringGroovyMethods drop groovy.lang.GString int
 method org.codehaus.groovy.runtime.StringGroovyMethods drop java.lang.CharSequence int
 method org.codehaus.groovy.runtime.StringGroovyMethods drop java.lang.String int
+method org.codehaus.groovy.runtime.StringGroovyMethods dropRight groovy.lang.GString int
+method org.codehaus.groovy.runtime.StringGroovyMethods dropRight java.lang.CharSequence int
+method org.codehaus.groovy.runtime.StringGroovyMethods dropRight java.lang.String int
 method org.codehaus.groovy.runtime.StringGroovyMethods dropWhile groovy.lang.GString groovy.lang.Closure
 method org.codehaus.groovy.runtime.StringGroovyMethods dropWhile java.lang.CharSequence groovy.lang.Closure
 method org.codehaus.groovy.runtime.StringGroovyMethods dropWhile java.lang.CharSequence groovy.lang.Closure
+method org.codehaus.groovy.runtime.StringGroovyMethods eachLine java.lang.CharSequence groovy.lang.Closure
+method org.codehaus.groovy.runtime.StringGroovyMethods eachLine java.lang.CharSequence int groovy.lang.Closure
 method org.codehaus.groovy.runtime.StringGroovyMethods eachMatch java.lang.CharSequence java.lang.CharSequence groovy.lang.Closure
 method org.codehaus.groovy.runtime.StringGroovyMethods eachMatch java.lang.CharSequence java.util.regex.Pattern groovy.lang.Closure
 method org.codehaus.groovy.runtime.StringGroovyMethods eachMatch java.lang.String java.lang.String groovy.lang.Closure
 method org.codehaus.groovy.runtime.StringGroovyMethods eachMatch java.lang.String java.util.regex.Pattern groovy.lang.Closure
+method org.codehaus.groovy.runtime.StringGroovyMethods endsWithIgnoreCase java.lang.CharSequence java.lang.CharSequence
 method org.codehaus.groovy.runtime.StringGroovyMethods expand java.lang.CharSequence
-method org.codehaus.groovy.runtime.StringGroovyMethods expand java.lang.CharSequence
-method org.codehaus.groovy.runtime.StringGroovyMethods expand java.lang.CharSequence int
 method org.codehaus.groovy.runtime.StringGroovyMethods expand java.lang.CharSequence int
 method org.codehaus.groovy.runtime.StringGroovyMethods expandLine java.lang.CharSequence int
 method org.codehaus.groovy.runtime.StringGroovyMethods find java.lang.CharSequence java.lang.CharSequence
-method org.codehaus.groovy.runtime.StringGroovyMethods find java.lang.CharSequence java.lang.CharSequence
-method org.codehaus.groovy.runtime.StringGroovyMethods find java.lang.CharSequence java.lang.CharSequence groovy.lang.Closure
 method org.codehaus.groovy.runtime.StringGroovyMethods find java.lang.CharSequence java.lang.CharSequence groovy.lang.Closure
 method org.codehaus.groovy.runtime.StringGroovyMethods find java.lang.CharSequence java.util.regex.Pattern
-method org.codehaus.groovy.runtime.StringGroovyMethods find java.lang.CharSequence java.util.regex.Pattern
-method org.codehaus.groovy.runtime.StringGroovyMethods find java.lang.CharSequence java.util.regex.Pattern groovy.lang.Closure
 method org.codehaus.groovy.runtime.StringGroovyMethods find java.lang.CharSequence java.util.regex.Pattern groovy.lang.Closure
 method org.codehaus.groovy.runtime.StringGroovyMethods findAll java.lang.CharSequence java.lang.CharSequence
 method org.codehaus.groovy.runtime.StringGroovyMethods findAll java.lang.CharSequence java.lang.CharSequence groovy.lang.Closure
@@ -1101,21 +1384,32 @@ method org.codehaus.groovy.runtime.StringGroovyMethods getAt java.lang.String gr
 method org.codehaus.groovy.runtime.StringGroovyMethods getAt java.lang.String int
 method org.codehaus.groovy.runtime.StringGroovyMethods getAt java.util.regex.Matcher int
 method org.codehaus.groovy.runtime.StringGroovyMethods getAt java.util.regex.Matcher java.util.Collection
+method org.codehaus.groovy.runtime.StringGroovyMethods getChars java.lang.CharSequence
+method org.codehaus.groovy.runtime.StringGroovyMethods getCount java.util.regex.Matcher
+method org.codehaus.groovy.runtime.StringGroovyMethods hasGroup java.util.regex.Matcher
 method org.codehaus.groovy.runtime.StringGroovyMethods isAllWhitespace java.lang.CharSequence
+method org.codehaus.groovy.runtime.StringGroovyMethods isAtLeast java.lang.String java.lang.String
+method org.codehaus.groovy.runtime.StringGroovyMethods isBigDecimal java.lang.CharSequence
+method org.codehaus.groovy.runtime.StringGroovyMethods isBigInteger java.lang.CharSequence
+method org.codehaus.groovy.runtime.StringGroovyMethods isBlank java.lang.CharSequence
+method org.codehaus.groovy.runtime.StringGroovyMethods isCase java.lang.CharSequence java.lang.Object
+method org.codehaus.groovy.runtime.StringGroovyMethods isCase java.util.regex.Pattern java.lang.Object
 method org.codehaus.groovy.runtime.StringGroovyMethods isDouble java.lang.CharSequence
 method org.codehaus.groovy.runtime.StringGroovyMethods isFloat java.lang.CharSequence
 method org.codehaus.groovy.runtime.StringGroovyMethods isInteger java.lang.CharSequence
 method org.codehaus.groovy.runtime.StringGroovyMethods isLong java.lang.CharSequence
+method org.codehaus.groovy.runtime.StringGroovyMethods isNumber java.lang.CharSequence
+method org.codehaus.groovy.runtime.StringGroovyMethods iterator java.util.regex.Matcher
 method org.codehaus.groovy.runtime.StringGroovyMethods leftShift java.lang.CharSequence java.lang.Object
 method org.codehaus.groovy.runtime.StringGroovyMethods leftShift java.lang.String java.lang.Object
 method org.codehaus.groovy.runtime.StringGroovyMethods leftShift java.lang.StringBuffer java.lang.Object
 method org.codehaus.groovy.runtime.StringGroovyMethods leftShift java.lang.StringBuilder java.lang.Object
 method org.codehaus.groovy.runtime.StringGroovyMethods matches java.lang.CharSequence java.util.regex.Pattern
+method org.codehaus.groovy.runtime.StringGroovyMethods matchesPartially java.util.regex.Matcher
 method org.codehaus.groovy.runtime.StringGroovyMethods minus java.lang.CharSequence java.lang.Object
 method org.codehaus.groovy.runtime.StringGroovyMethods minus java.lang.CharSequence java.util.regex.Pattern
 method org.codehaus.groovy.runtime.StringGroovyMethods multiply java.lang.CharSequence java.lang.Number
-method org.codehaus.groovy.runtime.StringGroovyMethods multiply java.lang.CharSequence java.lang.Number
-method org.codehaus.groovy.runtime.StringGroovyMethods normalize java.lang.CharSequence
+method org.codehaus.groovy.runtime.StringGroovyMethods next java.lang.CharSequence
 method org.codehaus.groovy.runtime.StringGroovyMethods normalize java.lang.CharSequence
 method org.codehaus.groovy.runtime.StringGroovyMethods padLeft java.lang.CharSequence java.lang.Number
 method org.codehaus.groovy.runtime.StringGroovyMethods padLeft java.lang.CharSequence java.lang.Number java.lang.CharSequence
@@ -1129,38 +1423,75 @@ method org.codehaus.groovy.runtime.StringGroovyMethods previous java.lang.CharSe
 method org.codehaus.groovy.runtime.StringGroovyMethods putAt java.lang.StringBuffer groovy.lang.EmptyRange java.lang.Object
 method org.codehaus.groovy.runtime.StringGroovyMethods putAt java.lang.StringBuffer groovy.lang.IntRange java.lang.Object
 method org.codehaus.groovy.runtime.StringGroovyMethods readLines java.lang.CharSequence
-method org.codehaus.groovy.runtime.StringGroovyMethods replaceAll java.lang.CharSequence java.lang.CharSequence groovy.lang.Closure
+method org.codehaus.groovy.runtime.StringGroovyMethods replace java.lang.CharSequence int java.util.Map
+method org.codehaus.groovy.runtime.StringGroovyMethods replace java.lang.CharSequence java.util.Map
 method org.codehaus.groovy.runtime.StringGroovyMethods replaceAll java.lang.CharSequence java.lang.CharSequence groovy.lang.Closure
 method org.codehaus.groovy.runtime.StringGroovyMethods replaceAll java.lang.CharSequence java.lang.CharSequence java.lang.CharSequence
-method org.codehaus.groovy.runtime.StringGroovyMethods replaceAll java.lang.CharSequence java.lang.CharSequence java.lang.CharSequence
-method org.codehaus.groovy.runtime.StringGroovyMethods replaceAll java.lang.CharSequence java.util.regex.Pattern groovy.lang.Closure
 method org.codehaus.groovy.runtime.StringGroovyMethods replaceAll java.lang.CharSequence java.util.regex.Pattern groovy.lang.Closure
 method org.codehaus.groovy.runtime.StringGroovyMethods replaceAll java.lang.CharSequence java.util.regex.Pattern java.lang.CharSequence
-method org.codehaus.groovy.runtime.StringGroovyMethods replaceAll java.lang.CharSequence java.util.regex.Pattern java.lang.CharSequence
-method org.codehaus.groovy.runtime.StringGroovyMethods replaceFirst java.lang.CharSequence java.lang.CharSequence groovy.lang.Closure
 method org.codehaus.groovy.runtime.StringGroovyMethods replaceFirst java.lang.CharSequence java.lang.CharSequence groovy.lang.Closure
 method org.codehaus.groovy.runtime.StringGroovyMethods replaceFirst java.lang.CharSequence java.lang.CharSequence java.lang.CharSequence
-method org.codehaus.groovy.runtime.StringGroovyMethods replaceFirst java.lang.CharSequence java.lang.CharSequence java.lang.CharSequence
-method org.codehaus.groovy.runtime.StringGroovyMethods replaceFirst java.lang.CharSequence java.util.regex.Pattern groovy.lang.Closure
 method org.codehaus.groovy.runtime.StringGroovyMethods replaceFirst java.lang.CharSequence java.util.regex.Pattern groovy.lang.Closure
 method org.codehaus.groovy.runtime.StringGroovyMethods replaceFirst java.lang.CharSequence java.util.regex.Pattern java.lang.CharSequence
-method org.codehaus.groovy.runtime.StringGroovyMethods replaceFirst java.lang.CharSequence java.util.regex.Pattern java.lang.CharSequence
 method org.codehaus.groovy.runtime.StringGroovyMethods reverse java.lang.CharSequence
-method org.codehaus.groovy.runtime.StringGroovyMethods reverse java.lang.CharSequence
+method org.codehaus.groovy.runtime.StringGroovyMethods setIndex java.util.regex.Matcher int
 method org.codehaus.groovy.runtime.StringGroovyMethods size java.lang.CharSequence
 method org.codehaus.groovy.runtime.StringGroovyMethods size java.lang.String
 method org.codehaus.groovy.runtime.StringGroovyMethods size java.lang.StringBuffer
 method org.codehaus.groovy.runtime.StringGroovyMethods size java.util.regex.Matcher
 method org.codehaus.groovy.runtime.StringGroovyMethods split java.lang.CharSequence
+method org.codehaus.groovy.runtime.StringGroovyMethods splitEachLine java.lang.CharSequence java.lang.CharSequence groovy.lang.Closure
+method org.codehaus.groovy.runtime.StringGroovyMethods splitEachLine java.lang.CharSequence java.util.regex.Pattern groovy.lang.Closure
+method org.codehaus.groovy.runtime.StringGroovyMethods startsWithIgnoreCase java.lang.CharSequence java.lang.CharSequence
+method org.codehaus.groovy.runtime.StringGroovyMethods stripIndent java.lang.CharSequence
+method org.codehaus.groovy.runtime.StringGroovyMethods stripIndent java.lang.CharSequence boolean
+method org.codehaus.groovy.runtime.StringGroovyMethods stripIndent java.lang.CharSequence int
+method org.codehaus.groovy.runtime.StringGroovyMethods stripMargin java.lang.CharSequence
+method org.codehaus.groovy.runtime.StringGroovyMethods stripMargin java.lang.CharSequence char
+method org.codehaus.groovy.runtime.StringGroovyMethods stripMargin java.lang.CharSequence java.lang.CharSequence
+method org.codehaus.groovy.runtime.StringGroovyMethods take groovy.lang.GString int
+method org.codehaus.groovy.runtime.StringGroovyMethods take java.lang.CharSequence int
+method org.codehaus.groovy.runtime.StringGroovyMethods take java.lang.String int
+method org.codehaus.groovy.runtime.StringGroovyMethods takeAfter groovy.lang.GString java.lang.CharSequence
+method org.codehaus.groovy.runtime.StringGroovyMethods takeAfter java.lang.CharSequence java.lang.CharSequence
+method org.codehaus.groovy.runtime.StringGroovyMethods takeAfter java.lang.String java.lang.CharSequence
+method org.codehaus.groovy.runtime.StringGroovyMethods takeBefore groovy.lang.GString java.lang.String
+method org.codehaus.groovy.runtime.StringGroovyMethods takeBefore java.lang.CharSequence java.lang.CharSequence
+method org.codehaus.groovy.runtime.StringGroovyMethods takeBefore java.lang.String java.lang.String
+method org.codehaus.groovy.runtime.StringGroovyMethods takeBetween groovy.lang.GString java.lang.CharSequence
+method org.codehaus.groovy.runtime.StringGroovyMethods takeBetween groovy.lang.GString java.lang.CharSequence int
+method org.codehaus.groovy.runtime.StringGroovyMethods takeBetween groovy.lang.GString java.lang.CharSequence java.lang.CharSequence
+method org.codehaus.groovy.runtime.StringGroovyMethods takeBetween groovy.lang.GString java.lang.CharSequence java.lang.CharSequence int
+method org.codehaus.groovy.runtime.StringGroovyMethods takeBetween java.lang.CharSequence java.lang.CharSequence
+method org.codehaus.groovy.runtime.StringGroovyMethods takeBetween java.lang.CharSequence java.lang.CharSequence int
+method org.codehaus.groovy.runtime.StringGroovyMethods takeBetween java.lang.CharSequence java.lang.CharSequence java.lang.CharSequence
+method org.codehaus.groovy.runtime.StringGroovyMethods takeBetween java.lang.CharSequence java.lang.CharSequence java.lang.CharSequence int
+method org.codehaus.groovy.runtime.StringGroovyMethods takeBetween java.lang.String java.lang.CharSequence
+method org.codehaus.groovy.runtime.StringGroovyMethods takeBetween java.lang.String java.lang.CharSequence int
+method org.codehaus.groovy.runtime.StringGroovyMethods takeBetween java.lang.String java.lang.CharSequence java.lang.CharSequence
+method org.codehaus.groovy.runtime.StringGroovyMethods takeBetween java.lang.String java.lang.CharSequence java.lang.CharSequence int
+method org.codehaus.groovy.runtime.StringGroovyMethods takeRight groovy.lang.GString int
+method org.codehaus.groovy.runtime.StringGroovyMethods takeRight java.lang.CharSequence int
+method org.codehaus.groovy.runtime.StringGroovyMethods takeRight java.lang.String int
 method org.codehaus.groovy.runtime.StringGroovyMethods takeWhile groovy.lang.GString groovy.lang.Closure
 method org.codehaus.groovy.runtime.StringGroovyMethods takeWhile java.lang.CharSequence groovy.lang.Closure
 method org.codehaus.groovy.runtime.StringGroovyMethods takeWhile java.lang.CharSequence groovy.lang.Closure
+method org.codehaus.groovy.runtime.StringGroovyMethods toBigDecimal java.lang.CharSequence
+method org.codehaus.groovy.runtime.StringGroovyMethods toBigInteger java.lang.CharSequence
 method org.codehaus.groovy.runtime.StringGroovyMethods toBoolean java.lang.String
+method org.codehaus.groovy.runtime.StringGroovyMethods toCharacter java.lang.String
+method org.codehaus.groovy.runtime.StringGroovyMethods toDouble java.lang.CharSequence
+method org.codehaus.groovy.runtime.StringGroovyMethods toFloat java.lang.CharSequence
+method org.codehaus.groovy.runtime.StringGroovyMethods toInteger java.lang.CharSequence
+method org.codehaus.groovy.runtime.StringGroovyMethods tokenize java.lang.CharSequence
+method org.codehaus.groovy.runtime.StringGroovyMethods tokenize java.lang.CharSequence java.lang.Character
+method org.codehaus.groovy.runtime.StringGroovyMethods tokenize java.lang.CharSequence java.lang.CharSequence
+method org.codehaus.groovy.runtime.StringGroovyMethods toList java.lang.CharSequence
+method org.codehaus.groovy.runtime.StringGroovyMethods toLong java.lang.CharSequence
+method org.codehaus.groovy.runtime.StringGroovyMethods toSet java.lang.CharSequence
+method org.codehaus.groovy.runtime.StringGroovyMethods toShort java.lang.CharSequence
 method org.codehaus.groovy.runtime.StringGroovyMethods tr java.lang.CharSequence java.lang.CharSequence java.lang.CharSequence
-method org.codehaus.groovy.runtime.StringGroovyMethods tr java.lang.CharSequence java.lang.CharSequence java.lang.CharSequence
+method org.codehaus.groovy.runtime.StringGroovyMethods uncapitalize java.lang.CharSequence
 method org.codehaus.groovy.runtime.StringGroovyMethods unexpand java.lang.CharSequence
 method org.codehaus.groovy.runtime.StringGroovyMethods unexpand java.lang.CharSequence int
 method org.codehaus.groovy.runtime.StringGroovyMethods unexpandLine java.lang.CharSequence int
-# Allows constructor signatures
-
-# Allows annotations

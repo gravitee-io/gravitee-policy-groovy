@@ -510,7 +510,7 @@ public class SecuredResolver {
         }
     }
 
-    private static Method parseMethod(String declaration) throws Exception {
+    protected static Method parseMethod(String declaration) throws Exception {
         String[] split = declaration.split(" ");
         String clazzName = split[1];
         String methodName = split[2];
