@@ -985,6 +985,40 @@ method org.codehaus.groovy.runtime.DefaultGroovyMethods withTraits java.lang.Obj
 method org.codehaus.groovy.runtime.DefaultGroovyMethods xor java.lang.Boolean java.lang.Boolean
 method org.codehaus.groovy.runtime.DefaultGroovyMethods xor java.lang.Number java.lang.Number
 method org.codehaus.groovy.runtime.DefaultGroovyMethods xor java.util.BitSet java.util.BitSet
+method org.codehaus.groovy.runtime.GStringImpl compareTo java.lang.String
+method org.codehaus.groovy.runtime.GStringImpl compareToIgnoreCase java.lang.String
+method org.codehaus.groovy.runtime.GStringImpl concat java.lang.String
+method org.codehaus.groovy.runtime.GStringImpl contains java.lang.CharSequence
+method org.codehaus.groovy.runtime.GStringImpl contentEquals java.lang.CharSequence
+method org.codehaus.groovy.runtime.GStringImpl contentEquals java.lang.StringBuffer
+method org.codehaus.groovy.runtime.GStringImpl endsWith java.lang.String
+method org.codehaus.groovy.runtime.GStringImpl equalsIgnoreCase java.lang.String
+method org.codehaus.groovy.runtime.GStringImpl getChars int int char[] int
+method org.codehaus.groovy.runtime.GStringImpl getStrings
+method org.codehaus.groovy.runtime.GStringImpl indexOf int
+method org.codehaus.groovy.runtime.GStringImpl indexOf int int
+method org.codehaus.groovy.runtime.GStringImpl indexOf java.lang.String
+method org.codehaus.groovy.runtime.GStringImpl indexOf java.lang.String int
+method org.codehaus.groovy.runtime.GStringImpl isEmpty
+method org.codehaus.groovy.runtime.GStringImpl lastIndexOf int
+method org.codehaus.groovy.runtime.GStringImpl lastIndexOf int int
+method org.codehaus.groovy.runtime.GStringImpl lastIndexOf java.lang.String
+method org.codehaus.groovy.runtime.GStringImpl lastIndexOf java.lang.String int
+method org.codehaus.groovy.runtime.GStringImpl matches java.lang.String
+method org.codehaus.groovy.runtime.GStringImpl replace char char
+method org.codehaus.groovy.runtime.GStringImpl replace java.lang.CharSequence java.lang.CharSequence
+method org.codehaus.groovy.runtime.GStringImpl replaceAll java.lang.String java.lang.String
+method org.codehaus.groovy.runtime.GStringImpl replaceFirst java.lang.String java.lang.String
+method org.codehaus.groovy.runtime.GStringImpl split java.lang.String
+method org.codehaus.groovy.runtime.GStringImpl split java.lang.String int
+method org.codehaus.groovy.runtime.GStringImpl startsWith java.lang.String
+method org.codehaus.groovy.runtime.GStringImpl startsWith java.lang.String int
+method org.codehaus.groovy.runtime.GStringImpl substring int
+method org.codehaus.groovy.runtime.GStringImpl substring int int
+method org.codehaus.groovy.runtime.GStringImpl toCharArray
+method org.codehaus.groovy.runtime.GStringImpl toLowerCase
+method org.codehaus.groovy.runtime.GStringImpl toUpperCase
+method org.codehaus.groovy.runtime.GStringImpl trim
 method org.codehaus.groovy.runtime.InvokerHelper asIterator java.lang.Object
 method org.codehaus.groovy.runtime.ScriptBytecodeAdapter bitwiseNegate java.lang.Object
 method org.codehaus.groovy.runtime.ScriptBytecodeAdapter compareEqual java.lang.Object java.lang.Object
