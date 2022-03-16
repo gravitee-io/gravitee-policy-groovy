@@ -985,6 +985,22 @@ method org.codehaus.groovy.runtime.DefaultGroovyMethods withTraits java.lang.Obj
 method org.codehaus.groovy.runtime.DefaultGroovyMethods xor java.lang.Boolean java.lang.Boolean
 method org.codehaus.groovy.runtime.DefaultGroovyMethods xor java.lang.Number java.lang.Number
 method org.codehaus.groovy.runtime.DefaultGroovyMethods xor java.util.BitSet java.util.BitSet
+method org.codehaus.groovy.runtime.EncodingGroovyMethods decodeBase64 java.lang.String
+method org.codehaus.groovy.runtime.EncodingGroovyMethods decodeBase64 java.lang.String boolean
+method org.codehaus.groovy.runtime.EncodingGroovyMethods decodeHex java.lang.String
+method org.codehaus.groovy.runtime.EncodingGroovyMethods digest byte[] java.lang.String
+method org.codehaus.groovy.runtime.EncodingGroovyMethods digest java.lang.CharSequence java.lang.String
+method org.codehaus.groovy.runtime.EncodingGroovyMethods encodeBase64 byte[]
+method org.codehaus.groovy.runtime.EncodingGroovyMethods encodeBase64 byte[] boolean
+method org.codehaus.groovy.runtime.EncodingGroovyMethods encodeBase64 byte[] boolean boolean boolean
+method org.codehaus.groovy.runtime.EncodingGroovyMethods encodeBase64 java.lang.Byte[]
+method org.codehaus.groovy.runtime.EncodingGroovyMethods encodeBase64 java.lang.Byte[] boolean
+method org.codehaus.groovy.runtime.EncodingGroovyMethods encodeHex byte[]
+method org.codehaus.groovy.runtime.EncodingGroovyMethods encodeHex java.lang.Byte[]
+method org.codehaus.groovy.runtime.EncodingGroovyMethods md5 byte[]
+method org.codehaus.groovy.runtime.EncodingGroovyMethods md5 java.lang.CharSequence
+method org.codehaus.groovy.runtime.EncodingGroovyMethods sha256 byte[]
+method org.codehaus.groovy.runtime.EncodingGroovyMethods sha256 java.lang.CharSequence
 method org.codehaus.groovy.runtime.GStringImpl compareTo java.lang.String
 method org.codehaus.groovy.runtime.GStringImpl compareToIgnoreCase java.lang.String
 method org.codehaus.groovy.runtime.GStringImpl concat java.lang.String
