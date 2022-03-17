@@ -1,3 +1,16 @@
+# [2.2.0](https://github.com/gravitee-io/gravitee-policy-groovy/compare/2.1.0...2.2.0) (2022-03-17)
+
+
+### Bug Fixes
+
+* resolve GStringImpl.trim() ([4ff3390](https://github.com/gravitee-io/gravitee-policy-groovy/commit/4ff3390c4b5fdaa226b27ae49eaa945854da885b))
+* resolve iteration on map ([d8fd8e5](https://github.com/gravitee-io/gravitee-policy-groovy/commit/d8fd8e5f18802373663adaf4e8080a9397276dd8)), closes [gravitee-io/issues#7302](https://github.com/gravitee-io/issues/issues/7302)
+
+
+### Features
+
+* add EncodingGroovyMethods to whitelist ([2ba4f27](https://github.com/gravitee-io/gravitee-policy-groovy/commit/2ba4f27a781a5304da58d3980e1c826165dce010))
+
 # [2.1.0](https://github.com/gravitee-io/gravitee-policy-groovy/compare/2.0.0...2.1.0) (2022-01-24)
 
 
