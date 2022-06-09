@@ -28,6 +28,7 @@ class io.gravitee.common.util.URIUtils
 class io.gravitee.gateway.api.ExecutionContext
 class io.gravitee.policy.groovy.model.ContentAwareRequest
 class io.gravitee.policy.groovy.model.ContentAwareResponse
+class io.gravitee.policy.groovy.model.HeaderMapAdapter
 class io.gravitee.policy.groovy.PolicyResult
 class io.gravitee.policy.groovy.PolicyResult$State
 class io.gravitee.policy.groovy.utils.AttributesBasedExecutionContext

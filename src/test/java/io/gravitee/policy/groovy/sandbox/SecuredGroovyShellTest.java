@@ -17,22 +17,14 @@ package io.gravitee.policy.groovy.sandbox;
 
 import static io.gravitee.policy.groovy.sandbox.SecuredResolver.WHITELIST_LIST_KEY;
 import static io.gravitee.policy.groovy.sandbox.SecuredResolver.WHITELIST_MODE_KEY;
-import static org.junit.Assert.assertEquals;
-import static org.mockito.MockitoAnnotations.initMocks;
 
 import groovy.lang.Binding;
-import groovy.lang.GroovyShell;
-import io.gravitee.el.TemplateEngine;
-import java.util.concurrent.ConcurrentHashMap;
 import org.codehaus.groovy.control.MultipleCompilationErrorsException;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.springframework.core.env.ConfigurableEnvironment;
-import org.springframework.core.env.Environment;
-import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.mock.env.MockEnvironment;
-import org.springframework.test.util.ReflectionTestUtils;
 
 /**
  * @author Jeoffrey HAEYAERT (jeoffrey.haeyaert at graviteesource.com)

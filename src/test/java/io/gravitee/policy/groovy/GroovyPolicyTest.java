@@ -15,6 +15,7 @@
  */
 package io.gravitee.policy.groovy;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -31,6 +32,8 @@ import io.gravitee.policy.groovy.configuration.GroovyPolicyConfiguration;
 import io.gravitee.reporter.api.http.Metrics;
 import java.io.*;
 import java.nio.charset.Charset;
+import java.util.List;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -82,7 +85,7 @@ public class GroovyPolicyTest {
         new GroovyPolicy(configuration).onRequest(request, response, executionContext, policyChain);
 
         verify(headers, times(1)).remove(eq("X-Powered-By"));
-        verify(headers, times(1)).set(eq("X-Gravitee-Gateway-Version"), eq("0.14.0"));
+        verify(headers, times(1)).set(eq("X-Gravitee-Gateway-Version"), eq(List.of("0.14.0")));
         verify(policyChain, times(1)).doNext(request, response);
     }
 
@@ -110,7 +113,7 @@ public class GroovyPolicyTest {
         when(configuration.getOnRequestScript()).thenReturn(loadResource("break_request.groovy"));
 
         new GroovyPolicy(configuration).onRequest(request, response, executionContext, policyChain);
-        verify(headers, times(1)).set(eq("X-Groovy-Policy"), eq("ok"));
+        verify(headers, times(1)).set(eq("X-Groovy-Policy"), eq(List.of("ok")));
         verify(policyChain, times(1)).doNext(request, response);
     }
 
@@ -199,6 +202,28 @@ public class GroovyPolicyTest {
         verify(policyChain, never()).failWith(any(PolicyResult.class));
         verify(policyChain, never()).streamFailWith(any(PolicyResult.class));
         verify(policyChain, never()).doNext(any(), any());
+    }
+
+    @Test
+    public void shouldPlayWithHeadersOnRequest() throws IOException {
+        HttpHeaders headers = spy(HttpHeaders.create());
+        headers.add("User-Agent", List.of("Agent1", "Agent2"));
+        final Request req = spy(Request.class);
+        final Response res = spy(Response.class);
+        when(req.headers()).thenReturn(headers);
+        when(res.headers()).thenReturn(headers);
+
+        when(configuration.getOnRequestScript())
+            .thenReturn("joined = request.headers.'User-Agent'.join('#')\n " + "request.headers.'requestResult' = joined");
+
+        when(configuration.getOnResponseScript())
+            .thenReturn("joined = response.headers.'User-Agent'.join('!')\n " + "response.headers.'responseResult' = joined");
+
+        new GroovyPolicy(configuration).onRequest(req, res, executionContext, policyChain);
+        new GroovyPolicy(configuration).onResponse(req, res, executionContext, policyChain);
+
+        assertEquals("Agent1#Agent2", req.headers().get("requestResult"));
+        assertEquals("Agent1!Agent2", req.headers().get("responseResult"));
     }
 
     private String loadResource(String resource) throws IOException {
