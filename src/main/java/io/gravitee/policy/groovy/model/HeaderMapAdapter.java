@@ -16,15 +16,18 @@
 package io.gravitee.policy.groovy.model;
 
 import io.gravitee.gateway.api.http.HttpHeaders;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * @author David BRASSELY (david.brassely at graviteesource.com)
  * @author GraviteeSource Team
  */
-public class HeaderMapAdapter implements Map<String, String> {
+public class HeaderMapAdapter implements Map<String, List<String>> {
 
     private final HttpHeaders headers;
 
@@ -53,26 +56,32 @@ public class HeaderMapAdapter implements Map<String, String> {
     }
 
     @Override
-    public String get(Object key) {
-        return headers.get((String) key);
+    public List<String> get(Object key) {
+        return headers.getAll((String) key);
     }
 
-    @Override
-    public String put(String key, String value) {
-        String oldValue = get(key);
-        headers.set(key, value);
+    public List<String> put(String key, String value) {
+        List<String> oldValue = get(key);
+        headers.set(key, List.of(value));
         return oldValue;
     }
 
     @Override
-    public String remove(Object key) {
-        String oldValue = get(key);
+    public List<String> put(String key, List<String> value) {
+        List<String> oldValue = get(key);
+        headers.set(key, new ArrayList<>(value));
+        return oldValue;
+    }
+
+    @Override
+    public List<String> remove(Object key) {
+        List<String> oldValue = get(key);
         headers.remove((String) key);
         return oldValue;
     }
 
     @Override
-    public void putAll(Map<? extends String, ? extends String> m) {
+    public void putAll(Map<? extends String, ? extends List<String>> m) {
         throw new IllegalStateException();
     }
 
@@ -87,12 +96,12 @@ public class HeaderMapAdapter implements Map<String, String> {
     }
 
     @Override
-    public Collection<String> values() {
+    public Collection<List<String>> values() {
         throw new IllegalStateException();
     }
 
     @Override
-    public Set<Entry<String, String>> entrySet() {
+    public Set<Entry<String, List<String>>> entrySet() {
         throw new IllegalStateException();
     }
 }
