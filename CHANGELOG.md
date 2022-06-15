@@ -1,3 +1,10 @@
+## [2.2.1](https://github.com/gravitee-io/gravitee-policy-groovy/compare/2.2.0...2.2.1) (2022-06-15)
+
+
+### Bug Fixes
+
+* make header accessor return an iterable instead of a string ([46774f2](https://github.com/gravitee-io/gravitee-policy-groovy/commit/46774f2b817cfe21c732aeb7cbd637af995aee48))
+
 # [2.2.0](https://github.com/gravitee-io/gravitee-policy-groovy/compare/2.1.0...2.2.0) (2022-03-17)
 
 
