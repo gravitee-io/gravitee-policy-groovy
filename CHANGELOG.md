@@ -1,3 +1,10 @@
+## [2.2.2](https://github.com/gravitee-io/gravitee-policy-groovy/compare/2.2.1...2.2.2) (2022-06-24)
+
+
+### Bug Fixes
+
+* whitelist gateway-api HttpHeaders ([f4bd528](https://github.com/gravitee-io/gravitee-policy-groovy/commit/f4bd5280544310548037560dcf74b12a2b29df13))
+
 ## [2.2.1](https://github.com/gravitee-io/gravitee-policy-groovy/compare/2.2.0...2.2.1) (2022-06-15)
 
 
