@@ -174,7 +174,7 @@ public class ContentAwareRequest implements Request {
 
     @Override
     public String scheme() {
-        return request.localAddress();
+        return request.scheme();
     }
 
     public String getScheme() {
