@@ -239,4 +239,8 @@ public class ContentAwareRequest implements Request {
     public String host() {
         return request.host();
     }
+
+    public String getHost() {
+        return this.host();
+    }
 }
