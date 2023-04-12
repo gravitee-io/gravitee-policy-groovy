@@ -1,3 +1,15 @@
+# [2.3.0](https://github.com/gravitee-io/gravitee-policy-groovy/compare/2.2.2...2.3.0) (2023-04-12)
+
+
+### Bug Fixes
+
+* properly return the scheme with `scheme()` and `getScheme()` methods ([2a827b9](https://github.com/gravitee-io/gravitee-policy-groovy/commit/2a827b9154664800032543429d2bfba0e4db58de))
+
+
+### Features
+
+* add a `getHost()` method so that "request.host" expression is correctly resolved ([12a3a04](https://github.com/gravitee-io/gravitee-policy-groovy/commit/12a3a04bff982fdfa0eac96d110bf59892046c86))
+
 ## [2.2.2](https://github.com/gravitee-io/gravitee-policy-groovy/compare/2.2.1...2.2.2) (2022-06-24)
 
 
