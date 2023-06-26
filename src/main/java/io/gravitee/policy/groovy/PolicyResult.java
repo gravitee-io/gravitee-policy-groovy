@@ -23,6 +23,8 @@ import io.gravitee.common.http.HttpStatusCode;
  */
 public class PolicyResult {
 
+    private String key;
+
     private State state = State.SUCCESS;
 
     private String error;
@@ -30,6 +32,14 @@ public class PolicyResult {
     private int code = HttpStatusCode.INTERNAL_SERVER_ERROR_500;
 
     private String contentType = null;
+
+    public String getKey() {
+        return key;
+    }
+
+    public void setKey(String key) {
+        this.key = key;
+    }
 
     public String getError() {
         return error;

@@ -236,6 +236,11 @@ public class ContentAwareRequest implements Request {
     }
 
     @Override
+    public Request closeHandler(Handler<Void> handler) {
+        return request.closeHandler(handler);
+    }
+
+    @Override
     public String host() {
         return request.host();
     }
