@@ -95,6 +95,7 @@ public class GroovyPolicy {
                             if (ex.getResult().getContentType() != null) {
                                 policyChain.streamFailWith(
                                     io.gravitee.policy.api.PolicyResult.failure(
+                                        ex.getResult().getKey(),
                                         ex.getResult().getCode(),
                                         ex.getResult().getError(),
                                         ex.getResult().getContentType()
@@ -102,7 +103,11 @@ public class GroovyPolicy {
                                 );
                             } else {
                                 policyChain.streamFailWith(
-                                    io.gravitee.policy.api.PolicyResult.failure(ex.getResult().getCode(), ex.getResult().getError())
+                                    io.gravitee.policy.api.PolicyResult.failure(
+                                        ex.getResult().getKey(),
+                                        ex.getResult().getCode(),
+                                        ex.getResult().getError()
+                                    )
                                 );
                             }
                         } catch (Throwable t) {
@@ -146,6 +151,7 @@ public class GroovyPolicy {
                             if (ex.getResult().getContentType() != null) {
                                 policyChain.streamFailWith(
                                     io.gravitee.policy.api.PolicyResult.failure(
+                                        ex.getResult().getKey(),
                                         ex.getResult().getCode(),
                                         ex.getResult().getError(),
                                         ex.getResult().getContentType()
@@ -153,7 +159,11 @@ public class GroovyPolicy {
                                 );
                             } else {
                                 policyChain.streamFailWith(
-                                    io.gravitee.policy.api.PolicyResult.failure(ex.getResult().getCode(), ex.getResult().getError())
+                                    io.gravitee.policy.api.PolicyResult.failure(
+                                        ex.getResult().getKey(),
+                                        ex.getResult().getCode(),
+                                        ex.getResult().getError()
+                                    )
                                 );
                             }
                         } catch (Throwable t) {
@@ -197,10 +207,17 @@ public class GroovyPolicy {
                 } else {
                     if (result.getContentType() != null) {
                         policyChain.failWith(
-                            io.gravitee.policy.api.PolicyResult.failure(result.getCode(), result.getError(), result.getContentType())
+                            io.gravitee.policy.api.PolicyResult.failure(
+                                result.getKey(),
+                                result.getCode(),
+                                result.getError(),
+                                result.getContentType()
+                            )
                         );
                     } else {
-                        policyChain.failWith(io.gravitee.policy.api.PolicyResult.failure(result.getCode(), result.getError()));
+                        policyChain.failWith(
+                            io.gravitee.policy.api.PolicyResult.failure(result.getKey(), result.getCode(), result.getError())
+                        );
                     }
                 }
             } catch (Throwable t) {
