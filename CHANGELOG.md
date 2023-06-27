@@ -1,3 +1,10 @@
+## [2.4.1](https://github.com/gravitee-io/gravitee-policy-groovy/compare/2.4.0...2.4.1) (2023-06-27)
+
+
+### Bug Fixes
+
+* add policy result key to readme ([f8b6774](https://github.com/gravitee-io/gravitee-policy-groovy/commit/f8b677474eac47758946a2d5be831a0686b866fc))
+
 # [2.4.0](https://github.com/gravitee-io/gravitee-policy-groovy/compare/2.3.0...2.4.0) (2023-06-27)
 
 
