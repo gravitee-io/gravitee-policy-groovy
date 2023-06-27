@@ -1,3 +1,10 @@
+# [2.4.0](https://github.com/gravitee-io/gravitee-policy-groovy/compare/2.3.0...2.4.0) (2023-06-27)
+
+
+### Features
+
+* allow to add response template key in policy result ([b26046e](https://github.com/gravitee-io/gravitee-policy-groovy/commit/b26046ee229cd9fe0225c90798f24f2533a047b9))
+
 # [2.3.0](https://github.com/gravitee-io/gravitee-policy-groovy/compare/2.2.2...2.3.0) (2023-04-12)
 
 
