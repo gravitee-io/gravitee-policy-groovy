@@ -55,14 +55,18 @@ Some variables are automatically bound to the Groovy script to allow users to us
 
 |===
 
-You can interrupt request or response processing by setting the result state to `FAILURE`, providing an HTTP
-status code and a message (this is not mandatory, as the default status is `500 - internal server error`).
+Request or response processing can be interrupted by setting the result state to `FAILURE`.
+By default, it will throw a `500 - internal server error` but you can override this behavior with the following properties:
+- `code`: An HTTP status code
+- `error`: The error message
+- `key`: The key of a response template
 
 [source, groovy]
 ----
 import io.gravitee.policy.groovy.PolicyResult.State
 
 if (request.headers.containsKey('X-Gravitee-Break')) {
+    result.key = 'RESPONSE_TEMPLATE_KEY';
     result.state = State.FAILURE;
     result.code = 500
     result.error = 'Stop request processing due to X-Gravitee-Break header'
@@ -76,6 +80,7 @@ To customize the error sent by the policy:
 [source, groovy]
 ----
 import io.gravitee.policy.groovy.PolicyResult.State
+result.key = 'RESPONSE_TEMPLATE_KEY';
 result.state = State.FAILURE;
 result.code = 400
 result.error = '{"error":"My specific error message","code":"MY_ERROR_CODE"}'
