@@ -25,7 +25,7 @@
     <version>2.4.1</version>
 
     <name>Gravitee.io APIM - Policy - Groovy</name>
-    <description>Description of the Groovy Gravitee Policy</description>
+    <description>Run Groovy scripts at any stage of request processing</description>
 
     <parent>
         <groupId>io.gravitee</groupId>
