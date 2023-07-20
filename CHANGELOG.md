@@ -1,3 +1,10 @@
+## [2.4.2](https://github.com/gravitee-io/gravitee-policy-groovy/compare/2.4.1...2.4.2) (2023-07-20)
+
+
+### Bug Fixes
+
+* update policy description ([b0e00a0](https://github.com/gravitee-io/gravitee-policy-groovy/commit/b0e00a0b44c8d7fcffb1cc6d80f55fdf1a948976))
+
 ## [2.4.1](https://github.com/gravitee-io/gravitee-policy-groovy/compare/2.4.0...2.4.1) (2023-06-27)
 
 
