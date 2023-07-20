@@ -27,6 +27,15 @@ response.headers.remove 'X-Powered-By'
 response.headers.'X-Gravitee-Gateway-Version' = '0.14.0'
 ----
 
+
+== Compatibility with APIM
+
+|===
+|Plugin version | APIM version
+
+|2.x                | All supported versions
+|===
+
 == Configuration
 
 [source, json]
