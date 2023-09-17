@@ -35,7 +35,7 @@
 
     <properties>
         <gravitee-bom.version>3.0.8</gravitee-bom.version>
-        <gravitee-gateway-api.version>1.34.2</gravitee-gateway-api.version>
+        <gravitee-gateway-api.version>1.47.1</gravitee-gateway-api.version>
         <gravitee-apim.version>3.18.28</gravitee-apim.version>
         <gravitee-policy-api.version>1.11.0</gravitee-policy-api.version>
         <gravitee-common.version>1.27.0</gravitee-common.version>
