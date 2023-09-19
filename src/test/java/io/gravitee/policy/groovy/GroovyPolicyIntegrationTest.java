@@ -1,11 +1,11 @@
-/**
- * Copyright (C) 2015 The Gravitee team (http://gravitee.io)
+/*
+ * Copyright © 2015 The Gravitee team (http://gravitee.io)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *         http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,17 +20,23 @@ import static com.github.tomakehurst.wiremock.client.WireMock.ok;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
+import static io.vertx.core.http.HttpMethod.GET;
+import static io.vertx.core.http.HttpMethod.POST;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import io.gravitee.apim.gateway.tests.sdk.AbstractPolicyTest;
 import io.gravitee.apim.gateway.tests.sdk.annotations.DeployApi;
 import io.gravitee.apim.gateway.tests.sdk.annotations.GatewayTest;
 import io.gravitee.apim.gateway.tests.sdk.configuration.GatewayConfigurationBuilder;
+import io.gravitee.common.http.MediaType;
 import io.gravitee.definition.model.Api;
 import io.gravitee.definition.model.ExecutionMode;
 import io.gravitee.gateway.api.http.HttpHeaderNames;
 import io.gravitee.policy.groovy.configuration.GroovyPolicyConfiguration;
-import io.vertx.reactivex.ext.web.client.WebClient;
+import io.vertx.rxjava3.core.buffer.Buffer;
+import io.vertx.rxjava3.core.http.HttpClient;
+import io.vertx.rxjava3.core.http.HttpClientRequest;
+import io.vertx.rxjava3.core.http.HttpClientResponse;
 import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator;
@@ -47,7 +53,6 @@ public class GroovyPolicyIntegrationTest extends AbstractPolicyTest<GroovyPolicy
     @Override
     protected void configureGateway(GatewayConfigurationBuilder gatewayConfigurationBuilder) {
         super.configureGateway(gatewayConfigurationBuilder);
-        gatewayConfigurationBuilder.set("api.jupiterMode.enabled", "false");
     }
 
     /**
@@ -61,12 +66,12 @@ public class GroovyPolicyIntegrationTest extends AbstractPolicyTest<GroovyPolicy
 
     @Test
     @DeployApi("/apis/api.json")
-    void should_execute_script(WebClient client) {
+    void should_execute_script(HttpClient client) {
         wiremock.stubFor(post("/team").willReturn(ok("").withHeader("X-To-Remove", "value")));
 
         client
-            .post("/test")
-            .rxSend()
+            .rxRequest(POST, "/test")
+            .flatMap(HttpClientRequest::rxSend)
             .test()
             .awaitDone(5, TimeUnit.SECONDS)
             .assertValue(
@@ -84,21 +89,21 @@ public class GroovyPolicyIntegrationTest extends AbstractPolicyTest<GroovyPolicy
 
     @Test
     @DeployApi("/apis/api-fail-response-template-no-key.json")
-    void should_not_use_response_template_when_no_key_provided(WebClient client) {
+    void should_not_use_response_template_when_no_key_provided(HttpClient client) {
         wiremock.stubFor(post("/team").willReturn(ok("")));
 
         client
-            .post("/test")
-            .putHeader(HttpHeaderNames.ACCEPT.toString(), "*/*")
-            .putHeader("X-Gravitee-Break", "break")
-            .rxSend()
-            .map(
+            .rxRequest(POST, "/test")
+            .map(request -> request.putHeader(HttpHeaderNames.ACCEPT.toString(), "*/*").putHeader("X-Gravitee-Break", "break"))
+            .flatMap(HttpClientRequest::rxSend)
+            .flatMapPublisher(
                 response -> {
                     assertThat(response.statusCode()).isEqualTo(409);
                     assertThat(response.headers().get(HttpHeaderNames.CONTENT_TYPE)).isNotNull().isEqualTo("application/json");
-                    return response.body();
+                    return response.toFlowable();
                 }
             )
+            .map(Buffer::toString)
             .test()
             .awaitDone(10, TimeUnit.SECONDS)
             .assertValue(
@@ -115,21 +120,21 @@ public class GroovyPolicyIntegrationTest extends AbstractPolicyTest<GroovyPolicy
 
     @Test
     @DeployApi("/apis/api-fail-response-template.json")
-    void should_use_response_template_when_key_provided(WebClient client) {
+    void should_use_response_template_when_key_provided(HttpClient client) {
         wiremock.stubFor(post("/team").willReturn(ok("")));
 
         client
-            .post("/test")
-            .putHeader(HttpHeaderNames.ACCEPT.toString(), "*/*")
-            .putHeader("X-Gravitee-Break", "break")
-            .rxSend()
-            .map(
+            .rxRequest(POST, "/test")
+            .map(request -> request.putHeader(HttpHeaderNames.ACCEPT.toString(), "*/*").putHeader("X-Gravitee-Break", "break"))
+            .flatMap(HttpClientRequest::rxSend)
+            .flatMapPublisher(
                 response -> {
                     assertThat(response.statusCode()).isEqualTo(450);
                     assertThat(response.headers().get(HttpHeaderNames.CONTENT_TYPE)).isNotNull().isEqualTo("application/xml");
-                    return response.body();
+                    return response.toFlowable();
                 }
             )
+            .map(Buffer::toString)
             .test()
             .awaitDone(5, TimeUnit.SECONDS)
             .assertValue(
