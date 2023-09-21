@@ -1,0 +1,82 @@
+{
+    "id": "api-subscribe",
+    "name": "api-subscribe",
+    "apiVersion": "1.0",
+    "definitionVersion": "4.0.0",
+    "type": "message",
+    "analytics": {},
+    "description": "api-subscribe",
+    "properties": [],
+    "listeners": [
+        {
+            "type": "http",
+            "paths": [
+                {
+                    "path": "/test"
+                }
+            ],
+            "entrypoints": [
+                {
+                    "type": "http-get",
+                    "configuration": {
+                        "messagesLimitCount": 2,
+                        "messagesLimitDurationMs": 500,
+                        "headersInPayload": true,
+                        "metadataInPayload": true
+                    }
+                },
+                {
+                    "type": "http-post",
+                    "configuration": {
+                        "requestHeadersToMessage": true
+                    }
+                }
+            ]
+        }
+    ],
+    "endpointGroups": [
+        {
+            "name": "default",
+            "type": "mock",
+            "endpoints": [
+                {
+                    "name": "default-endpoint",
+                    "type": "mock",
+                    "weight": 1,
+                    "inheritConfiguration": false,
+                    "configuration": {
+                        "messageInterval": 1,
+                        "messageContent": "{\"message\":\"Hello World!\"}",
+                        "messageCount": 2
+                    }
+                }
+            ]
+        }
+    ],
+    "flows": [
+        {
+            "name": "flow-1",
+            "enabled": true,
+            "selectors": [
+                {
+                    "type": "http",
+                    "path": "/",
+                    "pathOperator": "STARTS_WITH"
+                }
+            ],
+            "subscribe": [
+                {
+                    "name": "Groovy",
+                    "description": "",
+                    "enabled": true,
+                    "policy": "groovy",
+                    "configuration": {
+                        "overrideContent": true,
+                        "script": "import groovy.json.JsonSlurper\nimport groovy.json.JsonOutput\n\ndef jsonSlurper = new JsonSlurper()\ndef content = jsonSlurper.parseText(message.content)\ncontent.message = 'Hello Universe!'\nmessage.headers.'x-phase'='on-response-message'\n\nreturn JsonOutput.toJson(content)"
+                    }
+                }
+            ],
+            "publish": []
+        }
+    ]
+}

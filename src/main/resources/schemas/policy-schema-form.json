@@ -1,107 +1,129 @@
 {
-  "type" : "object",
-  "id" : "urn:jsonschema:io:gravitee:policy:groovy:configuration:GroovyPolicyConfiguration",
-  "properties" : {
-    "scope" : {
-      "title": "Scope",
-      "type" : "string",
-      "default": "REQUEST",
-      "enum" : [ "REQUEST", "RESPONSE"],
-      "x-schema-form": {
-        "hidden": true
-      }
-    },
-    "onRequestScript" : {
-      "title": "On-request script",
-      "description": "Groovy script to evaluate during the OnRequest phase.",
-      "type" : "string",
-      "x-schema-form": {
-        "type": "codemirror",
-        "codemirrorOptions": {
-          "placeholder": "Put your groovy script here or drag'n'drop groovy script",
-          "lineWrapping": true,
-          "lineNumbers": true,
-          "allowDropFileTypes": true,
-          "autoCloseTags": true,
-          "mode": "groovy"
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "properties": {
+        "scope": {
+            "title": "Scope",
+            "type": "string",
+            "default": "REQUEST",
+            "enum": ["REQUEST", "RESPONSE"],
+            "x-schema-form": {
+                "hidden": true
+            },
+            "deprecated": true
         },
-        "hidden": [
-          {
-            "$eq": {
-              "scope": "RESPONSE"
+        "overrideContent": {
+            "title": "Override content",
+            "description": "Set to true to override the content of the request / response with the value returned by your script.",
+            "type": "boolean",
+            "x-schema-form": {
+                "hidden": true
             }
-          }
-        ]
-      }
-    },
-    "onResponseScript" : {
-      "title": "On-response script",
-      "description": "Groovy script to evaluate during the OnResponse phase.",
-      "type" : "string",
-      "x-schema-form": {
-        "type": "codemirror",
-        "codemirrorOptions": {
-          "placeholder": "Put your groovy script here or drag'n'drop groovy script",
-          "lineWrapping": true,
-          "lineNumbers": true,
-          "allowDropFileTypes": true,
-          "autoCloseTags": true,
-          "mode": "groovy"
         },
-        "hidden": [
-          {
-            "$eq": {
-              "scope": "REQUEST"
+        "script": {
+            "title": "Script",
+            "description": "Groovy script to evaluate.",
+            "type": "string",
+            "format": "gio-code-editor",
+            "x-schema-form": {
+                "hidden": true
             }
-          }
-        ]
-      }
-    },
-    "onRequestContentScript" : {
-      "title": "On-request content script",
-      "description": "Groovy script to evaluate during the 'request-content' phase. <br> Useful to transform request content",
-      "type" : "string",
-      "x-schema-form": {
-        "type": "codemirror",
-        "codemirrorOptions": {
-          "placeholder": "Put your groovy script here or drag'n'drop groovy script",
-          "lineWrapping": true,
-          "lineNumbers": true,
-          "allowDropFileTypes": true,
-          "autoCloseTags": true,
-          "mode": "groovy"
         },
-        "hidden": [
-          {
-            "$eq": {
-              "scope": "RESPONSE"
+        "onRequestScript": {
+            "title": "On-request script",
+            "description": "Groovy script to evaluate during the OnRequest phase.",
+            "type": "string",
+            "deprecated": true,
+            "x-schema-form": {
+                "type": "codemirror",
+                "codemirrorOptions": {
+                    "placeholder": "Define your groovy script here or drag and drop a groovy script file",
+                    "lineWrapping": true,
+                    "lineNumbers": true,
+                    "allowDropFileTypes": true,
+                    "autoCloseTags": true,
+                    "mode": "groovy"
+                },
+                "hidden": [
+                    {
+                        "$eq": {
+                            "scope": "RESPONSE"
+                        }
+                    }
+                ]
             }
-          }
-        ]
-      }
-    },
-    "onResponseContentScript" : {
-      "title": "On-response content script",
-      "description": "Groovy script to evaluate during the 'response-content' phase. <br> Useful to transform response content",
-      "type" : "string",
-      "x-schema-form": {
-        "type": "codemirror",
-        "codemirrorOptions": {
-          "placeholder": "Put your groovy script here or drag'n'drop groovy script",
-          "lineWrapping": true,
-          "lineNumbers": true,
-          "allowDropFileTypes": true,
-          "autoCloseTags": true,
-          "mode": "groovy"
         },
-        "hidden": [
-          {
-            "$eq": {
-              "scope": "REQUEST"
+        "onResponseScript": {
+            "title": "On-response script",
+            "description": "Groovy script to evaluate during the OnRequest phase.",
+            "type": "string",
+            "deprecated": true,
+            "x-schema-form": {
+                "type": "codemirror",
+                "codemirrorOptions": {
+                    "placeholder": "Define your groovy script here or drag and drop a groovy script file",
+                    "lineWrapping": true,
+                    "lineNumbers": true,
+                    "allowDropFileTypes": true,
+                    "autoCloseTags": true,
+                    "mode": "groovy"
+                },
+                "hidden": [
+                    {
+                        "$eq": {
+                            "scope": "REQUEST"
+                        }
+                    }
+                ]
             }
-          }
-        ]
-      }
+        },
+        "onRequestContentScript": {
+            "title": "On-request content script",
+            "description": "Groovy script to evaluate during the OnRequestContent phase.",
+            "type": "string",
+            "deprecated": true,
+            "x-schema-form": {
+                "type": "codemirror",
+                "codemirrorOptions": {
+                    "placeholder": "Define your groovy script or drag and drop a groovy script file.",
+                    "lineWrapping": true,
+                    "lineNumbers": true,
+                    "allowDropFileTypes": true,
+                    "autoCloseTags": true,
+                    "mode": "groovy"
+                },
+                "hidden": [
+                    {
+                        "$eq": {
+                            "scope": "RESPONSE"
+                        }
+                    }
+                ]
+            }
+        },
+        "onResponseContentScript": {
+            "title": "On-response content script",
+            "description": "Groovy script to evaluate during the OnResponse phase.",
+            "type": "string",
+            "deprecated": true,
+            "x-schema-form": {
+                "type": "codemirror",
+                "codemirrorOptions": {
+                    "placeholder": "Define your groovy script or drag and drop a groovy script file.",
+                    "lineWrapping": true,
+                    "lineNumbers": true,
+                    "allowDropFileTypes": true,
+                    "autoCloseTags": true,
+                    "mode": "groovy"
+                },
+                "hidden": [
+                    {
+                        "$eq": {
+                            "scope": "REQUEST"
+                        }
+                    }
+                ]
+            }
+        }
     }
-  }
 }

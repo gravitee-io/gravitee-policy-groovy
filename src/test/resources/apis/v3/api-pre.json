@@ -1,0 +1,42 @@
+{
+    "id": "api-pre",
+    "name": "api-pre",
+    "gravitee": "2.0.0",
+    "proxy": {
+        "context_path": "/api-pre",
+        "endpoints": [
+            {
+                "name": "default",
+                "target": "http://localhost:8080/team",
+                "http": {
+                    "connectTimeout": 3000,
+                    "readTimeout": 60000
+                }
+            }
+        ]
+    },
+    "flows": [
+        {
+            "name": "flow-1",
+            "methods": [],
+            "enabled": true,
+            "path-operator": {
+                "path": "/",
+                "operator": "STARTS_WITH"
+            },
+            "pre": [
+                {
+                    "name": "Groovy",
+                    "description": "",
+                    "enabled": true,
+                    "policy": "groovy",
+                    "configuration": {
+                        "onRequestScript": "request.headers.'X-Phase' = 'on-request'",
+                        "onRequestContentScript": "import groovy.json.JsonSlurper\nimport groovy.json.JsonOutput\n\ndef jsonSlurper = new JsonSlurper()\ndef content = jsonSlurper.parseText(request.content)\ncontent.message = 'Hello Universe!'\nreturn JsonOutput.toJson(content)"
+                    }
+                }
+            ]
+        }
+    ],
+    "resources": []
+}

@@ -15,38 +15,44 @@
  */
 package io.gravitee.policy.groovy;
 
-import static org.junit.Assert.assertEquals;
+import static io.gravitee.common.http.HttpStatusCode.BAD_REQUEST_400;
+import static io.gravitee.common.http.HttpStatusCode.INTERNAL_SERVER_ERROR_500;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-import io.gravitee.common.http.HttpStatusCode;
-import io.gravitee.gateway.api.ExecutionContext;
-import io.gravitee.gateway.api.Request;
-import io.gravitee.gateway.api.Response;
 import io.gravitee.gateway.api.buffer.Buffer;
 import io.gravitee.gateway.api.http.HttpHeaders;
-import io.gravitee.gateway.api.stream.ReadWriteStream;
-import io.gravitee.policy.api.PolicyChain;
-import io.gravitee.policy.api.PolicyResult;
+import io.gravitee.gateway.reactive.api.ExecutionFailure;
+import io.gravitee.gateway.reactive.api.context.ExecutionContext;
+import io.gravitee.gateway.reactive.api.context.Request;
+import io.gravitee.gateway.reactive.api.context.Response;
+import io.gravitee.gateway.reactive.api.message.DefaultMessage;
+import io.gravitee.gateway.reactive.api.message.Message;
+import io.gravitee.gateway.reactive.core.context.interruption.InterruptionFailureException;
 import io.gravitee.policy.groovy.configuration.GroovyPolicyConfiguration;
-import io.gravitee.reporter.api.http.Metrics;
+import io.reactivex.rxjava3.core.Completable;
+import io.reactivex.rxjava3.core.Maybe;
+import io.reactivex.rxjava3.core.MaybeTransformer;
 import java.io.*;
-import java.nio.charset.Charset;
-import java.util.List;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import java.util.function.Function;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 /**
- * @author David BRASSELY (david.brassely at graviteesource.com)
+ * @author Antoine CORDIER (antoine.cordier at graviteesource.com)
  * @author GraviteeSource Team
  */
-public class GroovyPolicyTest {
+@ExtendWith(MockitoExtension.class)
+class GroovyPolicyTest {
 
     @Mock
-    private ExecutionContext executionContext;
+    private ExecutionContext ctx;
 
     @Mock
     private Request request;
@@ -54,192 +60,263 @@ public class GroovyPolicyTest {
     @Mock
     private Response response;
 
-    @Mock
-    private PolicyChain policyChain;
+    @Captor
+    private ArgumentCaptor<MaybeTransformer<Buffer, Buffer>> onBodyCaptor;
 
-    @Mock
-    private GroovyPolicyConfiguration configuration;
+    @Captor
+    private ArgumentCaptor<Function<Message, Maybe<Message>>> onMessageCaptor;
 
-    @Before
-    public void init() {
-        MockitoAnnotations.initMocks(this);
-        when(request.metrics()).thenReturn(Metrics.on(System.currentTimeMillis()).build());
+    @BeforeEach
+    @SuppressWarnings("ReactiveStreamsUnusedPublisher")
+    public void setUp() {
+        lenient().when(ctx.request()).thenReturn(request);
+        lenient().when(ctx.response()).thenReturn(response);
+        lenient().when(request.headers()).thenReturn(HttpHeaders.create());
+        lenient().when(response.headers()).thenReturn(HttpHeaders.create());
+        lenient()
+            .when(ctx.interruptBodyWith(any(ExecutionFailure.class)))
+            .thenAnswer(invocation -> Maybe.error(new InterruptionFailureException(invocation.getArgument(0))));
+        lenient()
+            .when(ctx.interruptMessageWith(any(ExecutionFailure.class)))
+            .thenAnswer(invocation -> Maybe.error(new InterruptionFailureException(invocation.getArgument(0))));
     }
 
     @Test
-    public void shouldFail_invalidScript() throws Exception {
-        when(configuration.getOnRequestScript()).thenReturn(loadResource("invalid_script.groovy"));
-        new GroovyPolicy(configuration).onRequest(request, response, executionContext, policyChain);
+    void should_fail_with_invalid_script() {
+        when(request.onBody(onBodyCaptor.capture())).thenReturn(Completable.complete());
 
-        verify(policyChain, times(1)).failWith(any(PolicyResult.class));
+        var policy = new GroovyPolicy(buildConfig("invalid_script.groovy"));
+        policy.onRequest(ctx).test().assertNoValues();
+
+        ((Maybe<Buffer>) onBodyCaptor.getValue().apply(Maybe.just(Buffer.buffer()))).test()
+            .assertError(error -> {
+                assertThat(error).isInstanceOf(InterruptionFailureException.class);
+                InterruptionFailureException failureException = (InterruptionFailureException) error;
+                ExecutionFailure executionFailure = failureException.getExecutionFailure();
+                assertThat(executionFailure).isNotNull();
+                assertThat(executionFailure.key()).isEqualTo("GROOVY_EXECUTION_FAILURE");
+                assertThat(executionFailure.statusCode()).isEqualTo(INTERNAL_SERVER_ERROR_500);
+                assertThat(executionFailure.message()).isNotNull();
+                return true;
+            });
     }
 
-    /**
-     * Doc example: https://docs.gravitee.io/apim_policies_groovy.html#description
-     */
     @Test
-    public void shouldModifyResponseHeaders() throws Exception {
-        HttpHeaders headers = spy(HttpHeaders.create());
+    void should_fail_with_result_failure() {
+        var policy = new GroovyPolicy(buildConfig("break_request.groovy"));
+
+        when(request.onBody(onBodyCaptor.capture())).thenReturn(Completable.complete());
+        policy.onRequest(ctx).test().assertNoValues();
+
+        ((Maybe<Buffer>) onBodyCaptor.getValue().apply(Maybe.just(Buffer.buffer()))).test()
+            .assertError(error -> {
+                assertThat(error).isInstanceOf(InterruptionFailureException.class);
+                InterruptionFailureException failureException = (InterruptionFailureException) error;
+                ExecutionFailure executionFailure = failureException.getExecutionFailure();
+                assertThat(executionFailure).isNotNull();
+                assertThat(executionFailure.key()).isEqualTo("GROOVY_FAILED_ON_PURPOSE");
+                assertThat(executionFailure.statusCode()).isEqualTo(BAD_REQUEST_400);
+                assertThat(executionFailure.message()).isEqualTo("Rejected Request");
+                return true;
+            });
+    }
+
+    @Test
+    void should_set_context_attribute_on_http_request() {
+        var policy = new GroovyPolicy(buildConfig("set_context_attribute.groovy"));
+
+        when(request.onBody(onBodyCaptor.capture())).thenReturn(Completable.complete());
+        policy.onRequest(ctx).test().assertNoValues();
+
+        ((Maybe<Buffer>) onBodyCaptor.getValue().apply(Maybe.just(Buffer.buffer()))).test().assertComplete().assertNoErrors();
+
+        verify(ctx, times(1)).setAttribute("count", 100);
+    }
+
+    @Test
+    void should_set_context_attribute_on_http_response() {
+        var policy = new GroovyPolicy(buildConfig("set_context_attribute.groovy"));
+
+        when(response.onBody(onBodyCaptor.capture())).thenReturn(Completable.complete());
+        policy.onResponse(ctx).test().assertNoValues();
+
+        ((Maybe<Buffer>) onBodyCaptor.getValue().apply(Maybe.just(Buffer.buffer()))).test().assertComplete().assertNoErrors();
+
+        verify(ctx, times(1)).setAttribute("count", 100);
+    }
+
+    @Test
+    void should_set_header_on_http_request() {
+        var policy = new GroovyPolicy(buildConfig("set_request_header.groovy"));
+
+        when(request.onBody(onBodyCaptor.capture())).thenReturn(Completable.complete());
+        policy.onRequest(ctx).test().assertNoValues();
+
+        var headers = HttpHeaders.create();
+        when(request.headers()).thenReturn(headers);
+
+        ((Maybe<Buffer>) onBodyCaptor.getValue().apply(Maybe.just(Buffer.buffer()))).test().assertComplete().assertNoErrors();
+
+        assertThat(headers.get("x-context")).isEqualTo("test");
+    }
+
+    @Test
+    void should_set_header_on_http_response() {
+        var policy = new GroovyPolicy(buildConfig("set_response_header.groovy"));
+
+        when(response.onBody(onBodyCaptor.capture())).thenReturn(Completable.complete());
+        policy.onResponse(ctx).test().assertNoValues();
+
+        var headers = HttpHeaders.create();
         when(response.headers()).thenReturn(headers);
-        when(configuration.getOnRequestScript()).thenReturn(loadResource("modify_response_headers.groovy"));
-        new GroovyPolicy(configuration).onRequest(request, response, executionContext, policyChain);
 
-        verify(headers, times(1)).remove(eq("X-Powered-By"));
-        verify(headers, times(1)).set(eq("X-Gravitee-Gateway-Version"), eq(List.of("0.14.0")));
-        verify(policyChain, times(1)).doNext(request, response);
+        ((Maybe<Buffer>) onBodyCaptor.getValue().apply(Maybe.just(Buffer.buffer()))).test().assertComplete().assertNoErrors();
+
+        assertThat(headers.get("x-context")).isEqualTo("test");
     }
 
-    /**
-     * Issue: https://github.com/gravitee-io/issues/issues/2455
-     */
     @Test
-    public void shouldSetContextAttribute() throws Exception {
-        when(configuration.getOnRequestScript()).thenReturn(loadResource("set_context_attribute.groovy"));
-        new GroovyPolicy(configuration).onRequest(request, response, executionContext, policyChain);
+    void should_remove_header_on_http_request() {
+        var policy = new GroovyPolicy(buildConfig("remove_request_header.groovy"));
 
-        verify(executionContext, times(1)).setAttribute(eq("anyKey"), eq(0));
-        verify(policyChain, times(1)).doNext(request, response);
-    }
+        when(request.onBody(onBodyCaptor.capture())).thenReturn(Completable.complete());
+        policy.onRequest(ctx).test().assertNoValues();
 
-    /**
-     * Doc example: https://docs.gravitee.io/apim_policies_groovy.html#onrequest_onresponse
-     * First run does not break the request.
-     */
-    @Test
-    public void shouldNotBreakRequest() throws Exception {
-        HttpHeaders headers = spy(HttpHeaders.create());
+        var headers = HttpHeaders.create().set("x-context", "test");
         when(request.headers()).thenReturn(headers);
 
-        when(configuration.getOnRequestScript()).thenReturn(loadResource("break_request.groovy"));
+        ((Maybe<Buffer>) onBodyCaptor.getValue().apply(Maybe.just(Buffer.buffer()))).test().assertComplete().assertNoErrors();
 
-        new GroovyPolicy(configuration).onRequest(request, response, executionContext, policyChain);
-        verify(headers, times(1)).set(eq("X-Groovy-Policy"), eq(List.of("ok")));
-        verify(policyChain, times(1)).doNext(request, response);
-    }
-
-    /**
-     * Doc example: https://docs.gravitee.io/apim_policies_groovy.html#onrequest_onresponse
-     * Second run must break because of HTTP headers
-     */
-    @Test
-    public void shouldBreakRequest() throws Exception {
-        HttpHeaders headers = spy(HttpHeaders.create());
-        when(request.headers()).thenReturn(headers);
-
-        when(configuration.getOnRequestScript()).thenReturn(loadResource("break_request.groovy"));
-
-        headers.set("X-Gravitee-Break", "value");
-        new GroovyPolicy(configuration).onRequest(request, response, executionContext, policyChain);
-
-        verify(policyChain, times(1))
-            .failWith(
-                argThat(
-                    result ->
-                        result.statusCode() == HttpStatusCode.INTERNAL_SERVER_ERROR_500 &&
-                        result.message().equals("Stop request processing due to X-Gravitee-Break header")
-                )
-            );
+        assertThat(headers.size()).isZero();
     }
 
     @Test
-    public void shouldReadJson() throws Exception {
-        HttpHeaders headers = spy(HttpHeaders.create());
-        when(request.headers()).thenReturn(headers);
+    void should_remove_header_on_http_response() {
+        var policy = new GroovyPolicy(buildConfig("remove_response_header.groovy"));
 
-        when(configuration.getOnRequestContentScript()).thenReturn(loadResource("read_json.groovy"));
-        String content = loadResource("read_json.json");
+        when(response.onBody(onBodyCaptor.capture())).thenReturn(Completable.complete());
+        policy.onResponse(ctx).test().assertNoValues();
 
-        ReadWriteStream stream = new GroovyPolicy(configuration).onRequestContent(request, response, executionContext, policyChain);
-        stream.end(Buffer.buffer(content));
+        var headers = HttpHeaders.create().set("x-context", "test");
+        when(response.headers()).thenReturn(headers);
 
-        verify(policyChain, never()).failWith(any(PolicyResult.class));
-        verify(policyChain, never()).streamFailWith(any(PolicyResult.class));
-        verify(policyChain, never()).doNext(any(), any());
+        ((Maybe<Buffer>) onBodyCaptor.getValue().apply(Maybe.just(Buffer.buffer()))).test().assertComplete().assertNoErrors();
+
+        assertThat(headers.size()).isZero();
     }
 
     @Test
-    public void shouldReadXml() throws Exception {
-        HttpHeaders headers = spy(HttpHeaders.create());
-        when(request.headers()).thenReturn(headers);
+    void should_set_context_attribute_on_message_request() {
+        var policy = new GroovyPolicy(buildConfig("set_context_attribute.groovy"));
 
-        when(configuration.getOnRequestContentScript()).thenReturn(loadResource("read_xml.groovy"));
-        String content = loadResource("read_xml.xml");
+        when(request.onMessage(onMessageCaptor.capture())).thenReturn(Completable.complete());
+        policy.onMessageRequest(ctx).test().assertNoValues();
 
-        ReadWriteStream stream = new GroovyPolicy(configuration).onRequestContent(request, response, executionContext, policyChain);
-        stream.end(Buffer.buffer(content));
+        var message = mock(Message.class);
 
-        verify(policyChain, never()).failWith(any(PolicyResult.class));
-        verify(policyChain, never()).streamFailWith(any(PolicyResult.class));
-        verify(policyChain, never()).doNext(any(), any());
+        onMessageCaptor.getValue().apply(message).test().assertComplete().assertNoErrors();
+
+        verify(ctx, times(1)).setAttribute("count", 100);
     }
 
     @Test
-    public void shouldIterateOnMap() throws Exception {
-        HttpHeaders headers = spy(HttpHeaders.create());
-        when(request.headers()).thenReturn(headers);
+    void should_set_context_attribute_on_message_response() {
+        var policy = new GroovyPolicy(buildConfig("set_context_attribute.groovy"));
 
-        when(configuration.getOnRequestContentScript()).thenReturn(loadResource("iterate_on_map.groovy"));
-        String content = loadResource("iterate_on_map.json");
+        when(response.onMessage(onMessageCaptor.capture())).thenReturn(Completable.complete());
+        policy.onMessageResponse(ctx).test().assertNoValues();
 
-        ReadWriteStream stream = new GroovyPolicy(configuration).onRequestContent(request, response, executionContext, policyChain);
-        stream.end(Buffer.buffer(content));
+        var message = mock(Message.class);
 
-        verify(policyChain, never()).failWith(any(PolicyResult.class));
-        verify(policyChain, never()).streamFailWith(any(PolicyResult.class));
-        verify(policyChain, never()).doNext(any(), any());
+        onMessageCaptor.getValue().apply(message).test().assertComplete().assertNoErrors();
+
+        verify(ctx, times(1)).setAttribute("count", 100);
     }
 
     @Test
-    public void shouldPlayWithStrings() throws Exception {
-        HttpHeaders headers = spy(HttpHeaders.create());
-        when(request.headers()).thenReturn(headers);
+    void should_set_message_request_header() {
+        var policy = new GroovyPolicy(buildConfig("set_message_header.groovy"));
+        var message = new DefaultMessage().headers(HttpHeaders.create());
 
-        when(configuration.getOnRequestContentScript()).thenReturn(loadResource("play_with_strings.groovy"));
+        when(request.onMessage(onMessageCaptor.capture())).thenReturn(Completable.complete());
+        policy.onMessageRequest(ctx).test().assertNoValues();
 
-        ReadWriteStream stream = new GroovyPolicy(configuration).onRequestContent(request, response, executionContext, policyChain);
-        stream.end(Buffer.buffer());
+        onMessageCaptor.getValue().apply(message).test().assertComplete().assertNoErrors();
 
-        verify(policyChain, never()).failWith(any(PolicyResult.class));
-        verify(policyChain, never()).streamFailWith(any(PolicyResult.class));
-        verify(policyChain, never()).doNext(any(), any());
+        assertThat(message.headers().get("x-context")).isEqualTo("test");
     }
 
     @Test
-    public void shouldPlayWithHeadersOnRequest() throws IOException {
-        HttpHeaders headers = spy(HttpHeaders.create());
-        headers.add("User-Agent", List.of("Agent1", "Agent2"));
-        final Request req = spy(Request.class);
-        final Response res = spy(Response.class);
-        when(req.headers()).thenReturn(headers);
-        when(res.headers()).thenReturn(headers);
+    void should_set_message_response_header() {
+        var policy = new GroovyPolicy(buildConfig("set_message_header.groovy"));
+        var message = new DefaultMessage().headers(HttpHeaders.create());
 
-        when(configuration.getOnRequestScript())
-            .thenReturn("joined = request.headers.'User-Agent'.join('#')\n " + "request.headers.'requestResult' = joined");
+        when(response.onMessage(onMessageCaptor.capture())).thenReturn(Completable.complete());
+        policy.onMessageResponse(ctx).test().assertNoValues();
 
-        when(configuration.getOnResponseScript())
-            .thenReturn("joined = response.headers.'User-Agent'.join('!')\n " + "response.headers.'responseResult' = joined");
+        onMessageCaptor.getValue().apply(message).test().assertComplete().assertNoErrors();
 
-        new GroovyPolicy(configuration).onRequest(req, res, executionContext, policyChain);
-        new GroovyPolicy(configuration).onResponse(req, res, executionContext, policyChain);
-
-        assertEquals("Agent1#Agent2", req.headers().get("requestResult"));
-        assertEquals("Agent1!Agent2", req.headers().get("responseResult"));
+        assertThat(message.headers().get("x-context")).isEqualTo("test");
     }
 
-    private String loadResource(String resource) throws IOException {
-        InputStream stream = GroovyPolicy.class.getResourceAsStream(resource);
-        return readInputStreamToString(stream, Charset.defaultCharset());
+    @Test
+    void should_remove_message_request_header() {
+        var policy = new GroovyPolicy(buildConfig("remove_message_header.groovy"));
+        var message = new DefaultMessage().headers(HttpHeaders.create().set("x-context", "test"));
+
+        when(request.onMessage(onMessageCaptor.capture())).thenReturn(Completable.complete());
+        policy.onMessageRequest(ctx).test().assertNoValues();
+
+        onMessageCaptor.getValue().apply(message).test().assertComplete().assertNoErrors();
+
+        assertThat(message.headers().size()).isZero();
     }
 
-    private String readInputStreamToString(InputStream stream, Charset defaultCharset) throws IOException {
-        StringBuilder builder = new StringBuilder();
-        try (Reader reader = new BufferedReader(new InputStreamReader(stream, defaultCharset))) {
-            int c = 0;
-            while ((c = reader.read()) != -1) {
-                builder.append((char) c);
-            }
+    @Test
+    void should_remove_message_response_header() {
+        var policy = new GroovyPolicy(buildConfig("remove_message_header.groovy"));
+        var message = new DefaultMessage().headers(HttpHeaders.create().set("x-context", "test"));
+
+        when(response.onMessage(onMessageCaptor.capture())).thenReturn(Completable.complete());
+        policy.onMessageResponse(ctx).test().assertNoValues();
+
+        onMessageCaptor.getValue().apply(message).test().assertComplete().assertNoErrors();
+
+        assertThat(message.headers().size()).isZero();
+    }
+
+    @Test
+    void should_set_message_attribute() {
+        var policy = new GroovyPolicy(buildConfig("set_message_attribute.groovy"));
+        var message = new DefaultMessage();
+
+        when(request.onMessage(onMessageCaptor.capture())).thenReturn(Completable.complete());
+        policy.onMessageRequest(ctx).test().assertNoValues();
+
+        onMessageCaptor.getValue().apply(message).test().assertComplete().assertNoErrors();
+
+        assertThat(message.attributes()).containsEntry("count", 100);
+    }
+
+    private static GroovyPolicyConfiguration buildConfig(String script) {
+        return GroovyPolicyConfiguration.builder().script(loadScript(script)).build();
+    }
+
+    private static String loadScript(String file) {
+        try {
+            return new String(getResourceAsStream(file).readAllBytes());
+        } catch (IOException e) {
+            throw new IllegalStateException("Unable to read script bytes from file " + file, e);
+        }
+    }
+
+    private static InputStream getResourceAsStream(String file) {
+        var resourceAsStream = GroovyPolicy.class.getResourceAsStream(file);
+
+        if (resourceAsStream == null) {
+            throw new IllegalArgumentException("Unable to find script file " + file);
         }
 
-        return builder.toString();
+        return resourceAsStream;
     }
 }

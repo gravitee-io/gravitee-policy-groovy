@@ -820,7 +820,7 @@ public class SandboxTransformer extends CompilationCustomizer {
         }
 
         private boolean isLocalVariableExpression(Expression exp) {
-            if (exp != null && exp instanceof VariableExpression) {
+            if (exp instanceof VariableExpression) {
                 return isLocalVariable(((VariableExpression) exp).getName());
             }
 

@@ -1,0 +1,43 @@
+{
+    "id": "api-post",
+    "name": "api-post",
+    "gravitee": "2.0.0",
+    "proxy": {
+        "context_path": "/api-post",
+        "endpoints": [
+            {
+                "name": "default",
+                "target": "http://localhost:8080/team",
+                "http": {
+                    "connectTimeout": 3000,
+                    "readTimeout": 60000
+                }
+            }
+        ]
+    },
+    "flows": [
+        {
+            "name": "flow-1",
+            "methods": [],
+            "enabled": true,
+            "path-operator": {
+                "path": "/",
+                "operator": "STARTS_WITH"
+            },
+            "pre": [],
+            "post": [
+                {
+                    "name": "Groovy",
+                    "description": "",
+                    "enabled": true,
+                    "policy": "groovy",
+                    "configuration": {
+                        "onResponseScript": "response.headers.'X-Phase' = 'on-response'",
+                        "onResponseContentScript": "import groovy.json.JsonSlurper\nimport groovy.json.JsonOutput\n\ndef jsonSlurper = new JsonSlurper()\ndef content = jsonSlurper.parseText(response.content)\ncontent.message = 'Hello Universe!'\nreturn JsonOutput.toJson(content)"
+                    }
+                }
+            ]
+        }
+    ],
+    "resources": []
+}

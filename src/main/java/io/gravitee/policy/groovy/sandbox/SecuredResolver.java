@@ -30,6 +30,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.reflect.ConstructorUtils;
 import org.apache.commons.lang3.reflect.FieldUtils;
@@ -38,8 +39,6 @@ import org.codehaus.groovy.runtime.DateGroovyMethods;
 import org.codehaus.groovy.runtime.DefaultGroovyMethods;
 import org.codehaus.groovy.runtime.EncodingGroovyMethods;
 import org.codehaus.groovy.runtime.StringGroovyMethods;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.Environment;
 import org.springframework.lang.Nullable;
@@ -49,14 +48,13 @@ import org.springframework.util.ClassUtils;
  * The {@link SecuredResolver} is a thread-safe singleton class which can be used by any {@link org.kohsuke.groovy.sandbox.GroovyInterceptor} to determine if a method, field, constructor, ... is allowed.
  * <p/>
  * By default, the whitelisted methods, constructors, fields and annotations are loaded from groovy-whitelist file located in the classpath.
- * The list can be either replaced either completed specifying a 'groovy.whitelist.list' configuration (array).
+ * The list can be either replaced or completed specifying a 'groovy.whitelist.list' configuration (array).
  *
  * @author Jeoffrey HAEYAERT (jeoffrey.haeyaert at graviteesource.com)
  * @author GraviteeSource Team
  */
+@Slf4j
 public class SecuredResolver {
-
-    private static final Logger logger = LoggerFactory.getLogger(SecuredResolver.class);
 
     static final String WHITELIST_MODE = "append";
     static final String WHITELIST_MODE_KEY = "groovy.whitelist.mode";
@@ -96,7 +94,6 @@ public class SecuredResolver {
 
     private static final List<String> ALLOWED_ARRAY_NATIVE_METHODS = Arrays.asList("getAt", "putAt", "getLength");
 
-    private static SecuredResolver INSTANCE;
     private static Map<Class<?>, List<Method>> methodsByType;
     private static Map<Class<?>, List<Field>> fieldsByType;
     private static Map<Class<?>, List<Constructor<?>>> constructorsByType;
@@ -105,15 +102,17 @@ public class SecuredResolver {
     private final Map<Class<?>, List<Method>> methodsByTypeAndSuperTypes;
     private final Map<String, Boolean> resolved;
 
+    private static SecuredResolver instance;
+
     public static synchronized void initialize(@Nullable Environment environment) {
         if (!isInitialized()) {
             loadWhitelist(environment);
-            INSTANCE = new SecuredResolver();
+            instance = new SecuredResolver();
         }
     }
 
     public static synchronized boolean isInitialized() {
-        return INSTANCE != null;
+        return instance != null;
     }
 
     public static synchronized void destroy() {
@@ -122,7 +121,7 @@ public class SecuredResolver {
             fieldsByType.clear();
             constructorsByType.clear();
             annotations.clear();
-            INSTANCE = null;
+            instance = null;
         }
     }
 
@@ -131,7 +130,7 @@ public class SecuredResolver {
             initialize(null);
         }
 
-        return INSTANCE;
+        return instance;
     }
 
     private SecuredResolver() {
@@ -143,12 +142,11 @@ public class SecuredResolver {
         // We only have an annotation name. Just try to find corresponding annotation testing all combinations.
         return annotations
             .stream()
-            .anyMatch(
-                aClass ->
-                    aClass.getCanonicalName().equals(name) ||
-                    aClass.getName().equals(name) ||
-                    aClass.getSimpleName().equals(name) ||
-                    aClass.getTypeName().equals(name)
+            .anyMatch(aClass ->
+                aClass.getCanonicalName().equals(name) ||
+                aClass.getName().equals(name) ||
+                aClass.getSimpleName().equals(name) ||
+                aClass.getTypeName().equals(name)
             );
     }
 
@@ -460,7 +458,7 @@ public class SecuredResolver {
                     parseDeclaration(declaration, methods, fields, constructors, annotationClasses);
                 }
             } catch (IOException ioe) {
-                logger.error("Unable to read Groovy built-in groovy-whitelist", ioe);
+                log.error("Unable to read Groovy built-in groovy-whitelist", ioe);
             }
         }
 
@@ -495,11 +493,11 @@ public class SecuredResolver {
                 constructors.addAll(parseAllConstructors(declaration));
             }
         } catch (Exception e) {
-            logger.warn("The Groovy whitelisted declaration [{}] cannot be loaded. Message is [{}]", declaration, e.toString());
+            log.warn("The Groovy whitelisted declaration [{}] cannot be loaded. Message is [{}]", declaration, e.toString());
         }
     }
 
-    private static Method parseMethod(String declaration) throws Exception {
+    private static Method parseMethod(String declaration) throws ClassNotFoundException, NoSuchMethodException {
         String[] split = declaration.split(" ");
         String clazzName = split[1];
         String methodName = split[2];
@@ -509,18 +507,14 @@ public class SecuredResolver {
             methodArgs = Arrays.copyOfRange(split, 3, split.length);
         }
 
-        Class<?>[] argumentClasses = new Class<?>[methodArgs.length];
-
-        for (int i = 0; i < methodArgs.length; i++) {
-            argumentClasses[i] = ClassUtils.forName(methodArgs[i], SecuredResolver.class.getClassLoader());
-        }
+        Class<?>[] argumentClasses = getArgumentClasses(methodArgs);
 
         Class<?> clazz = ClassUtils.forName(clazzName, SecuredResolver.class.getClassLoader());
 
         return clazz.getDeclaredMethod(methodName, argumentClasses);
     }
 
-    private static List<Method> parseAllMethods(String declaration) throws Exception {
+    private static List<Method> parseAllMethods(String declaration) throws ClassNotFoundException {
         String[] split = declaration.split(" ");
         String clazzName = split[1];
         Class<?> clazz = ClassUtils.forName(clazzName, SecuredResolver.class.getClassLoader());
@@ -528,7 +522,7 @@ public class SecuredResolver {
         return Arrays.asList(clazz.getDeclaredMethods());
     }
 
-    private static Field parseField(String declaration) throws Exception {
+    private static Field parseField(String declaration) throws ClassNotFoundException, NoSuchFieldException {
         String[] split = declaration.split(" ");
         String clazzName = split[1];
         String fieldName = split[2];
@@ -537,7 +531,7 @@ public class SecuredResolver {
         return clazz.getDeclaredField(fieldName);
     }
 
-    private static List<Field> parseAllFields(String declaration) throws Exception {
+    private static List<Field> parseAllFields(String declaration) throws ClassNotFoundException {
         String[] split = declaration.split(" ");
         String clazzName = split[1];
         Class<?> clazz = ClassUtils.forName(clazzName, SecuredResolver.class.getClassLoader());
@@ -545,27 +539,31 @@ public class SecuredResolver {
         return Arrays.asList(clazz.getDeclaredFields());
     }
 
-    private static Constructor parseConstructor(String declaration) throws Exception {
+    private static Constructor<?> parseConstructor(String declaration) throws ClassNotFoundException, NoSuchMethodException {
         String[] split = declaration.split(" ");
         String clazzName = split[1];
-        String[] methodArgs = {};
+        String[] args = {};
 
         if (split.length > 2) {
-            methodArgs = Arrays.copyOfRange(split, 2, split.length);
+            args = Arrays.copyOfRange(split, 2, split.length);
         }
 
-        Class<?>[] argumentClasses = new Class<?>[methodArgs.length];
-
-        for (int i = 0; i < methodArgs.length; i++) {
-            argumentClasses[i] = ClassUtils.forName(methodArgs[i], SecuredResolver.class.getClassLoader());
-        }
+        Class<?>[] argumentClasses = getArgumentClasses(args);
 
         Class<?> clazz = ClassUtils.forName(clazzName, SecuredResolver.class.getClassLoader());
 
         return clazz.getDeclaredConstructor(argumentClasses);
     }
 
-    private static List<Constructor<?>> parseAllConstructors(String declaration) throws Exception {
+    private static Class<?>[] getArgumentClasses(String[] args) throws ClassNotFoundException {
+        Class<?>[] argumentClasses = new Class<?>[args.length];
+        for (int i = 0; i < args.length; i++) {
+            argumentClasses[i] = ClassUtils.forName(args[i], SecuredResolver.class.getClassLoader());
+        }
+        return argumentClasses;
+    }
+
+    private static List<Constructor<?>> parseAllConstructors(String declaration) throws ClassNotFoundException {
         String[] split = declaration.split(" ");
         String clazzName = split[1];
         Class<?> clazz = ClassUtils.forName(clazzName, SecuredResolver.class.getClassLoader());
@@ -573,7 +571,7 @@ public class SecuredResolver {
         return Arrays.asList(clazz.getDeclaredConstructors());
     }
 
-    private static Class<?> parseAnnotation(String declaration) throws Exception {
+    private static Class<?> parseAnnotation(String declaration) throws ClassNotFoundException {
         String[] split = declaration.split(" ");
         String clazzName = split[1];
 

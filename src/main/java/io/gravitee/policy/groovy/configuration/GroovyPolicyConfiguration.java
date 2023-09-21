@@ -15,51 +15,60 @@
  */
 package io.gravitee.policy.groovy.configuration;
 
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
 import io.gravitee.policy.api.PolicyConfiguration;
+import java.util.List;
+import java.util.stream.Stream;
+import lombok.*;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * @author David BRASSELY (david.brassely at graviteesource.com)
  * @author GraviteeSource Team
  */
+@Getter
+@Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class GroovyPolicyConfiguration implements PolicyConfiguration {
+
+    private boolean readContent;
+
+    private boolean overrideContent;
+
+    private String script;
 
     private String onRequestScript;
 
     private String onResponseScript;
 
-    private String onResponseContentScript;
-
     private String onRequestContentScript;
 
-    public String getOnRequestScript() {
-        return onRequestScript;
+    private String onResponseContentScript;
+
+    /**
+     * This getter is overridden for backward compatibility.
+     * For v3 API, we assume that the policy will override the content if the script is a onContent script.
+     * For v4 API, overriding content is an explicit configuration property.
+     * @return whether the policy should override the content or not
+     */
+    public boolean isOverrideContent() {
+        return overrideContent || isNotBlank(onRequestContentScript) || isNotBlank(onResponseContentScript);
     }
 
-    public void setOnRequestScript(String onRequestScript) {
-        this.onRequestScript = onRequestScript;
-    }
-
-    public String getOnResponseContentScript() {
-        return onResponseContentScript;
-    }
-
-    public void setOnResponseContentScript(String onResponseContentScript) {
-        this.onResponseContentScript = onResponseContentScript;
-    }
-
-    public String getOnResponseScript() {
-        return onResponseScript;
-    }
-
-    public void setOnResponseScript(String onResponseScript) {
-        this.onResponseScript = onResponseScript;
-    }
-
-    public String getOnRequestContentScript() {
-        return onRequestContentScript;
-    }
-
-    public void setOnRequestContentScript(String onRequestContentScript) {
-        this.onRequestContentScript = onRequestContentScript;
+    /**
+     * This getter is used for backward compatibility.
+     * If script is defined, it means that all other scripts are not (this property is not available for v3 API).
+     * If script is not defined, we return either one or both of the onRequest or onResponse scripts depending on the phase.
+     * The order ensures that overriding the content will be done using the onContent script.
+     * @return the list of scripts to run for a v3 API, a singleton list with the script for a v4 API.
+     */
+    public List<String> getScripts() {
+        return Stream
+            .of(script, onRequestScript, onRequestContentScript, onResponseScript, onResponseContentScript)
+            .filter(StringUtils::isNotBlank)
+            .toList();
     }
 }

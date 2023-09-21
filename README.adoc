@@ -10,9 +10,31 @@ endif::[]
 
 == Phase
 
+=== V3 engine
+
+[cols="^2,^2,^2,^2",options="header"]
 |===
 |onRequest|onResponse|onRequestContent|onResponseContent
-|X|X|X|X
+
+|X
+|X
+|X
+|X
+|===
+
+=== V4 engine
+
+[cols="4*", options="header"]
+|===
+^|onRequest
+^|onResponse
+^|onMessageRequest
+^|onMessageResponse
+
+^.^| X
+^.^| X
+^.^| X
+^.^| X
 |===
 
 == Description
@@ -33,7 +55,7 @@ response.headers.'X-Gravitee-Gateway-Version' = '0.14.0'
 |===
 |Plugin version | APIM version
 
-|2.x                | All supported versions
+|2.x            | All supported versions
 |===
 
 == Configuration
@@ -101,6 +123,9 @@ result.contentType = 'application/json'
 You can also transform request or response body content by applying a Groovy script on
 the `OnRequestContent` phase or the `OnResponseContent` phase.
 
+Please note that if you are using the V4 engine, a single script is defined. To override
+the content of the request or response, `overrideContent`must be enabled in your configuration.
+
 The following example shows you how to use the Groovy policy to transform JSON content:
 
 ==== Input body content
@@ -141,6 +166,30 @@ return JsonOutput.toJson(content)
 ]
 ----
 
+=== Overriding the content of a message
+
+The content of a message can be accessed using the `message.content` property from your Groovy script.
+
+==== Input message content
+[source, json]
+----
+{
+    "greeting": "Hello World !"
+}
+----
+
+==== Groovy script
+[source, groovy]
+----
+import groovy.json.JsonSlurper
+import groovy.json.JsonOutput
+
+def jsonSlurper = new JsonSlurper()
+def content = jsonSlurper.parseText(message.content)
+content.greeting = 'Hello Universe!'
+return JsonOutput.toJson(content)
+----
+
 == Errors
 
 === Sandbox
@@ -175,6 +224,29 @@ groovy:
 *WARNING*: be care when you allow use of classes or methods. In some cases, giving access to all methods of a classes may allow access by transitivity to unwanted methods and may open security breaches.
 
 === Policy configuration
+
+=== V3 engine
+
+[cols="^2,^2,^2,^2",options="header"]
+|===
+|onRequestScript|onResponseScript|onRequestContentScript|onResponseContentScript
+
+|This script will be executed during the `onRequest` phase.
+|This script will be executed during the `onResponse` phase.
+|This script will be executed during the `onRequestContent` phase, meaning that you can access the content of the request.
+|This script will be executed during the `onRequestContent` phase, meaning that you can access the content of the response.
+|===
+
+=== V4 engine
+
+[cols="^2,^2", options="header"]
+|===
+^|script
+^|overrideContent
+
+^.^|This script will be executed regardless of the phase.
+^.^|If set to true, the content of the request, response, or message will be overridden by the result of the script.
+|===
 
 === HTTP status code
 
