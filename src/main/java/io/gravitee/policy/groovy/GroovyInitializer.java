@@ -31,14 +31,14 @@ public class GroovyInitializer implements PolicyContext, PolicyContextProviderAw
     private boolean classLoaderLegacyMode = true;
 
     @Override
-    public void onActivation() throws Exception {
+    public void onActivation() {
         if (classLoaderLegacyMode || !SecuredResolver.isInitialized()) {
             SecuredResolver.initialize(this.environment);
         }
     }
 
     @Override
-    public void onDeactivation() throws Exception {
+    public void onDeactivation() {
         if (classLoaderLegacyMode) {
             SecuredResolver.destroy();
         }

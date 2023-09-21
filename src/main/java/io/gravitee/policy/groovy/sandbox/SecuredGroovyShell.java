@@ -23,6 +23,7 @@ import groovy.lang.GroovyShell;
 import groovy.lang.Script;
 import io.gravitee.policy.groovy.GroovyPolicy;
 import io.gravitee.policy.groovy.utils.Sha1;
+import io.gravitee.policy.v3.groovy.GroovyPolicyV3;
 import java.time.Duration;
 import org.apache.groovy.json.internal.FastStringUtils;
 import org.codehaus.groovy.control.CompilationFailedException;
@@ -117,7 +118,7 @@ public class SecuredGroovyShell {
             } else if (cause instanceof SecurityException) {
                 throw (SecurityException) cause;
             }
-            throw new RuntimeException("Unable to compile script", e);
+            throw new IllegalStateException("Unable to compile script", e);
         }
     }
 }

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.gravitee.policy.groovy.model;
+package io.gravitee.policy.v3.groovy.model;
 
 import io.gravitee.common.http.HttpMethod;
 import io.gravitee.common.http.HttpVersion;
@@ -25,6 +25,7 @@ import io.gravitee.gateway.api.http.HttpHeaders;
 import io.gravitee.gateway.api.http2.HttpFrame;
 import io.gravitee.gateway.api.stream.ReadStream;
 import io.gravitee.gateway.api.ws.WebSocket;
+import io.gravitee.policy.groovy.model.ScriptableHttpHeaders;
 import io.gravitee.reporter.api.http.Metrics;
 import javax.net.ssl.SSLSession;
 
@@ -32,6 +33,7 @@ import javax.net.ssl.SSLSession;
  * @author David BRASSELY (david.brassely at graviteesource.com)
  * @author GraviteeSource Team
  */
+@SuppressWarnings("unused")
 public class ContentAwareRequest implements Request {
 
     private final Request request;
@@ -42,12 +44,12 @@ public class ContentAwareRequest implements Request {
         this.content = content;
     }
 
-    public Request getRequest() {
-        return request;
-    }
-
     public String getContent() {
         return content;
+    }
+
+    public Request getRequest() {
+        return request;
     }
 
     @Override
@@ -123,8 +125,8 @@ public class ContentAwareRequest implements Request {
         return request.headers();
     }
 
-    public HeaderMapAdapter getHeaders() {
-        return new HeaderMapAdapter(this.headers());
+    public ScriptableHttpHeaders getHeaders() {
+        return new ScriptableHttpHeaders(this.headers());
     }
 
     @Override

@@ -1,0 +1,42 @@
+{
+    "id": "api-with-scripting-syntax-error",
+    "name": "api-with-scripting-syntax-error",
+    "gravitee": "2.0.0",
+    "proxy": {
+        "context_path": "/fail",
+        "endpoints": [
+            {
+                "name": "default",
+                "target": "http://localhost:8080/team",
+                "http": {
+                    "connectTimeout": 3000,
+                    "readTimeout": 60000
+                }
+            }
+        ]
+    },
+    "flows": [
+        {
+            "name": "flow-1",
+            "methods": [],
+            "enabled": true,
+            "path-operator": {
+                "path": "/",
+                "operator": "STARTS_WITH"
+            },
+            "pre": [
+                {
+                    "name": "Groovy",
+                    "description": "",
+                    "enabled": true,
+                    "policy": "groovy",
+                    "configuration": {
+                        "onRequestScript": "package unsafe"
+                    }
+                }
+            ],
+            "post": []
+        }
+    ],
+    "resources": []
+}

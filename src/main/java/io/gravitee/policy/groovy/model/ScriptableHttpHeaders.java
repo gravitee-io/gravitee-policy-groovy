@@ -21,17 +21,17 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
+import javax.annotation.Nonnull;
 
 /**
  * @author David BRASSELY (david.brassely at graviteesource.com)
  * @author GraviteeSource Team
  */
-public class HeaderMapAdapter implements Map<String, List<String>> {
+public class ScriptableHttpHeaders implements Map<String, List<String>> {
 
     private final HttpHeaders headers;
 
-    public HeaderMapAdapter(HttpHeaders headers) {
+    public ScriptableHttpHeaders(HttpHeaders headers) {
         this.headers = headers;
     }
 
@@ -60,6 +60,7 @@ public class HeaderMapAdapter implements Map<String, List<String>> {
         return headers.getAll((String) key);
     }
 
+    @SuppressWarnings("unused")
     public List<String> put(String key, String value) {
         List<String> oldValue = get(key);
         headers.set(key, List.of(value));
@@ -81,8 +82,8 @@ public class HeaderMapAdapter implements Map<String, List<String>> {
     }
 
     @Override
-    public void putAll(Map<? extends String, ? extends List<String>> m) {
-        throw new IllegalStateException();
+    public void putAll(@Nonnull Map<? extends String, ? extends List<String>> all) {
+        throw new UnsupportedOperationException("Groovy scripts do not support accessing this method");
     }
 
     @Override
@@ -97,11 +98,11 @@ public class HeaderMapAdapter implements Map<String, List<String>> {
 
     @Override
     public Collection<List<String>> values() {
-        throw new IllegalStateException();
+        throw new UnsupportedOperationException("Groovy scripts do not support accessing this method");
     }
 
     @Override
     public Set<Entry<String, List<String>>> entrySet() {
-        throw new IllegalStateException();
+        throw new UnsupportedOperationException("Groovy scripts do not support accessing this method");
     }
 }

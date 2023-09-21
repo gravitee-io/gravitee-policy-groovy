@@ -13,30 +13,39 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.gravitee.policy.groovy.model;
+package io.gravitee.policy.groovy.model.http;
 
-import io.gravitee.gateway.api.Response;
 import io.gravitee.gateway.api.buffer.Buffer;
 import io.gravitee.gateway.api.http.HttpHeaders;
-import io.gravitee.gateway.api.stream.WriteStream;
+import io.gravitee.gateway.reactive.api.context.GenericResponse;
+import io.gravitee.gateway.reactive.api.context.HttpResponse;
+import io.gravitee.policy.groovy.model.ScriptableHttpHeaders;
+import lombok.Getter;
 
 /**
- * @author David BRASSELY (david.brassely at graviteesource.com)
+ * @author Antoine CORDIER (antoine.cordier at graviteesource.com)
  * @author GraviteeSource Team
  */
-public class ContentAwareResponse implements Response {
+public class ScriptableHttpResponse implements GenericResponse {
 
-    private final Response response;
+    @Getter
+    private final HttpResponse response;
+
+    @Getter
     private final String content;
 
-    public ContentAwareResponse(Response response, String content) {
+    public ScriptableHttpResponse(HttpResponse response, Buffer buffer) {
         this.response = response;
-        this.content = content;
+        this.content = buffer.toString();
+    }
+
+    public ScriptableHttpResponse(HttpResponse response) {
+        this(response, Buffer.buffer());
     }
 
     @Override
-    public Response status(int statusCode) {
-        return response.status(statusCode);
+    public GenericResponse status(int httpStatusCode) {
+        return response.status(httpStatusCode);
     }
 
     @Override
@@ -44,18 +53,22 @@ public class ContentAwareResponse implements Response {
         return response.status();
     }
 
+    public int getStatus() {
+        return status();
+    }
+
     @Override
     public String reason() {
         return response.reason();
     }
 
-    @Override
-    public Response reason(String message) {
-        return response.reason(message);
+    public String getReason() {
+        return reason();
     }
 
-    public int getStatus() {
-        return this.status();
+    @Override
+    public GenericResponse reason(String reason) {
+        return response.reason(reason);
     }
 
     @Override
@@ -63,9 +76,8 @@ public class ContentAwareResponse implements Response {
         return response.headers();
     }
 
-    @Override
-    public boolean ended() {
-        return response.ended();
+    public ScriptableHttpHeaders getHeaders() {
+        return new ScriptableHttpHeaders(headers());
     }
 
     @Override
@@ -73,21 +85,8 @@ public class ContentAwareResponse implements Response {
         return response.trailers();
     }
 
-    public HeaderMapAdapter getHeaders() {
-        return new HeaderMapAdapter(this.headers());
-    }
-
     @Override
-    public WriteStream<Buffer> write(Buffer content) {
-        return response.write(content);
-    }
-
-    @Override
-    public void end() {
-        response.end();
-    }
-
-    public String getContent() {
-        return content;
+    public boolean ended() {
+        return response.ended();
     }
 }

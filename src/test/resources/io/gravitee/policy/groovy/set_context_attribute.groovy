@@ -1,1 +1,1 @@
-context.setAttribute('anyKey',0)
+context.setAttribute('count', 100)

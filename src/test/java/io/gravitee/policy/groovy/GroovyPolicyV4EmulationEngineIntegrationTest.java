@@ -15,30 +15,16 @@
  */
 package io.gravitee.policy.groovy;
 
-import io.gravitee.common.http.HttpStatusCode;
-import io.gravitee.gateway.api.buffer.Buffer;
-import lombok.*;
+import io.gravitee.apim.gateway.tests.sdk.annotations.GatewayTest;
+import io.gravitee.definition.model.ExecutionMode;
+import io.gravitee.policy.v3.groovy.GroovyPolicyV3IntegrationTest;
+import org.junit.jupiter.api.DisplayNameGeneration;
+import org.junit.jupiter.api.DisplayNameGenerator;
 
 /**
- * @author David BRASSELY (david.brassely at graviteesource.com)
+ * @author Yann TAVERNIER (yann.tavernier at graviteesource.com)
  * @author GraviteeSource Team
  */
-@Getter
-@Setter
-public class PolicyResult {
-
-    private String key;
-
-    private State state = State.SUCCESS;
-
-    private String error;
-
-    private int code = HttpStatusCode.INTERNAL_SERVER_ERROR_500;
-
-    private String contentType = null;
-
-    public enum State {
-        SUCCESS,
-        FAILURE,
-    }
-}
+@GatewayTest(v2ExecutionMode = ExecutionMode.V4_EMULATION_ENGINE)
+@DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
+public class GroovyPolicyV4EmulationEngineIntegrationTest extends GroovyPolicyV3IntegrationTest {}
