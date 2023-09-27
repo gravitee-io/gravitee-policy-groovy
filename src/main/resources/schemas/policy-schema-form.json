@@ -12,9 +12,17 @@
             },
             "deprecated": true
         },
+        "readContent": {
+            "title": "Read content",
+            "description": "Enable if your script needs to access the content of the HTTP request or response in your script.",
+            "type": "boolean",
+            "x-schema-form": {
+                "hidden": true
+            }
+        },
         "overrideContent": {
             "title": "Override content",
-            "description": "Set to true to override the content of the request / response with the value returned by your script.",
+            "description": "Enable to override the content of the request or response with the value returned by your script.",
             "type": "boolean",
             "x-schema-form": {
                 "hidden": true

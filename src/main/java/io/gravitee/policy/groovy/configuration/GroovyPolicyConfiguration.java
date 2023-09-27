@@ -15,6 +15,7 @@
  */
 package io.gravitee.policy.groovy.configuration;
 
+import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import io.gravitee.policy.api.PolicyConfiguration;
@@ -50,8 +51,29 @@ public class GroovyPolicyConfiguration implements PolicyConfiguration {
 
     /**
      * This getter is overridden for backward compatibility.
-     * For v3 API, we assume that the policy will override the content if the script is a onContent script.
+     *
+     * As there is no way to know if a v3 script would read the content or not, we assume that it will
+     * if the new script property is empty (which ensures we are running for a v3 API).
+     *
+     * For v4 API, reading the content is an explicit configuration property.
+     *
+     * Not enabling it will result in the content not being loaded to run the script,
+     * which can improve performances if the script does not need it.
+     *
+     * @return whether the policy should read the content or not to run the script
+     */
+    public boolean isReadContent() {
+        return readContent || isBlank(script);
+    }
+
+    /**
+     * This getter is overridden for backward compatibility.
+     *
+     * For v3 API, we assume that the policy will override the content if the script is an on{PHASE}Content script,
+     * where {PHASE} can be either Request or Response.
+     *
      * For v4 API, overriding content is an explicit configuration property.
+     *
      * @return whether the policy should override the content or not
      */
     public boolean isOverrideContent() {
@@ -60,9 +82,15 @@ public class GroovyPolicyConfiguration implements PolicyConfiguration {
 
     /**
      * This getter is used for backward compatibility.
-     * If script is defined, it means that all other scripts are not (this property is not available for v3 API).
-     * If script is not defined, we return either one or both of the onRequest or onResponse scripts depending on the phase.
-     * The order ensures that overriding the content will be done using the onContent script.
+     *
+     * If `script` is defined, it means that all other scripts are not (this property is not available for v3 API).
+     *
+     * If `script` is not defined, we return either one or both of the on{PHASE} and on{PHASE}Content
+     * scripts, where {PHASE} can be either Request or Response.
+     *
+     * When running both  on${PHASE} and on${PHASE}Content scrips, the order ensures
+     * that overriding the content will be done using the on${PHASE}Content script.
+     *
      * @return the list of scripts to run for a v3 API, a singleton list with the script for a v4 API.
      */
     public List<String> getScripts() {

@@ -27,11 +27,11 @@ import javax.annotation.Nonnull;
  * @author David BRASSELY (david.brassely at graviteesource.com)
  * @author GraviteeSource Team
  */
-public class ScriptableHttpHeaders implements Map<String, List<String>> {
+public class BindableHttpHeaders implements Map<String, List<String>> {
 
     private final HttpHeaders headers;
 
-    public ScriptableHttpHeaders(HttpHeaders headers) {
+    public BindableHttpHeaders(HttpHeaders headers) {
         this.headers = headers;
     }
 

@@ -25,7 +25,7 @@ import io.gravitee.gateway.api.http.HttpHeaders;
 import io.gravitee.gateway.api.http2.HttpFrame;
 import io.gravitee.gateway.api.stream.ReadStream;
 import io.gravitee.gateway.api.ws.WebSocket;
-import io.gravitee.policy.groovy.model.ScriptableHttpHeaders;
+import io.gravitee.policy.groovy.model.BindableHttpHeaders;
 import io.gravitee.reporter.api.http.Metrics;
 import javax.net.ssl.SSLSession;
 
@@ -125,8 +125,8 @@ public class ContentAwareRequest implements Request {
         return request.headers();
     }
 
-    public ScriptableHttpHeaders getHeaders() {
-        return new ScriptableHttpHeaders(this.headers());
+    public BindableHttpHeaders getHeaders() {
+        return new BindableHttpHeaders(this.headers());
     }
 
     @Override

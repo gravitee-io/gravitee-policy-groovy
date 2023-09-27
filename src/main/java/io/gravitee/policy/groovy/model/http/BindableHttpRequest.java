@@ -22,7 +22,8 @@ import io.gravitee.gateway.api.buffer.Buffer;
 import io.gravitee.gateway.api.http.HttpHeaders;
 import io.gravitee.gateway.reactive.api.context.GenericRequest;
 import io.gravitee.gateway.reactive.api.context.HttpRequest;
-import io.gravitee.policy.groovy.model.ScriptableHttpHeaders;
+import io.gravitee.policy.groovy.model.BindableHttpHeaders;
+import javax.annotation.Nullable;
 import javax.net.ssl.SSLSession;
 import lombok.Getter;
 
@@ -30,21 +31,27 @@ import lombok.Getter;
  * @author Antoine CORDIER (antoine.cordier at graviteesource.com)
  * @author GraviteeSource Team
  */
-public class ScriptableHttpRequest implements GenericRequest {
+public class BindableHttpRequest implements GenericRequest {
 
     @Getter
     private final HttpRequest request;
 
-    @Getter
     private final String content;
 
-    public ScriptableHttpRequest(HttpRequest request, Buffer buffer) {
+    public BindableHttpRequest(HttpRequest request, @Nullable Buffer buffer) {
         this.request = request;
-        this.content = buffer.toString();
+        this.content = buffer != null ? buffer.toString() : null;
     }
 
-    public ScriptableHttpRequest(HttpRequest request) {
-        this(request, Buffer.buffer());
+    public BindableHttpRequest(HttpRequest request) {
+        this(request, null);
+    }
+
+    public String getContent() {
+        if (content == null) {
+            throw new UnsupportedOperationException("Accessing request content must be enabled in the policy configuration");
+        }
+        return content;
     }
 
     @Override
@@ -64,6 +71,10 @@ public class ScriptableHttpRequest implements GenericRequest {
     @Override
     public String clientIdentifier() {
         return request.clientIdentifier();
+    }
+
+    public String getClientIdentifier() {
+        return clientIdentifier();
     }
 
     @Override
@@ -143,8 +154,8 @@ public class ScriptableHttpRequest implements GenericRequest {
         return request.headers();
     }
 
-    public ScriptableHttpHeaders getHeaders() {
-        return new ScriptableHttpHeaders(request.headers());
+    public BindableHttpHeaders getHeaders() {
+        return new BindableHttpHeaders(request.headers());
     }
 
     @Override

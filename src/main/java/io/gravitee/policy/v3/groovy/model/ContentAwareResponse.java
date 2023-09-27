@@ -19,7 +19,7 @@ import io.gravitee.gateway.api.Response;
 import io.gravitee.gateway.api.buffer.Buffer;
 import io.gravitee.gateway.api.http.HttpHeaders;
 import io.gravitee.gateway.api.stream.WriteStream;
-import io.gravitee.policy.groovy.model.ScriptableHttpHeaders;
+import io.gravitee.policy.groovy.model.BindableHttpHeaders;
 
 /**
  * @author David BRASSELY (david.brassely at graviteesource.com)
@@ -83,8 +83,8 @@ public class ContentAwareResponse implements Response {
         return response.trailers();
     }
 
-    public ScriptableHttpHeaders getHeaders() {
-        return new ScriptableHttpHeaders(this.headers());
+    public BindableHttpHeaders getHeaders() {
+        return new BindableHttpHeaders(this.headers());
     }
 
     @Override
