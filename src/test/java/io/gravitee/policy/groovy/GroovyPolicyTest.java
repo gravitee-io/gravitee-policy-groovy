@@ -299,7 +299,7 @@ class GroovyPolicyTest {
     }
 
     private static GroovyPolicyConfiguration buildConfig(String script) {
-        return GroovyPolicyConfiguration.builder().script(loadScript(script)).build();
+        return GroovyPolicyConfiguration.builder().script(loadScript(script)).readContent(true).build();
     }
 
     private static String loadScript(String file) {

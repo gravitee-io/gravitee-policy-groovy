@@ -48,8 +48,7 @@
                     "pathOperator": "STARTS_WITH"
                 }
             ],
-            "request": [],
-            "response": [
+            "request": [
                 {
                     "name": "Groovy",
                     "description": "",
@@ -57,11 +56,12 @@
                     "policy": "groovy",
                     "configuration": {
                         "overrideContent": true,
-                        "readContent": true,
-                        "script": "import groovy.json.JsonSlurper\nimport groovy.json.JsonOutput\n\ndef jsonSlurper = new JsonSlurper()\ndef content = jsonSlurper.parseText(response.content)\ncontent.message = 'Hello Universe!'\nresponse.headers.'X-Phase'='on-response'\nreturn JsonOutput.toJson(content)"
+                        "readContent": false,
+                        "script": "import groovy.json.JsonSlurper\nimport groovy.json.JsonOutput\n\ndef jsonSlurper = new JsonSlurper()\ndef content = jsonSlurper.parseText(request.content)\ncontent.message = 'Hello Universe!'\nrequest.headers.'X-Phase' = 'on-request'\nreturn JsonOutput.toJson(content)"
                     }
                 }
             ],
+            "response": [],
             "subscribe": [],
             "publish": []
         }

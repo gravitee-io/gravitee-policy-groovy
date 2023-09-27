@@ -19,28 +19,35 @@ import io.gravitee.gateway.api.buffer.Buffer;
 import io.gravitee.gateway.api.http.HttpHeaders;
 import io.gravitee.gateway.reactive.api.context.GenericResponse;
 import io.gravitee.gateway.reactive.api.context.HttpResponse;
-import io.gravitee.policy.groovy.model.ScriptableHttpHeaders;
+import io.gravitee.policy.groovy.model.BindableHttpHeaders;
+import javax.annotation.Nullable;
 import lombok.Getter;
 
 /**
  * @author Antoine CORDIER (antoine.cordier at graviteesource.com)
  * @author GraviteeSource Team
  */
-public class ScriptableHttpResponse implements GenericResponse {
+public class BindableHttpResponse implements GenericResponse {
 
     @Getter
     private final HttpResponse response;
 
-    @Getter
     private final String content;
 
-    public ScriptableHttpResponse(HttpResponse response, Buffer buffer) {
+    public BindableHttpResponse(HttpResponse response, @Nullable Buffer buffer) {
         this.response = response;
-        this.content = buffer.toString();
+        this.content = buffer != null ? buffer.toString() : null;
     }
 
-    public ScriptableHttpResponse(HttpResponse response) {
-        this(response, Buffer.buffer());
+    public BindableHttpResponse(HttpResponse response) {
+        this(response, null);
+    }
+
+    public String getContent() {
+        if (content == null) {
+            throw new UnsupportedOperationException("Accessing response content must be enabled in the policy configuration");
+        }
+        return content;
     }
 
     @Override
@@ -76,8 +83,8 @@ public class ScriptableHttpResponse implements GenericResponse {
         return response.headers();
     }
 
-    public ScriptableHttpHeaders getHeaders() {
-        return new ScriptableHttpHeaders(headers());
+    public BindableHttpHeaders getHeaders() {
+        return new BindableHttpHeaders(headers());
     }
 
     @Override

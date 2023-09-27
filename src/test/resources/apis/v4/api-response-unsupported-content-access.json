@@ -57,7 +57,7 @@
                     "policy": "groovy",
                     "configuration": {
                         "overrideContent": true,
-                        "readContent": true,
+                        "readContent": false,
                         "script": "import groovy.json.JsonSlurper\nimport groovy.json.JsonOutput\n\ndef jsonSlurper = new JsonSlurper()\ndef content = jsonSlurper.parseText(response.content)\ncontent.message = 'Hello Universe!'\nresponse.headers.'X-Phase'='on-response'\nreturn JsonOutput.toJson(content)"
                     }
                 }

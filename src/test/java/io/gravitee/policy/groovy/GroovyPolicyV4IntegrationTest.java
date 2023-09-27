@@ -61,13 +61,13 @@ import org.junit.jupiter.api.Test;
  */
 public class GroovyPolicyV4IntegrationTest {
 
-    private static final String GIVEN_CONTENT = """
+    private static final JsonObject GIVEN_CONTENT = new JsonObject("""
         {"message":"Hello World!"}
-        """;
+        """);
 
-    private static final String EXPECTED_CONTENT = """
+    private static final JsonObject EXPECTED_CONTENT = new JsonObject("""
         {"message":"Hello Universe!"}
-        """;
+        """);
 
     @GatewayTest
     @Nested
@@ -85,12 +85,12 @@ public class GroovyPolicyV4IntegrationTest {
 
         @Test
         @DeployApi("/apis/v4/api-request.json")
-        void should_execute_on_request_script(HttpClient client) {
+        void should_override_content_on_request_script(HttpClient client) {
             wiremock.stubFor(post("/team").willReturn(ok("")));
 
             client
                 .rxRequest(POST, "/test")
-                .flatMap(request -> request.rxSend(GIVEN_CONTENT))
+                .flatMap(request -> request.rxSend(GIVEN_CONTENT.toString()))
                 .doOnSuccess(response -> assertThat(response.statusCode()).isEqualTo(200))
                 .test()
                 .awaitDone(5, TimeUnit.SECONDS)
@@ -101,14 +101,55 @@ public class GroovyPolicyV4IntegrationTest {
                 1,
                 postRequestedFor(urlPathEqualTo("/team"))
                     .withHeader("X-Phase", equalTo("on-request"))
-                    .withRequestBody(equalToJson(EXPECTED_CONTENT.trim()))
+                    .withRequestBody(equalToJson(EXPECTED_CONTENT.toString()))
             );
         }
 
         @Test
+        @DeployApi("/apis/v4/api-request-no-content-override.json")
+        void should_not_override_content_on_request_script(HttpClient client) {
+            wiremock.stubFor(post("/team").willReturn(ok("")));
+
+            client
+                .rxRequest(POST, "/test")
+                .flatMap(request -> request.rxSend(GIVEN_CONTENT.toString()))
+                .doOnSuccess(response -> assertThat(response.statusCode()).isEqualTo(200))
+                .test()
+                .awaitDone(5, TimeUnit.SECONDS)
+                .assertComplete()
+                .assertNoErrors();
+
+            wiremock.verify(
+                1,
+                postRequestedFor(urlPathEqualTo("/team"))
+                    .withHeader("X-Phase", equalTo("on-request"))
+                    .withRequestBody(equalToJson(GIVEN_CONTENT.toString()))
+            );
+        }
+
+        @Test
+        @DeployApi("/apis/v4/api-request-unsupported-content-access.json")
+        void should_fail_on_request_with_read_content_disabled(HttpClient client) {
+            wiremock.stubFor(post("/team").willReturn(ok("")));
+
+            client
+                .rxRequest(POST, "/test")
+                .flatMap(request -> request.rxSend(GIVEN_CONTENT.toString()))
+                .doOnSuccess(response -> assertThat(response.statusCode()).isEqualTo(500))
+                .flatMap(HttpClientResponse::body)
+                .doOnSuccess(body -> assertThat(body).hasToString("Internal Server Error"))
+                .test()
+                .awaitDone(5, TimeUnit.SECONDS)
+                .assertNoErrors()
+                .assertComplete();
+
+            wiremock.verify(0, anyRequestedFor(anyUrl()));
+        }
+
+        @Test
         @DeployApi("/apis/v4/api-response.json")
-        void should_execute_on_response_script(HttpClient client) {
-            wiremock.stubFor(post("/team").willReturn(okJson(EXPECTED_CONTENT)));
+        void should_override_content_on_response_script(HttpClient client) {
+            wiremock.stubFor(post("/team").willReturn(okJson(GIVEN_CONTENT.toString())));
 
             client
                 .rxRequest(POST, "/test")
@@ -116,11 +157,50 @@ public class GroovyPolicyV4IntegrationTest {
                 .doOnSuccess(response -> assertThat(response.statusCode()).isEqualTo(200))
                 .doOnSuccess(response -> assertThat(response.headers().names()).contains("X-Phase"))
                 .flatMap(HttpClientResponse::body)
-                .doOnSuccess(body -> assertThat(body).hasToString(EXPECTED_CONTENT.trim()))
+                .doOnSuccess(body -> assertThat(body).hasToString(EXPECTED_CONTENT.toString()))
                 .test()
                 .awaitDone(5, TimeUnit.SECONDS)
                 .assertComplete()
                 .assertNoErrors();
+
+            wiremock.verify(1, postRequestedFor(urlPathEqualTo("/team")));
+        }
+
+        @Test
+        @DeployApi("/apis/v4/api-response-no-content-override.json")
+        void should_not_override_content_on_response_script(HttpClient client) {
+            wiremock.stubFor(post("/team").willReturn(okJson(GIVEN_CONTENT.toString())));
+
+            client
+                .rxRequest(POST, "/test")
+                .flatMap(HttpClientRequest::rxSend)
+                .doOnSuccess(response -> assertThat(response.statusCode()).isEqualTo(200))
+                .doOnSuccess(response -> assertThat(response.headers().names()).contains("X-Phase"))
+                .flatMap(HttpClientResponse::body)
+                .doOnSuccess(body -> assertThat(body).hasToString(GIVEN_CONTENT.toString()))
+                .test()
+                .awaitDone(5, TimeUnit.SECONDS)
+                .assertComplete()
+                .assertNoErrors();
+
+            wiremock.verify(1, postRequestedFor(urlPathEqualTo("/team")));
+        }
+
+        @Test
+        @DeployApi("/apis/v4/api-response-unsupported-content-access.json")
+        void should_fail_on_response_with_read_content_disabled(HttpClient client) {
+            wiremock.stubFor(post("/team").willReturn(okJson(EXPECTED_CONTENT.toString())));
+
+            client
+                .rxRequest(POST, "/test")
+                .flatMap(HttpClientRequest::rxSend)
+                .doOnSuccess(response -> assertThat(response.statusCode()).isEqualTo(500))
+                .flatMap(HttpClientResponse::body)
+                .doOnSuccess(body -> assertThat(body).hasToString("Internal Server Error"))
+                .test()
+                .awaitDone(5, TimeUnit.SECONDS)
+                .assertNoErrors()
+                .assertComplete();
 
             wiremock.verify(1, postRequestedFor(urlPathEqualTo("/team")));
         }
@@ -160,7 +240,7 @@ public class GroovyPolicyV4IntegrationTest {
                 .doOnSuccess(items -> {
                     items.forEach(item -> {
                         var message = (JsonObject) item;
-                        assertThat(message.getString("content")).isEqualTo(EXPECTED_CONTENT.trim());
+                        assertThat(message.getString("content")).isEqualTo(EXPECTED_CONTENT.toString());
                         var headers = message.getJsonObject("headers");
                         assertThat(headers.getString("x-phase")).contains("on-response-message");
                     });
@@ -208,7 +288,7 @@ public class GroovyPolicyV4IntegrationTest {
         void should_transform_on_request_message(HttpClient client) {
             client
                 .rxRequest(POST, "/test")
-                .flatMap(request -> request.rxSend(GIVEN_CONTENT))
+                .flatMap(request -> request.rxSend(GIVEN_CONTENT.toString()))
                 .doOnSuccess(response -> assertThat(response.statusCode()).isEqualTo(202))
                 .test()
                 .awaitDone(5, TimeUnit.SECONDS)
@@ -217,7 +297,7 @@ public class GroovyPolicyV4IntegrationTest {
 
             messageStorage
                 .subject()
-                .doOnNext(message -> assertThat(message.content()).hasToString(EXPECTED_CONTENT.trim()))
+                .doOnNext(message -> assertThat(message.content()).hasToString(EXPECTED_CONTENT.toString()))
                 .doOnNext(message -> assertThat(message.attributes()).containsEntry("message.mutated", true))
                 .test()
                 .assertNoErrors()
@@ -229,7 +309,7 @@ public class GroovyPolicyV4IntegrationTest {
         void should_return_error_500_if_script_fails(HttpClient client) {
             client
                 .rxRequest(POST, "/test")
-                .flatMap(request -> request.rxSend(GIVEN_CONTENT))
+                .flatMap(request -> request.rxSend(GIVEN_CONTENT.toString()))
                 .doOnSuccess(response -> assertThat(response.statusCode()).isEqualTo(500))
                 .flatMap(HttpClientResponse::body)
                 .doOnSuccess(body -> assertThat(body).hasToString("Internal Server Error"))

@@ -22,9 +22,9 @@ import io.gravitee.gateway.reactive.api.context.HttpExecutionContext;
 import io.gravitee.gateway.reactive.api.context.MessageExecutionContext;
 import io.gravitee.gateway.reactive.api.message.Message;
 import io.gravitee.policy.groovy.PolicyResult;
-import io.gravitee.policy.groovy.model.http.ScriptableHttpRequest;
-import io.gravitee.policy.groovy.model.http.ScriptableHttpResponse;
-import io.gravitee.policy.groovy.model.message.ScriptableMessage;
+import io.gravitee.policy.groovy.model.http.BindableHttpRequest;
+import io.gravitee.policy.groovy.model.http.BindableHttpResponse;
+import io.gravitee.policy.groovy.model.message.BindableMessage;
 
 /**
  * @author Antoine CORDIER (antoine.cordier at graviteesource.com)
@@ -40,29 +40,36 @@ public class GroovyBindings {
 
     private GroovyBindings() {}
 
-    public static Binding bindRequest(HttpExecutionContext ctx, Buffer bodyBuffer) {
+    public static Binding bindHttp(HttpExecutionContext ctx) {
         var binding = bindCommon(ctx);
-        binding.setVariable(REQUEST_VARIABLE_NAME, new ScriptableHttpRequest(ctx.request(), bodyBuffer));
-        binding.setVariable(RESPONSE_VARIABLE_NAME, new ScriptableHttpResponse(ctx.response()));
+        binding.setVariable(REQUEST_VARIABLE_NAME, new BindableHttpRequest(ctx.request()));
+        binding.setVariable(RESPONSE_VARIABLE_NAME, new BindableHttpResponse(ctx.response()));
         return binding;
     }
 
-    public static Binding bindResponse(HttpExecutionContext ctx, Buffer bodyBuffer) {
+    public static Binding bindRequestContent(HttpExecutionContext ctx, Buffer bodyBuffer) {
         var binding = bindCommon(ctx);
-        binding.setVariable(REQUEST_VARIABLE_NAME, new ScriptableHttpRequest(ctx.request()));
-        binding.setVariable(RESPONSE_VARIABLE_NAME, new ScriptableHttpResponse(ctx.response(), bodyBuffer));
+        binding.setVariable(REQUEST_VARIABLE_NAME, new BindableHttpRequest(ctx.request(), bodyBuffer));
+        binding.setVariable(RESPONSE_VARIABLE_NAME, new BindableHttpResponse(ctx.response()));
+        return binding;
+    }
+
+    public static Binding bindResponseContent(HttpExecutionContext ctx, Buffer bodyBuffer) {
+        var binding = bindCommon(ctx);
+        binding.setVariable(REQUEST_VARIABLE_NAME, new BindableHttpRequest(ctx.request()));
+        binding.setVariable(RESPONSE_VARIABLE_NAME, new BindableHttpResponse(ctx.response(), bodyBuffer));
         return binding;
     }
 
     public static Binding bindMessage(MessageExecutionContext ctx, Message message) {
         var binding = bindCommon(ctx);
-        binding.setVariable(MESSAGE_VARIABLE, new ScriptableMessage(message));
+        binding.setVariable(MESSAGE_VARIABLE, new BindableMessage(message));
         return binding;
     }
 
     private static Binding bindCommon(GenericExecutionContext ctx) {
         var binding = new Binding();
-        binding.setVariable(CONTEXT_VARIABLE_NAME, new ScriptableExecutionContext(ctx));
+        binding.setVariable(CONTEXT_VARIABLE_NAME, new BindableExecutionContext(ctx));
         binding.setVariable(RESULT_VARIABLE_NAME, new PolicyResult());
         return binding;
     }

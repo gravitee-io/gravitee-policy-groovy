@@ -18,7 +18,7 @@ package io.gravitee.policy.groovy.model.message;
 import io.gravitee.gateway.api.buffer.Buffer;
 import io.gravitee.gateway.api.http.HttpHeaders;
 import io.gravitee.gateway.reactive.api.message.Message;
-import io.gravitee.policy.groovy.model.ScriptableHttpHeaders;
+import io.gravitee.policy.groovy.model.BindableHttpHeaders;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -29,7 +29,7 @@ import lombok.RequiredArgsConstructor;
  * @author GraviteeSource Team
  */
 @RequiredArgsConstructor
-public class ScriptableMessage implements Message {
+public class BindableMessage implements Message {
 
     private final Message message;
 
@@ -93,8 +93,8 @@ public class ScriptableMessage implements Message {
         return message.headers();
     }
 
-    public ScriptableHttpHeaders getHeaders() {
-        return new ScriptableHttpHeaders(headers());
+    public BindableHttpHeaders getHeaders() {
+        return new BindableHttpHeaders(headers());
     }
 
     @Override
@@ -165,31 +165,31 @@ public class ScriptableMessage implements Message {
     }
 
     public Map<String, Object> getAttributes() {
-        return new ScriptableMessageAttributes(message);
+        return new BindableMessageAttributes(message);
     }
 
     @Override
     public <T> T internalAttribute(String name) {
-        return message.internalAttribute(name);
+        throw new UnsupportedOperationException("Groovy scripts do not support accessing this method");
     }
 
     @Override
     public Message internalAttribute(String name, Object value) {
-        return message.internalAttribute(name, value);
+        throw new UnsupportedOperationException("Groovy scripts do not support accessing this method");
     }
 
     @Override
     public Message removeInternalAttribute(String name) {
-        return message.removeInternalAttribute(name);
+        throw new UnsupportedOperationException("Groovy scripts do not support accessing this method");
     }
 
     @Override
     public Set<String> internalAttributeNames() {
-        return message.internalAttributeNames();
+        throw new UnsupportedOperationException("Groovy scripts do not support accessing this method");
     }
 
     @Override
     public <T> Map<String, T> internalAttributes() {
-        return message.internalAttributes();
+        throw new UnsupportedOperationException("Groovy scripts do not support accessing this method");
     }
 }

@@ -25,12 +25,12 @@ import javax.annotation.Nonnull;
  * @author Antoine CORDIER (antoine.cordier at graviteesource.com)
  * @author GraviteeSource Team
  */
-public class ScriptableMessageAttributes implements Map<String, Object> {
+public class BindableMessageAttributes implements Map<String, Object> {
 
     private final Message message;
     private final Map<String, Object> attributes;
 
-    public ScriptableMessageAttributes(Message message) {
+    public BindableMessageAttributes(Message message) {
         this.message = message;
         this.attributes = message.attributes();
     }
@@ -74,12 +74,12 @@ public class ScriptableMessageAttributes implements Map<String, Object> {
 
     @Override
     public void putAll(@Nonnull Map<? extends String, ?> all) {
-        throw new UnsupportedOperationException("Putting all attributes is not supported");
+        throw new UnsupportedOperationException("Groovy scripts do not support accessing this method");
     }
 
     @Override
     public void clear() {
-        throw new UnsupportedOperationException("Clearing message attributes is not supported");
+        throw new UnsupportedOperationException("Groovy scripts do not support accessing this method");
     }
 
     @Override
@@ -89,11 +89,11 @@ public class ScriptableMessageAttributes implements Map<String, Object> {
 
     @Override
     public Collection<Object> values() {
-        throw new UnsupportedOperationException("Getting attributes values is not supported");
+        throw new UnsupportedOperationException("Groovy scripts do not support accessing this method");
     }
 
     @Override
     public Set<Entry<String, Object>> entrySet() {
-        throw new UnsupportedOperationException("Accessing attributes entry set is not supported");
+        throw new UnsupportedOperationException("Groovy scripts do not support accessing this method");
     }
 }

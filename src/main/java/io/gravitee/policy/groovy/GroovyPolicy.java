@@ -44,8 +44,11 @@ public class GroovyPolicy extends GroovyPolicyV3 implements Policy {
 
     private static final ExecutionFailure DEFAULT_EXECUTION_FAILURE = new ExecutionFailure(INTERNAL_SERVER_ERROR_500)
         .key("GROOVY_EXECUTION_FAILURE")
-        .message("Groovy execution failure");
+        .message("Internal Server Error");
 
+    /**
+     * @see GroovyPolicyConfiguration#getScripts()
+     */
     private final Flowable<String> scriptFlowable;
 
     public GroovyPolicy(GroovyPolicyConfiguration configuration) {
@@ -60,41 +63,60 @@ public class GroovyPolicy extends GroovyPolicyV3 implements Policy {
 
     @Override
     public Completable onRequest(HttpExecutionContext ctx) {
+        if (configuration.isReadContent()) {
+            return onRequestContent(ctx);
+        }
+        return runScript(ctx, GroovyBindings.bindHttp(ctx), configuration.getScript());
+    }
+
+    private Completable onRequestContent(HttpExecutionContext ctx) {
         return ctx
             .request()
             .onBody(bodyBuffer ->
                 bodyBuffer
                     .defaultIfEmpty(Buffer.buffer())
-                    .flatMapMaybe(buffer -> onHttp(ctx, buffer, ctx.request().headers(), GroovyBindings.bindRequest(ctx, buffer)))
+                    .flatMapMaybe(buffer ->
+                        onHttpContent(ctx, buffer, ctx.request().headers(), GroovyBindings.bindRequestContent(ctx, buffer))
+                    )
             );
     }
 
     @Override
     public Completable onResponse(HttpExecutionContext ctx) {
+        if (configuration.isReadContent()) {
+            return onResponseContent(ctx);
+        }
+        return runScript(ctx, GroovyBindings.bindHttp(ctx), configuration.getScript());
+    }
+
+    private Completable onResponseContent(HttpExecutionContext ctx) {
         return ctx
             .response()
             .onBody(bodyBuffer ->
                 bodyBuffer
                     .defaultIfEmpty(Buffer.buffer())
-                    .flatMapMaybe(buffer -> onHttp(ctx, buffer, ctx.response().headers(), GroovyBindings.bindResponse(ctx, buffer)))
+                    .flatMapMaybe(buffer ->
+                        onHttpContent(ctx, buffer, ctx.response().headers(), GroovyBindings.bindResponseContent(ctx, buffer))
+                    )
             );
     }
 
-    private Maybe<Buffer> onHttp(HttpExecutionContext ctx, Buffer bodyBuffer, HttpHeaders headers, Binding binding) {
+    private Maybe<Buffer> onHttpContent(HttpExecutionContext ctx, Buffer bodyBuffer, HttpHeaders headers, Binding binding) {
         return scriptFlowable
-            .flatMapMaybe(script -> runScript(ctx, binding, script))
+            .concatMapMaybe(script -> runContentAwareScript(ctx, binding, script))
             .lastElement()
             .filter(groovyBuffer -> configuration.isOverrideContent())
             .doOnSuccess(groovyBuffer -> setContentLength(headers, groovyBuffer))
             .switchIfEmpty(Maybe.just(bodyBuffer));
     }
 
-    private Maybe<Buffer> runScript(HttpExecutionContext ctx, Binding binding, String script) {
+    private Maybe<Buffer> runContentAwareScript(HttpExecutionContext ctx, Binding binding, String script) {
         try {
             var content = GROOVY_SHELL.evaluate(script, binding);
             var result = (PolicyResult) binding.getVariable(GroovyBindings.RESULT_VARIABLE_NAME);
             return handleResult(ctx, result, content);
         } catch (Exception e) {
+            log.error("An error occurs while executing Groovy script", e);
             return ctx.interruptBodyWith(DEFAULT_EXECUTION_FAILURE);
         }
     }
@@ -107,6 +129,27 @@ public class GroovyPolicy extends GroovyPolicyV3 implements Policy {
         }
 
         return content == null ? Maybe.just(Buffer.buffer()) : Maybe.just(Buffer.buffer(content.toString()));
+    }
+
+    private Completable runScript(HttpExecutionContext ctx, Binding binding, String script) {
+        try {
+            GROOVY_SHELL.evaluate(script, binding);
+            var result = (PolicyResult) binding.getVariable(GroovyBindings.RESULT_VARIABLE_NAME);
+            return handleResult(ctx, result);
+        } catch (Exception e) {
+            log.error("An error occurs while executing Groovy script", e);
+            return ctx.interruptWith(DEFAULT_EXECUTION_FAILURE);
+        }
+    }
+
+    private Completable handleResult(HttpExecutionContext ctx, PolicyResult result) {
+        if (result.getState() == State.FAILURE) {
+            return ctx.interruptWith(
+                new ExecutionFailure(result.getCode()).key(result.getKey()).message(result.getError()).contentType(result.getContentType())
+            );
+        }
+
+        return Completable.complete();
     }
 
     private static void setContentLength(final HttpHeaders headers, final Buffer buffer) {

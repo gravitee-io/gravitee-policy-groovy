@@ -30,7 +30,7 @@ import lombok.Value;
  * @author GraviteeSource Team
  */
 @Value
-public class ScriptableExecutionContext implements GenericExecutionContext {
+public class BindableExecutionContext implements GenericExecutionContext {
 
     private static final String CONTEXT_DICTIONARIES_VARIABLE = "dictionaries";
 
@@ -46,16 +46,20 @@ public class ScriptableExecutionContext implements GenericExecutionContext {
 
     @Override
     public GenericRequest request() {
-        return executionContext.request();
+        throw new UnsupportedOperationException("Groovy scripts do not support accessing this method");
     }
 
     @Override
     public GenericResponse response() {
-        return executionContext.response();
+        throw new UnsupportedOperationException("Groovy scripts do not support accessing this method");
     }
 
     @Override
     public Metrics metrics() {
+        return executionContext.metrics();
+    }
+
+    public Metrics getMetrics() {
         return executionContext.metrics();
     }
 
@@ -101,17 +105,17 @@ public class ScriptableExecutionContext implements GenericExecutionContext {
 
     @Override
     public void setInternalAttribute(String s, Object o) {
-        executionContext.setInternalAttribute(s, o);
+        throw new UnsupportedOperationException("Groovy scripts do not support accessing this method");
     }
 
     @Override
     public void putInternalAttribute(String s, Object o) {
-        executionContext.putInternalAttribute(s, o);
+        throw new UnsupportedOperationException("Groovy scripts do not support accessing this method");
     }
 
     @Override
     public void removeInternalAttribute(String s) {
-        executionContext.removeInternalAttribute(s);
+        throw new UnsupportedOperationException("Groovy scripts do not support accessing this method");
     }
 
     @Override
@@ -121,7 +125,7 @@ public class ScriptableExecutionContext implements GenericExecutionContext {
 
     @Override
     public <T> Map<String, T> getInternalAttributes() {
-        return executionContext.getInternalAttributes();
+        throw new UnsupportedOperationException("Groovy scripts do not support accessing this method");
     }
 
     @Override
