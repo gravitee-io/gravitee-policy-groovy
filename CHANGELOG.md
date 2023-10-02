@@ -1,3 +1,10 @@
+# [2.5.0](https://github.com/gravitee-io/gravitee-policy-groovy/compare/2.4.2...2.5.0) (2023-10-02)
+
+
+### Features
+
+* add message level support to policy ([632813e](https://github.com/gravitee-io/gravitee-policy-groovy/commit/632813e1ab7496a58fae8b3918889beac0420d31))
+
 ## [2.4.2](https://github.com/gravitee-io/gravitee-policy-groovy/compare/2.4.1...2.4.2) (2023-07-20)
 
 
