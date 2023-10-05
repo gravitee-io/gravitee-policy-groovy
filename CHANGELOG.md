@@ -1,3 +1,10 @@
+## [2.5.1](https://github.com/gravitee-io/gravitee-policy-groovy/compare/2.5.0...2.5.1) (2023-10-05)
+
+
+### Bug Fixes
+
+* add request and response to message phases ([154db98](https://github.com/gravitee-io/gravitee-policy-groovy/commit/154db98744d3614f2f8d085ad8029b8f452afe15))
+
 # [2.5.0](https://github.com/gravitee-io/gravitee-policy-groovy/compare/2.4.2...2.5.0) (2023-10-02)
 
 
