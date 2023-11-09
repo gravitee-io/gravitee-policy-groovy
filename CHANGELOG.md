@@ -1,3 +1,10 @@
+## [2.5.2](https://github.com/gravitee-io/gravitee-policy-groovy/compare/2.5.1...2.5.2) (2023-11-09)
+
+
+### Bug Fixes
+
+* do not write body if onRequest/Response only ([62f692c](https://github.com/gravitee-io/gravitee-policy-groovy/commit/62f692c5c685a4afaf537958fa61fef77be7c215))
+
 ## [2.5.1](https://github.com/gravitee-io/gravitee-policy-groovy/compare/2.5.0...2.5.1) (2023-10-05)
 
 
