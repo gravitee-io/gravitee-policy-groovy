@@ -17,6 +17,7 @@ package io.gravitee.policy.v3.groovy;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
+import static io.vertx.core.http.HttpMethod.GET;
 import static io.vertx.core.http.HttpMethod.POST;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -165,5 +166,22 @@ public class GroovyPolicyV3IntegrationTest extends AbstractPolicyTest<GroovyPoli
             .assertNoErrors();
 
         wiremock.verify(0, postRequestedFor(urlPathEqualTo("/team")));
+    }
+
+    @Test
+    @DeployApi("/apis/v3/api-pre-nocontent.json")
+    public void should_execute_on_request_script_only(HttpClient client) {
+        wiremock.stubFor(get("/team").willReturn(ok("")));
+
+        client
+            .rxRequest(GET, "/api-pre")
+            .flatMap(request -> request.rxSend())
+            .doOnSuccess(response -> assertThat(response.statusCode()).isEqualTo(200))
+            .test()
+            .awaitDone(5, TimeUnit.SECONDS)
+            .assertComplete()
+            .assertNoErrors();
+
+        wiremock.verify(1, getRequestedFor(urlPathEqualTo("/team")).withHeader("X-Phase", equalTo("on-request")));
     }
 }

@@ -15,7 +15,9 @@
  */
 package io.gravitee.policy.groovy;
 
-import static io.gravitee.common.http.HttpStatusCode.*;
+import static io.gravitee.common.http.HttpStatusCode.INTERNAL_SERVER_ERROR_500;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import groovy.lang.Binding;
 import io.gravitee.gateway.api.buffer.Buffer;
@@ -63,10 +65,24 @@ public class GroovyPolicy extends GroovyPolicyV3 implements Policy {
 
     @Override
     public Completable onRequest(HttpExecutionContext ctx) {
-        if (configuration.isReadContent()) {
+        if (
+            isBlank(configuration.getScript()) &&
+            isBlank(configuration.getOnRequestScript()) &&
+            isBlank(configuration.getOnRequestContentScript())
+        ) {
+            return Completable.complete();
+        }
+
+        if (
+            (isNotBlank(configuration.getScript()) && configuration.isReadContent()) ||
+            isNotBlank(configuration.getOnRequestContentScript())
+        ) {
             return onRequestContent(ctx);
         }
-        return runScript(ctx, GroovyBindings.bindHttp(ctx), configuration.getScript());
+        if (isNotBlank(configuration.getScript())) {
+            return runScript(ctx, GroovyBindings.bindHttp(ctx), configuration.getScript());
+        }
+        return runScript(ctx, GroovyBindings.bindHttp(ctx), configuration.getOnRequestScript());
     }
 
     private Completable onRequestContent(HttpExecutionContext ctx) {
@@ -83,10 +99,24 @@ public class GroovyPolicy extends GroovyPolicyV3 implements Policy {
 
     @Override
     public Completable onResponse(HttpExecutionContext ctx) {
-        if (configuration.isReadContent()) {
+        if (
+            isBlank(configuration.getScript()) &&
+            isBlank(configuration.getOnResponseScript()) &&
+            isBlank(configuration.getOnResponseContentScript())
+        ) {
+            return Completable.complete();
+        }
+
+        if (
+            (isNotBlank(configuration.getScript()) && configuration.isReadContent()) ||
+            isNotBlank(configuration.getOnResponseContentScript())
+        ) {
             return onResponseContent(ctx);
         }
-        return runScript(ctx, GroovyBindings.bindHttp(ctx), configuration.getScript());
+        if (isNotBlank(configuration.getScript())) {
+            return runScript(ctx, GroovyBindings.bindHttp(ctx), configuration.getScript());
+        }
+        return runScript(ctx, GroovyBindings.bindHttp(ctx), configuration.getOnResponseScript());
     }
 
     private Completable onResponseContent(HttpExecutionContext ctx) {
