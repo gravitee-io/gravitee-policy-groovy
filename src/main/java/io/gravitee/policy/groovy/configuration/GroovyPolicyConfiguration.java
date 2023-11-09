@@ -15,7 +15,6 @@
  */
 package io.gravitee.policy.groovy.configuration;
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import io.gravitee.policy.api.PolicyConfiguration;
@@ -48,23 +47,6 @@ public class GroovyPolicyConfiguration implements PolicyConfiguration {
     private String onRequestContentScript;
 
     private String onResponseContentScript;
-
-    /**
-     * This getter is overridden for backward compatibility.
-     *
-     * As there is no way to know if a v3 script would read the content or not, we assume that it will
-     * if the new script property is empty (which ensures we are running for a v3 API).
-     *
-     * For v4 API, reading the content is an explicit configuration property.
-     *
-     * Not enabling it will result in the content not being loaded to run the script,
-     * which can improve performances if the script does not need it.
-     *
-     * @return whether the policy should read the content or not to run the script
-     */
-    public boolean isReadContent() {
-        return readContent || isBlank(script);
-    }
 
     /**
      * This getter is overridden for backward compatibility.
