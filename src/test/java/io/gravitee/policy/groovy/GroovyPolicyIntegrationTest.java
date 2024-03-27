@@ -146,4 +146,88 @@ public class GroovyPolicyIntegrationTest extends AbstractPolicyTest<GroovyPolicy
 
         wiremock.verify(0, postRequestedFor(urlPathEqualTo("/team")));
     }
+
+    @Test
+    @DeployApi("/apis/api-fail-parse-response-content.json")
+    void should_throw_exception_on_response_content(WebClient client) {
+        wiremock.stubFor(post("/team").willReturn(ok("[{\"foo\", \"bar\"},\"bar\": \"baz\"]")));
+
+        client
+            .post("/test")
+            .rxSend()
+            .test()
+            .awaitDone(5, TimeUnit.SECONDS)
+            .assertValue(
+                response -> {
+                    assertThat(response.statusCode()).isEqualTo(500);
+                    assertThat(response.bodyAsString()).contains("Internal Server Error");
+                    return true;
+                }
+            )
+            .assertComplete()
+            .assertNoErrors();
+    }
+
+    @Test
+    @DeployApi("/apis/api-fail-parse-request-content.json")
+    void should_throw_exception_on_request_content(WebClient client) {
+        wiremock.stubFor(post("/team").willReturn(ok("")));
+
+        client
+            .post("/test")
+            .rxSendJson("[{\"foo\": \"bar\"}, {\"bar\": \"baz\"}]")
+            .test()
+            .awaitDone(5, TimeUnit.SECONDS)
+            .assertValue(
+                response -> {
+                    assertThat(response.statusCode()).isEqualTo(500);
+                    assertThat(response.bodyAsString()).contains("Internal Server Error");
+                    return true;
+                }
+            )
+            .assertComplete()
+            .assertNoErrors();
+    }
+
+    @Test
+    @DeployApi("/apis/api-fail-execute-response-script.json")
+    void should_throw_exception_on_response(WebClient client) {
+        wiremock.stubFor(post("/team").willReturn(ok("")));
+
+        client
+            .post("/test")
+            .rxSend()
+            .test()
+            .awaitDone(5, TimeUnit.SECONDS)
+            .assertValue(
+                response -> {
+                    assertThat(response.statusCode()).isEqualTo(500);
+                    assertThat(response.bodyAsString()).contains("Internal Server Error");
+                    return true;
+                }
+            )
+            .assertComplete()
+            .assertNoErrors();
+    }
+
+    @Test
+    @DeployApi("/apis/api-fail-execute-request-script.json")
+    void should_throw_exception_on_request(WebClient client) {
+        wiremock.stubFor(post("/team").willReturn(ok("")));
+
+        client
+            .post("/test")
+            .rxSend()
+            .test()
+            .awaitDone(5, TimeUnit.SECONDS)
+            .assertValue(
+                response -> {
+                    assertThat(response.statusCode()).isEqualTo(500);
+                    assertThat(response.bodyAsString()).contains("Internal Server Error");
+                    return true;
+                }
+            )
+            .assertComplete()
+            .assertNoErrors();
+    }
 }

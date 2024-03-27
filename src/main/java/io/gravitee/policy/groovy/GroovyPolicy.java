@@ -112,7 +112,7 @@ public class GroovyPolicy {
                             }
                         } catch (Throwable t) {
                             logger.error("Unable to run Groovy script", t);
-                            throw new TransformationException("Unable to run Groovy script: " + t.getMessage(), t);
+                            throw new TransformationException("Internal Server Error");
                         }
                         return null;
                     }
@@ -168,7 +168,7 @@ public class GroovyPolicy {
                             }
                         } catch (Throwable t) {
                             logger.error("Unable to run Groovy script", t);
-                            throw new TransformationException("Unable to run Groovy script: " + t.getMessage(), t);
+                            throw new TransformationException("Internal Server Error");
                         }
                         return null;
                     }
@@ -222,7 +222,7 @@ public class GroovyPolicy {
                 }
             } catch (Throwable t) {
                 logger.error("Unable to run Groovy script", t);
-                policyChain.failWith(io.gravitee.policy.api.PolicyResult.failure(t.getMessage()));
+                policyChain.failWith(io.gravitee.policy.api.PolicyResult.failure("Internal Server Error"));
             }
         }
 
