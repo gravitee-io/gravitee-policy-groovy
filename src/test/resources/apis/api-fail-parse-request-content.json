@@ -1,0 +1,44 @@
+{
+  "id": "api-fail-response-template",
+  "name": "my-api",
+  "gravitee": "2.0.0",
+  "proxy": {
+    "context_path": "/test",
+    "endpoints": [
+      {
+        "name": "default",
+        "target": "http://localhost:8080/team",
+        "http": {
+          "connectTimeout": 3000,
+          "readTimeout": 60000
+        }
+      }
+    ]
+  },
+  "flows": [
+    {
+      "name": "flow-1",
+      "methods": [
+      ],
+      "enabled": true,
+      "path-operator": {
+        "path": "/",
+        "operator": "STARTS_WITH"
+      },
+      "pre": [
+        {
+          "name": "Groovy",
+          "description": "",
+          "enabled": true,
+          "policy": "groovy",
+          "configuration": {
+            "scope": "REQUEST",
+            "onRequestContentScript": "import groovy.json.JsonSlurper\nimport groovy.json.JsonOutput\n\ndef jsonSlurper = new JsonSlurper()\ndef content = jsonSlurper.parseText(response.content)\nreturn JsonOutput.toJson(content)"
+          }
+        }
+      ],
+      "post": []
+    }
+  ],
+  "resources": []
+}
