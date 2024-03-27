@@ -1,3 +1,10 @@
+## [2.4.3](https://github.com/gravitee-io/gravitee-policy-groovy/compare/2.4.2...2.4.3) (2024-03-27)
+
+
+### Bug Fixes
+
+* update logs sent on groovy script error ([400762c](https://github.com/gravitee-io/gravitee-policy-groovy/commit/400762c16bf13c8a4753a6a4a89c8b71eb38533e))
+
 ## [2.4.2](https://github.com/gravitee-io/gravitee-policy-groovy/compare/2.4.1...2.4.2) (2023-07-20)
 
 
