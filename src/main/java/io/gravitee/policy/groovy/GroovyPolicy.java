@@ -35,6 +35,7 @@ import io.gravitee.policy.v3.groovy.GroovyPolicyV3;
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Flowable;
 import io.reactivex.rxjava3.core.Maybe;
+import io.reactivex.rxjava3.schedulers.Schedulers;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -56,6 +57,14 @@ public class GroovyPolicy extends GroovyPolicyV3 implements Policy {
     public GroovyPolicy(GroovyPolicyConfiguration configuration) {
         super(configuration);
         scriptFlowable = Flowable.fromIterable(configuration.getScripts());
+
+        // Precompile all the scripts on a io schedulers to get ready when necessary.
+        scriptFlowable
+            .doOnNext(GROOVY_SHELL::compile)
+            .subscribeOn(Schedulers.io())
+            .doOnError(e -> log.warn("Error while compiling script. Ignoring", e))
+            .onErrorComplete()
+            .subscribe();
     }
 
     @Override
@@ -141,14 +150,16 @@ public class GroovyPolicy extends GroovyPolicyV3 implements Policy {
     }
 
     private Maybe<Buffer> runContentAwareScript(HttpExecutionContext ctx, Binding binding, String script) {
-        try {
-            var content = GROOVY_SHELL.evaluate(script, binding);
-            var result = (PolicyResult) binding.getVariable(GroovyBindings.RESULT_VARIABLE_NAME);
-            return handleResult(ctx, result, content);
-        } catch (Exception e) {
-            log.error("An error occurs while executing Groovy script", e);
-            return ctx.interruptBodyWith(DEFAULT_EXECUTION_FAILURE);
-        }
+        return GROOVY_SHELL
+            .evaluateRx(script, binding)
+            .onErrorResumeNext(e -> {
+                log.error("An error occurred while executing Groovy script", e);
+                return ctx.interruptBodyWith(DEFAULT_EXECUTION_FAILURE);
+            })
+            .flatMap(content -> {
+                var result = (PolicyResult) binding.getVariable(GroovyBindings.RESULT_VARIABLE_NAME);
+                return handleResult(ctx, result, content);
+            });
     }
 
     private Maybe<Buffer> handleResult(HttpExecutionContext ctx, PolicyResult result, Object content) {
@@ -162,14 +173,19 @@ public class GroovyPolicy extends GroovyPolicyV3 implements Policy {
     }
 
     private Completable runScript(HttpExecutionContext ctx, Binding binding, String script) {
-        try {
-            GROOVY_SHELL.evaluate(script, binding);
-            var result = (PolicyResult) binding.getVariable(GroovyBindings.RESULT_VARIABLE_NAME);
-            return handleResult(ctx, result);
-        } catch (Exception e) {
-            log.error("An error occurs while executing Groovy script", e);
-            return ctx.interruptWith(DEFAULT_EXECUTION_FAILURE);
-        }
+        return GROOVY_SHELL
+            .evaluateRx(script, binding)
+            .ignoreElement()
+            .onErrorResumeNext(e -> {
+                log.error("An error occurred while executing Groovy script", e);
+                return ctx.interruptWith(DEFAULT_EXECUTION_FAILURE);
+            })
+            .andThen(
+                Completable.defer(() -> {
+                    var result = (PolicyResult) binding.getVariable(GroovyBindings.RESULT_VARIABLE_NAME);
+                    return handleResult(ctx, result);
+                })
+            );
     }
 
     private Completable handleResult(HttpExecutionContext ctx, PolicyResult result) {
@@ -197,15 +213,16 @@ public class GroovyPolicy extends GroovyPolicyV3 implements Policy {
     }
 
     private Maybe<Message> runScript(MessageExecutionContext ctx, Message message) {
-        try {
-            var script = configuration.getScript();
-            var binding = GroovyBindings.bindMessage(ctx, message);
-            var content = GROOVY_SHELL.evaluate(script, binding);
-            var result = (PolicyResult) binding.getVariable(GroovyBindings.RESULT_VARIABLE_NAME);
-            return handleResult(ctx, message, result, content);
-        } catch (Exception e) {
-            return ctx.interruptMessageWith(DEFAULT_EXECUTION_FAILURE);
-        }
+        var script = configuration.getScript();
+        var binding = GroovyBindings.bindMessage(ctx, message);
+
+        return GROOVY_SHELL
+            .evaluateRx(script, binding)
+            .onErrorResumeNext(e -> ctx.interruptMessageWith(DEFAULT_EXECUTION_FAILURE))
+            .flatMap(content -> {
+                var result = (PolicyResult) binding.getVariable(GroovyBindings.RESULT_VARIABLE_NAME);
+                return handleResult(ctx, message, result, content);
+            });
     }
 
     private Maybe<Message> handleResult(MessageExecutionContext ctx, Message message, PolicyResult result, Object content) {

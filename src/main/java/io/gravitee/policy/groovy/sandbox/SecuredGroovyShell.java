@@ -23,7 +23,9 @@ import groovy.lang.GroovyShell;
 import groovy.lang.Script;
 import io.gravitee.policy.groovy.GroovyPolicy;
 import io.gravitee.policy.groovy.utils.Sha1;
-import io.gravitee.policy.v3.groovy.GroovyPolicyV3;
+import io.reactivex.rxjava3.annotations.NonNull;
+import io.reactivex.rxjava3.core.Maybe;
+import io.reactivex.rxjava3.schedulers.Schedulers;
 import java.time.Duration;
 import org.apache.groovy.json.internal.FastStringUtils;
 import org.codehaus.groovy.control.CompilationFailedException;
@@ -84,12 +86,39 @@ public class SecuredGroovyShell {
         this.groovyInterceptor = new SecuredInterceptor();
     }
 
+    /**
+     * Useful to pre-compile a given script or to check if a script compiles correctly.
+     *
+     * @param script the script to compile.
+     *
+     * @throws CompilationFailedException in case the script does not compile.
+     */
+    public void compile(String script) throws CompilationFailedException {
+        getOrCreate(getKey(script), script);
+    }
+
     public <T> T evaluate(String script, Binding binding) {
+        return evaluate(getKey(script), script, binding);
+    }
+
+    public <T> Maybe<T> evaluateRx(String script, Binding binding) {
+        final String key = getKey(script);
+        final boolean compiled = sources.getIfPresent(key) != null;
+        final Maybe<@NonNull T> groovyEval = Maybe.fromCallable(() -> evaluate(key, script, binding));
+
+        if (!compiled) {
+            return groovyEval.subscribeOn(Schedulers.io()).observeOn(Schedulers.computation());
+        }
+
+        return groovyEval;
+    }
+
+    private <T> T evaluate(String key, String script, Binding binding) {
         try {
             this.groovyInterceptor.register();
 
             // Get script class.
-            Class<?> scriptClass = getOrCreate(script);
+            Class<?> scriptClass = getOrCreate(key, script);
 
             // And run script.
             Script gScript = InvokerHelper.createScript(scriptClass, binding);
@@ -100,9 +129,11 @@ public class SecuredGroovyShell {
         }
     }
 
-    private Class<?> getOrCreate(String script) throws CompilationFailedException {
-        String key = Sha1.sha1(script);
+    private String getKey(String script) {
+        return Sha1.sha1(script);
+    }
 
+    private Class<?> getOrCreate(String key, String script) throws CompilationFailedException {
         try {
             return sources.get(
                 key,
