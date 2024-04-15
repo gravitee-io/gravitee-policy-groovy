@@ -21,6 +21,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+import io.gravitee.common.util.LinkedMultiValueMap;
 import io.gravitee.gateway.api.buffer.Buffer;
 import io.gravitee.gateway.api.http.HttpHeaders;
 import io.gravitee.gateway.reactive.api.ExecutionFailure;
@@ -35,6 +36,8 @@ import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Maybe;
 import io.reactivex.rxjava3.core.MaybeTransformer;
 import java.io.*;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -89,6 +92,7 @@ class GroovyPolicyTest {
         policy.onRequest(ctx).test().assertNoValues();
 
         ((Maybe<Buffer>) onBodyCaptor.getValue().apply(Maybe.just(Buffer.buffer()))).test()
+            .awaitDone(10, TimeUnit.SECONDS)
             .assertError(error -> {
                 assertThat(error).isInstanceOf(InterruptionFailureException.class);
                 InterruptionFailureException failureException = (InterruptionFailureException) error;
@@ -109,6 +113,7 @@ class GroovyPolicyTest {
         policy.onRequest(ctx).test().assertNoValues();
 
         ((Maybe<Buffer>) onBodyCaptor.getValue().apply(Maybe.just(Buffer.buffer()))).test()
+            .awaitDone(10, TimeUnit.SECONDS)
             .assertError(error -> {
                 assertThat(error).isInstanceOf(InterruptionFailureException.class);
                 InterruptionFailureException failureException = (InterruptionFailureException) error;
@@ -128,7 +133,10 @@ class GroovyPolicyTest {
         when(request.onBody(onBodyCaptor.capture())).thenReturn(Completable.complete());
         policy.onRequest(ctx).test().assertNoValues();
 
-        ((Maybe<Buffer>) onBodyCaptor.getValue().apply(Maybe.just(Buffer.buffer()))).test().assertComplete().assertNoErrors();
+        ((Maybe<Buffer>) onBodyCaptor.getValue().apply(Maybe.just(Buffer.buffer()))).test()
+            .awaitDone(10, TimeUnit.SECONDS)
+            .assertComplete()
+            .assertNoErrors();
 
         verify(ctx, times(1)).setAttribute("count", 100);
     }
@@ -140,7 +148,10 @@ class GroovyPolicyTest {
         when(response.onBody(onBodyCaptor.capture())).thenReturn(Completable.complete());
         policy.onResponse(ctx).test().assertNoValues();
 
-        ((Maybe<Buffer>) onBodyCaptor.getValue().apply(Maybe.just(Buffer.buffer()))).test().assertComplete().assertNoErrors();
+        ((Maybe<Buffer>) onBodyCaptor.getValue().apply(Maybe.just(Buffer.buffer()))).test()
+            .awaitDone(10, TimeUnit.SECONDS)
+            .assertComplete()
+            .assertNoErrors();
 
         verify(ctx, times(1)).setAttribute("count", 100);
     }
@@ -155,7 +166,10 @@ class GroovyPolicyTest {
         var headers = HttpHeaders.create();
         when(request.headers()).thenReturn(headers);
 
-        ((Maybe<Buffer>) onBodyCaptor.getValue().apply(Maybe.just(Buffer.buffer()))).test().assertComplete().assertNoErrors();
+        ((Maybe<Buffer>) onBodyCaptor.getValue().apply(Maybe.just(Buffer.buffer()))).test()
+            .awaitDone(10, TimeUnit.SECONDS)
+            .assertComplete()
+            .assertNoErrors();
 
         assertThat(headers.get("x-context")).isEqualTo("test");
     }
@@ -170,7 +184,10 @@ class GroovyPolicyTest {
         var headers = HttpHeaders.create();
         when(response.headers()).thenReturn(headers);
 
-        ((Maybe<Buffer>) onBodyCaptor.getValue().apply(Maybe.just(Buffer.buffer()))).test().assertComplete().assertNoErrors();
+        ((Maybe<Buffer>) onBodyCaptor.getValue().apply(Maybe.just(Buffer.buffer()))).test()
+            .awaitDone(10, TimeUnit.SECONDS)
+            .assertComplete()
+            .assertNoErrors();
 
         assertThat(headers.get("x-context")).isEqualTo("test");
     }
@@ -185,7 +202,10 @@ class GroovyPolicyTest {
         var headers = HttpHeaders.create().set("x-context", "test");
         when(request.headers()).thenReturn(headers);
 
-        ((Maybe<Buffer>) onBodyCaptor.getValue().apply(Maybe.just(Buffer.buffer()))).test().assertComplete().assertNoErrors();
+        ((Maybe<Buffer>) onBodyCaptor.getValue().apply(Maybe.just(Buffer.buffer()))).test()
+            .awaitDone(10, TimeUnit.SECONDS)
+            .assertComplete()
+            .assertNoErrors();
 
         assertThat(headers.size()).isZero();
     }
@@ -200,7 +220,10 @@ class GroovyPolicyTest {
         var headers = HttpHeaders.create().set("x-context", "test");
         when(response.headers()).thenReturn(headers);
 
-        ((Maybe<Buffer>) onBodyCaptor.getValue().apply(Maybe.just(Buffer.buffer()))).test().assertComplete().assertNoErrors();
+        ((Maybe<Buffer>) onBodyCaptor.getValue().apply(Maybe.just(Buffer.buffer()))).test()
+            .awaitDone(10, TimeUnit.SECONDS)
+            .assertComplete()
+            .assertNoErrors();
 
         assertThat(headers.size()).isZero();
     }
@@ -214,7 +237,7 @@ class GroovyPolicyTest {
 
         var message = mock(Message.class);
 
-        onMessageCaptor.getValue().apply(message).test().assertComplete().assertNoErrors();
+        onMessageCaptor.getValue().apply(message).test().awaitDone(10, TimeUnit.SECONDS).assertComplete().assertNoErrors();
 
         verify(ctx, times(1)).setAttribute("count", 100);
     }
@@ -228,7 +251,7 @@ class GroovyPolicyTest {
 
         var message = mock(Message.class);
 
-        onMessageCaptor.getValue().apply(message).test().assertComplete().assertNoErrors();
+        onMessageCaptor.getValue().apply(message).test().awaitDone(10, TimeUnit.SECONDS).assertComplete().assertNoErrors();
 
         verify(ctx, times(1)).setAttribute("count", 100);
     }
@@ -241,7 +264,7 @@ class GroovyPolicyTest {
         when(request.onMessage(onMessageCaptor.capture())).thenReturn(Completable.complete());
         policy.onMessageRequest(ctx).test().assertNoValues();
 
-        onMessageCaptor.getValue().apply(message).test().assertComplete().assertNoErrors();
+        onMessageCaptor.getValue().apply(message).test().awaitDone(10, TimeUnit.SECONDS).assertComplete().assertNoErrors();
 
         assertThat(message.headers().get("x-context")).isEqualTo("test");
     }
@@ -254,7 +277,7 @@ class GroovyPolicyTest {
         when(response.onMessage(onMessageCaptor.capture())).thenReturn(Completable.complete());
         policy.onMessageResponse(ctx).test().assertNoValues();
 
-        onMessageCaptor.getValue().apply(message).test().assertComplete().assertNoErrors();
+        onMessageCaptor.getValue().apply(message).test().awaitDone(10, TimeUnit.SECONDS).assertComplete().assertNoErrors();
 
         assertThat(message.headers().get("x-context")).isEqualTo("test");
     }
@@ -267,7 +290,7 @@ class GroovyPolicyTest {
         when(request.onMessage(onMessageCaptor.capture())).thenReturn(Completable.complete());
         policy.onMessageRequest(ctx).test().assertNoValues();
 
-        onMessageCaptor.getValue().apply(message).test().assertComplete().assertNoErrors();
+        onMessageCaptor.getValue().apply(message).test().awaitDone(10, TimeUnit.SECONDS).assertComplete().assertNoErrors();
 
         assertThat(message.headers().size()).isZero();
     }
@@ -280,7 +303,7 @@ class GroovyPolicyTest {
         when(response.onMessage(onMessageCaptor.capture())).thenReturn(Completable.complete());
         policy.onMessageResponse(ctx).test().assertNoValues();
 
-        onMessageCaptor.getValue().apply(message).test().assertComplete().assertNoErrors();
+        onMessageCaptor.getValue().apply(message).test().awaitDone(10, TimeUnit.SECONDS).assertComplete().assertNoErrors();
 
         assertThat(message.headers().size()).isZero();
     }
@@ -293,7 +316,7 @@ class GroovyPolicyTest {
         when(request.onMessage(onMessageCaptor.capture())).thenReturn(Completable.complete());
         policy.onMessageRequest(ctx).test().assertNoValues();
 
-        onMessageCaptor.getValue().apply(message).test().assertComplete().assertNoErrors();
+        onMessageCaptor.getValue().apply(message).test().awaitDone(10, TimeUnit.SECONDS).assertComplete().assertNoErrors();
 
         assertThat(message.attributes()).containsEntry("count", 100);
     }
