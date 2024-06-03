@@ -35,6 +35,9 @@ import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Maybe;
 import io.reactivex.rxjava3.core.MaybeTransformer;
 import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.Base64;
 import java.util.function.Function;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -300,6 +303,24 @@ class GroovyPolicyTest {
 
     private static GroovyPolicyConfiguration buildConfig(String script) {
         return GroovyPolicyConfiguration.builder().script(loadScript(script)).readContent(true).build();
+    }
+
+    @Test
+    void should_get_message_binary_content_as_base64() {
+        var policy = new GroovyPolicy(buildConfig("get_message_binary_content.groovy"));
+        var message = new DefaultMessage();
+        byte[] isoEncodedCharacter = "é".getBytes(StandardCharsets.ISO_8859_1);
+        message.content(Buffer.buffer(isoEncodedCharacter));
+
+        when(request.onMessage(onMessageCaptor.capture())).thenReturn(Completable.complete());
+        policy.onMessageRequest(ctx).test().assertNoValues();
+
+        onMessageCaptor.getValue().apply(message).test().assertComplete().assertNoErrors();
+
+        assertThat(message.<String>attribute("wronglyBase64EncodedContent"))
+            .isNotEqualTo(Base64.getEncoder().encodeToString(isoEncodedCharacter));
+        assertThat(message.<String>attribute("goodBase64Content")).isEqualTo(Base64.getEncoder().encodeToString(isoEncodedCharacter));
+        assertThat(message.<String>attribute("byteArray")).isEqualTo(Arrays.toString(isoEncodedCharacter));
     }
 
     private static String loadScript(String file) {
