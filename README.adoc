@@ -190,6 +190,11 @@ content.greeting = 'Hello Universe!'
 return JsonOutput.toJson(content)
 ----
 
+The content of a message can also be accessed directly:
+
+ - as a base64 string with `message.contentAsBase64`
+ - as an array of bytes with `message.contentAsByteArray`
+
 == Errors
 
 === Sandbox
