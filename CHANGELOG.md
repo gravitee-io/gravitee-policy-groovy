@@ -1,3 +1,10 @@
+# [2.6.0](https://github.com/gravitee-io/gravitee-policy-groovy/compare/2.5.2...2.6.0) (2024-06-03)
+
+
+### Features
+
+* add methods for binary content of messages ([707519e](https://github.com/gravitee-io/gravitee-policy-groovy/commit/707519e220256f9d00386fec1d0525c7d37309be))
+
 ## [2.5.2](https://github.com/gravitee-io/gravitee-policy-groovy/compare/2.5.1...2.5.2) (2023-11-09)
 
 
