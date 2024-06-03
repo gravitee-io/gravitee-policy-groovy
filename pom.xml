@@ -46,7 +46,7 @@
         <groovy.version>3.0.19</groovy.version>
         <groovy-sandbox.version>1.27</groovy-sandbox.version>
         <commons-lang3.version>3.12.0</commons-lang3.version>
-        <guava.version>30.1.1-jre</guava.version>
+        <guava.version>32.0.0-jre</guava.version>
         <maven-assembly-plugin.version>3.6.0</maven-assembly-plugin.version>
         <!-- Property used by the publication job in CI-->
         <publish-folder-path>graviteeio-apim/plugins/policies</publish-folder-path>
