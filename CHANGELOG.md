@@ -1,3 +1,11 @@
+## [2.6.1](https://github.com/gravitee-io/gravitee-policy-groovy/compare/2.6.0...2.6.1) (2024-08-21)
+
+
+### Bug Fixes
+
+* add missing dateutil extension ([f6ab32d](https://github.com/gravitee-io/gravitee-policy-groovy/commit/f6ab32d778088bcaf9a154318ca491de98ec2a85))
+* add missing java.time classes to whitelist ([c1f7456](https://github.com/gravitee-io/gravitee-policy-groovy/commit/c1f74563a03e4d1b5137d19cb8426c46e460bbc6))
+
 # [2.6.0](https://github.com/gravitee-io/gravitee-policy-groovy/compare/2.5.2...2.6.0) (2024-06-03)
 
 
