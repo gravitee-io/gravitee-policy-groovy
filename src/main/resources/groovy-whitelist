@@ -49,10 +49,16 @@ class java.math.BigDecimal
 class java.math.BigInteger
 class java.net.URLDecoder
 class java.net.URLEncoder
+class java.time.chrono.ChronoLocalDateTime
+class java.time.chrono.ChronoZonedDateTime
+class java.time.temporal.Temporal
+class java.time.temporal.TemporalAdjuster
 class java.time.format.DateTimeFormatter
+class java.time.Instant
 class java.time.LocalDate
 class java.time.LocalDateTime
 class java.time.ZonedDateTime
+class java.time.ZoneId
 class java.util.Calendar
 class java.util.Collection
 class java.util.Collections
