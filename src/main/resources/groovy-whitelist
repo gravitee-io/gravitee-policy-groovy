@@ -68,6 +68,9 @@ class java.util.List
 class java.util.Map
 class java.util.Queue
 class java.util.Random
+class org.codehaus.groovy.runtime.DateGroovyMethods
+class org.apache.groovy.dateutil.extensions.DateUtilExtensions
+class org.apache.groovy.dateutil.extensions.DateUtilStaticExtensions
 
 # Allows method signatures
 method groovy.json.JsonSlurper parseText java.lang.String
@@ -1174,6 +1177,7 @@ method org.codehaus.groovy.runtime.StringGroovyMethods tr java.lang.CharSequence
 method org.codehaus.groovy.runtime.StringGroovyMethods unexpand java.lang.CharSequence
 method org.codehaus.groovy.runtime.StringGroovyMethods unexpand java.lang.CharSequence int
 method org.codehaus.groovy.runtime.StringGroovyMethods unexpandLine java.lang.CharSequence int
+
 # Allows constructor signatures
 
 # Allows annotations
