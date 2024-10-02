@@ -1,3 +1,10 @@
+## [2.6.2](https://github.com/gravitee-io/gravitee-policy-groovy/compare/2.6.1...2.6.2) (2024-10-02)
+
+
+### Bug Fixes
+
+* avoid blocking eventloop when compiling ([5bccbe2](https://github.com/gravitee-io/gravitee-policy-groovy/commit/5bccbe21442b73e6936bb62f6cc5cd4bc03dfa3c))
+
 ## [2.6.1](https://github.com/gravitee-io/gravitee-policy-groovy/compare/2.6.0...2.6.1) (2024-08-21)
 
 
