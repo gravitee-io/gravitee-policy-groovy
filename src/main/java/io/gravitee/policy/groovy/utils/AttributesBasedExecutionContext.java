@@ -27,7 +27,7 @@ import java.util.Map;
  * @author David BRASSELY (david.brassely at graviteesource.com)
  * @author GraviteeSource Team
  */
-public class AttributesBasedExecutionContext implements ExecutionContext {
+public class AttributesBasedExecutionContext {
 
     private static final String CONTEXT_DICTIONARIES_VARIABLE = "dictionaries";
     private final ExecutionContext context;
@@ -42,53 +42,35 @@ public class AttributesBasedExecutionContext implements ExecutionContext {
             .lookupVariable(CONTEXT_DICTIONARIES_VARIABLE);
     }
 
-    @Override
     public Request request() {
         return context.request();
     }
 
-    @Override
     public Response response() {
         return context.response();
     }
 
-    @Override
-    public <T> T getComponent(Class<T> aClass) {
-        return context.getComponent(aClass);
-    }
-
-    @Override
     public void setAttribute(String s, Object o) {
         context.setAttribute(s, o);
     }
 
-    @Override
     public void removeAttribute(String s) {
         context.removeAttribute(s);
     }
 
-    @Override
     public Object getAttribute(String s) {
         return context.getAttribute(s);
     }
 
-    @Override
     public Enumeration<String> getAttributeNames() {
         return context.getAttributeNames();
     }
 
-    @Override
     public Map<String, Object> getAttributes() {
         return context.getAttributes();
     }
 
-    @Override
     public TemplateEngine getTemplateEngine() {
         return context.getTemplateEngine();
-    }
-
-    @Override
-    public Tracer getTracer() {
-        return context.getTracer();
     }
 }
