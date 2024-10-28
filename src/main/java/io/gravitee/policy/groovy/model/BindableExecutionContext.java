@@ -30,7 +30,7 @@ import lombok.Value;
  * @author GraviteeSource Team
  */
 @Value
-public class BindableExecutionContext implements GenericExecutionContext {
+public class BindableExecutionContext {
 
     private static final String CONTEXT_DICTIONARIES_VARIABLE = "dictionaries";
 
@@ -44,17 +44,14 @@ public class BindableExecutionContext implements GenericExecutionContext {
             .lookupVariable(CONTEXT_DICTIONARIES_VARIABLE);
     }
 
-    @Override
     public GenericRequest request() {
         throw new UnsupportedOperationException("Groovy scripts do not support accessing this method");
     }
 
-    @Override
     public GenericResponse response() {
         throw new UnsupportedOperationException("Groovy scripts do not support accessing this method");
     }
 
-    @Override
     public Metrics metrics() {
         return executionContext.metrics();
     }
@@ -63,73 +60,31 @@ public class BindableExecutionContext implements GenericExecutionContext {
         return executionContext.metrics();
     }
 
-    @Override
-    public <T> T getComponent(Class<T> aClass) {
-        throw new UnsupportedOperationException("Groovy scripts do not support accessing this method");
-    }
-
-    @Override
     public void setAttribute(String s, Object o) {
         executionContext.setAttribute(s, o);
     }
 
-    @Override
     public void putAttribute(String s, Object o) {
         executionContext.putAttribute(s, o);
     }
 
-    @Override
     public void removeAttribute(String s) {
         executionContext.removeAttribute(s);
     }
 
-    @Override
     public <T> T getAttribute(String s) {
         return executionContext.getAttribute(s);
     }
 
-    @Override
     public <T> List<T> getAttributeAsList(String s) {
         return executionContext.getAttributeAsList(s);
     }
 
-    @Override
     public Set<String> getAttributeNames() {
         return executionContext.getAttributeNames();
     }
 
-    @Override
     public <T> Map<String, T> getAttributes() {
         return executionContext.getAttributes();
-    }
-
-    @Override
-    public void setInternalAttribute(String s, Object o) {
-        throw new UnsupportedOperationException("Groovy scripts do not support accessing this method");
-    }
-
-    @Override
-    public void putInternalAttribute(String s, Object o) {
-        throw new UnsupportedOperationException("Groovy scripts do not support accessing this method");
-    }
-
-    @Override
-    public void removeInternalAttribute(String s) {
-        throw new UnsupportedOperationException("Groovy scripts do not support accessing this method");
-    }
-
-    @Override
-    public <T> T getInternalAttribute(String s) {
-        throw new UnsupportedOperationException("Groovy scripts do not support accessing this method");
-    }
-
-    @Override
-    public <T> Map<String, T> getInternalAttributes() {
-        throw new UnsupportedOperationException("Groovy scripts do not support accessing this method");
-    }
-
-    @Override
-    public TemplateEngine getTemplateEngine() {
-        throw new UnsupportedOperationException("Groovy scripts do not support accessing this method");
     }
 }
