@@ -1,3 +1,21 @@
+# [3.0.0-alpha.1](https://github.com/gravitee-io/gravitee-policy-groovy/compare/2.6.2...3.0.0-alpha.1) (2024-11-06)
+
+
+### Bug Fixes
+
+* use latest node and apim version ([fb3706b](https://github.com/gravitee-io/gravitee-policy-groovy/commit/fb3706b1a7016f6229de992026a85362293f2cb0))
+
+
+### Features
+
+* support new OpenTelemetry feature ([14ca260](https://github.com/gravitee-io/gravitee-policy-groovy/commit/14ca2604e7ad08f3340885b1f67119c43a7cf02e))
+
+
+### BREAKING CHANGES
+
+* Tracer interface is not more available through tracer-api module
+* tracer and components are no longer allowed for groovy context
+
 ## [2.6.2](https://github.com/gravitee-io/gravitee-policy-groovy/compare/2.6.1...2.6.2) (2024-10-02)
 
 
