@@ -37,6 +37,7 @@
         <gravitee-bom.version>6.0.6</gravitee-bom.version>
         <gravitee-gateway-api.version>3.2.1</gravitee-gateway-api.version>
         <gravitee-apim.version>4.1.0-SNAPSHOT</gravitee-apim.version>
+        <gravitee-am.version>4.7.0-SNAPSHOT</gravitee-am.version>
         <gravitee-policy-api.version>1.11.0</gravitee-policy-api.version>
         <gravitee-common.version>3.3.0</gravitee-common.version>
         <gravitee-expression-language.version>3.1.0</gravitee-expression-language.version>
@@ -155,6 +156,12 @@
             <artifactId>guava</artifactId>
             <version>${guava.version}</version>
             <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>io.gravitee.am.model</groupId>
+            <artifactId>gravitee-am-model</artifactId>
+            <version>${gravitee-am.version}</version>
         </dependency>
 
         <!-- Test scope -->
