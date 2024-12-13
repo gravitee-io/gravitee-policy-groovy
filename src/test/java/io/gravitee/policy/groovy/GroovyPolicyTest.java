@@ -261,7 +261,7 @@ class GroovyPolicyTest {
     @Test
     void should_set_message_request_header() {
         var policy = new GroovyPolicy(buildConfig("set_message_header.groovy"));
-        var message = new DefaultMessage().headers(HttpHeaders.create());
+        var message = DefaultMessage.builder().headers(HttpHeaders.create()).build();
 
         when(request.onMessage(onMessageCaptor.capture())).thenReturn(Completable.complete());
         policy.onMessageRequest(ctx).test().assertNoValues();
@@ -274,7 +274,7 @@ class GroovyPolicyTest {
     @Test
     void should_set_message_response_header() {
         var policy = new GroovyPolicy(buildConfig("set_message_header.groovy"));
-        var message = new DefaultMessage().headers(HttpHeaders.create());
+        var message = DefaultMessage.builder().headers(HttpHeaders.create()).build();
 
         when(response.onMessage(onMessageCaptor.capture())).thenReturn(Completable.complete());
         policy.onMessageResponse(ctx).test().assertNoValues();
@@ -287,7 +287,7 @@ class GroovyPolicyTest {
     @Test
     void should_remove_message_request_header() {
         var policy = new GroovyPolicy(buildConfig("remove_message_header.groovy"));
-        var message = new DefaultMessage().headers(HttpHeaders.create().set("x-context", "test"));
+        var message = DefaultMessage.builder().headers(HttpHeaders.create().set("x-context", "test")).build();
 
         when(request.onMessage(onMessageCaptor.capture())).thenReturn(Completable.complete());
         policy.onMessageRequest(ctx).test().assertNoValues();
@@ -300,7 +300,7 @@ class GroovyPolicyTest {
     @Test
     void should_remove_message_response_header() {
         var policy = new GroovyPolicy(buildConfig("remove_message_header.groovy"));
-        var message = new DefaultMessage().headers(HttpHeaders.create().set("x-context", "test"));
+        var message = DefaultMessage.builder().headers(HttpHeaders.create().set("x-context", "test")).build();
 
         when(response.onMessage(onMessageCaptor.capture())).thenReturn(Completable.complete());
         policy.onMessageResponse(ctx).test().assertNoValues();
@@ -313,7 +313,7 @@ class GroovyPolicyTest {
     @Test
     void should_set_message_attribute() {
         var policy = new GroovyPolicy(buildConfig("set_message_attribute.groovy"));
-        var message = new DefaultMessage();
+        var message = DefaultMessage.builder().build();
 
         when(request.onMessage(onMessageCaptor.capture())).thenReturn(Completable.complete());
         policy.onMessageRequest(ctx).test().assertNoValues();
@@ -330,7 +330,7 @@ class GroovyPolicyTest {
     @Test
     void should_get_message_binary_content_as_base64() {
         var policy = new GroovyPolicy(buildConfig("get_message_binary_content.groovy"));
-        var message = new DefaultMessage();
+        var message = DefaultMessage.builder().build();
         byte[] isoEncodedCharacter = "é".getBytes(StandardCharsets.ISO_8859_1);
         message.content(Buffer.buffer(isoEncodedCharacter));
 
