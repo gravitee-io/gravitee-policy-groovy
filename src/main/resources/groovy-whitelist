@@ -35,7 +35,7 @@ class io.gravitee.policy.groovy.utils.AttributesBasedExecutionContext
 class io.gravitee.policy.groovy.model.BindableExecutionContext
 class io.gravitee.policy.groovy.model.http.BindableHttpRequest
 class io.gravitee.policy.groovy.model.http.BindableHttpResponse
-class io.gravitee.policy.groovy.model.http.BindableHttpHeaders
+class io.gravitee.policy.groovy.model.BindableHttpHeaders
 class io.gravitee.policy.groovy.model.message.BindableMessage
 class io.gravitee.policy.groovy.model.message.BindableMessageAttributes
 class java.lang.Double
@@ -71,6 +71,7 @@ class java.util.Random
 class org.codehaus.groovy.runtime.DateGroovyMethods
 class org.apache.groovy.dateutil.extensions.DateUtilExtensions
 class org.apache.groovy.dateutil.extensions.DateUtilStaticExtensions
+class java.lang.Byte
 
 # Allows method signatures
 method groovy.json.JsonSlurper parseText java.lang.String
@@ -1177,6 +1178,7 @@ method org.codehaus.groovy.runtime.StringGroovyMethods tr java.lang.CharSequence
 method org.codehaus.groovy.runtime.StringGroovyMethods unexpand java.lang.CharSequence
 method org.codehaus.groovy.runtime.StringGroovyMethods unexpand java.lang.CharSequence int
 method org.codehaus.groovy.runtime.StringGroovyMethods unexpandLine java.lang.CharSequence int
+method java.lang.String format java.lang.String java.lang.Object[]
 
 # Allows constructor signatures
 
