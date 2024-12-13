@@ -1,3 +1,10 @@
+## [2.6.3](https://github.com/gravitee-io/gravitee-policy-groovy/compare/2.6.2...2.6.3) (2024-12-13)
+
+
+### Bug Fixes
+
+* warning messages in logs for groovy classes ([612f554](https://github.com/gravitee-io/gravitee-policy-groovy/commit/612f5542a14fb13f100408f0c616ccf86ec9df53))
+
 ## [2.6.2](https://github.com/gravitee-io/gravitee-policy-groovy/compare/2.6.1...2.6.2) (2024-10-02)
 
 
