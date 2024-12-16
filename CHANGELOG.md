@@ -1,3 +1,10 @@
+# [3.0.0-alpha.2](https://github.com/gravitee-io/gravitee-policy-groovy/compare/3.0.0-alpha.1...3.0.0-alpha.2) (2024-12-16)
+
+
+### Bug Fixes
+
+* warning messages ([5b3b334](https://github.com/gravitee-io/gravitee-policy-groovy/commit/5b3b334924b84d2dae870fefd778288d82768ba2))
+
 # [3.0.0-alpha.1](https://github.com/gravitee-io/gravitee-policy-groovy/compare/2.6.2...3.0.0-alpha.1) (2024-11-06)
 
 
