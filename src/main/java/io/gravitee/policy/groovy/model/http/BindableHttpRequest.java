@@ -22,6 +22,7 @@ import io.gravitee.gateway.api.buffer.Buffer;
 import io.gravitee.gateway.api.http.HttpHeaders;
 import io.gravitee.gateway.reactive.api.context.GenericRequest;
 import io.gravitee.gateway.reactive.api.context.HttpRequest;
+import io.gravitee.gateway.reactive.api.context.TlsSession;
 import io.gravitee.policy.groovy.model.BindableHttpHeaders;
 import javax.annotation.Nullable;
 import javax.net.ssl.SSLSession;
@@ -219,6 +220,15 @@ public class BindableHttpRequest implements GenericRequest {
 
     public SSLSession getSslSession() {
         return sslSession();
+    }
+
+    @Override
+    public TlsSession tlsSession() {
+        return request.tlsSession();
+    }
+
+    public TlsSession getTslSession() {
+        return tlsSession();
     }
 
     @Override

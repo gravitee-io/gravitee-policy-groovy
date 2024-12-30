@@ -22,7 +22,7 @@
 
     <groupId>io.gravitee.policy</groupId>
     <artifactId>gravitee-policy-groovy</artifactId>
-    <version>2.6.3</version>
+    <version>3.0.0-alpha.3</version>
 
     <name>Gravitee.io APIM - Policy - Groovy</name>
     <description>Run Groovy scripts at any stage of request or message processing</description>
@@ -34,15 +34,10 @@
     </parent>
 
     <properties>
-        <gravitee-bom.version>6.0.6</gravitee-bom.version>
-        <gravitee-gateway-api.version>3.2.1</gravitee-gateway-api.version>
-        <gravitee-apim.version>4.1.0</gravitee-apim.version>
-        <gravitee-policy-api.version>1.11.0</gravitee-policy-api.version>
-        <gravitee-common.version>3.3.0</gravitee-common.version>
-        <gravitee-expression-language.version>3.1.0</gravitee-expression-language.version>
-        <gravitee-entrypoint-http-post.version>1.0.0</gravitee-entrypoint-http-post.version>
-        <gravitee-entrypoint-http-get.version>1.0.0</gravitee-entrypoint-http-get.version>
-        <gravitee-reactor-message.version>1.0.1</gravitee-reactor-message.version>
+        <gravitee-apim.version>4.6.0-alpha.3</gravitee-apim.version>
+        <gravitee-entrypoint-http-post.version>2.0.0</gravitee-entrypoint-http-post.version>
+        <gravitee-entrypoint-http-get.version>2.0.0</gravitee-entrypoint-http-get.version>
+        <gravitee-reactor-message.version>5.0.0</gravitee-reactor-message.version>
         <groovy.version>3.0.19</groovy.version>
         <groovy-sandbox.version>1.27</groovy-sandbox.version>
         <commons-lang3.version>3.12.0</commons-lang3.version>
@@ -56,9 +51,9 @@
         <dependencies>
             <!-- Import bom to properly inherit all dependencies -->
             <dependency>
-                <groupId>io.gravitee</groupId>
-                <artifactId>gravitee-bom</artifactId>
-                <version>${gravitee-bom.version}</version>
+                <groupId>io.gravitee.apim</groupId>
+                <artifactId>gravitee-apim-bom</artifactId>
+                <version>${gravitee-apim.version}</version>
                 <scope>import</scope>
                 <type>pom</type>
             </dependency>
@@ -70,28 +65,24 @@
         <dependency>
             <groupId>io.gravitee.gateway</groupId>
             <artifactId>gravitee-gateway-api</artifactId>
-            <version>${gravitee-gateway-api.version}</version>
             <scope>provided</scope>
         </dependency>
 
         <dependency>
             <groupId>io.gravitee.policy</groupId>
             <artifactId>gravitee-policy-api</artifactId>
-            <version>${gravitee-policy-api.version}</version>
             <scope>provided</scope>
         </dependency>
 
         <dependency>
             <groupId>io.gravitee.common</groupId>
             <artifactId>gravitee-common</artifactId>
-            <version>${gravitee-common.version}</version>
             <scope>provided</scope>
         </dependency>
 
         <dependency>
             <groupId>io.gravitee.el</groupId>
             <artifactId>gravitee-expression-language</artifactId>
-            <version>${gravitee-expression-language.version}</version>
             <scope>provided</scope>
         </dependency>
 
