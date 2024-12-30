@@ -22,7 +22,7 @@
 
     <groupId>io.gravitee.policy</groupId>
     <artifactId>gravitee-policy-groovy</artifactId>
-    <version>3.0.0-alpha.2</version>
+    <version>3.0.0-alpha.3</version>
 
     <name>Gravitee.io APIM - Policy - Groovy</name>
     <description>Run Groovy scripts at any stage of request or message processing</description>

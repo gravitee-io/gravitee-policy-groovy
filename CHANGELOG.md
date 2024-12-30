@@ -1,3 +1,10 @@
+# [3.0.0-alpha.3](https://github.com/gravitee-io/gravitee-policy-groovy/compare/3.0.0-alpha.2...3.0.0-alpha.3) (2024-12-30)
+
+
+### Bug Fixes
+
+* **deps:** bump apim version ([4eb775a](https://github.com/gravitee-io/gravitee-policy-groovy/commit/4eb775a8c3e81921e2f5ca68199902e501b3bda8))
+
 # [3.0.0-alpha.2](https://github.com/gravitee-io/gravitee-policy-groovy/compare/3.0.0-alpha.1...3.0.0-alpha.2) (2024-12-16)
 
 
