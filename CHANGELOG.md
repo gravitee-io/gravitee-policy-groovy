@@ -1,3 +1,10 @@
+## [3.0.1](https://github.com/gravitee-io/gravitee-policy-groovy/compare/3.0.0...3.0.1) (2025-01-15)
+
+
+### Bug Fixes
+
+* **deps:** upgrade groovy-sandbox to 1.30 ([32fba8f](https://github.com/gravitee-io/gravitee-policy-groovy/commit/32fba8f5f3cd8b89b16bb1be5b9535048eb43612))
+
 # [3.0.0](https://github.com/gravitee-io/gravitee-policy-groovy/compare/2.6.3...3.0.0) (2024-12-30)
 
 
