@@ -38,7 +38,7 @@
         <gravitee-entrypoint-http-post.version>2.0.0</gravitee-entrypoint-http-post.version>
         <gravitee-entrypoint-http-get.version>2.0.0</gravitee-entrypoint-http-get.version>
         <gravitee-reactor-message.version>5.0.0</gravitee-reactor-message.version>
-        <groovy.version>3.0.19</groovy.version>
+        <groovy.version>3.0.23</groovy.version>
         <groovy-sandbox.version>1.30</groovy-sandbox.version>
         <commons-lang3.version>3.12.0</commons-lang3.version>
         <guava.version>30.1.1-jre</guava.version>
