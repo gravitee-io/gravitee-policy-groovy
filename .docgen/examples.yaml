@@ -1,0 +1,15 @@
+genExamples: []
+#
+rawExamples:
+    - title: Proxy API on Request phase
+      templateRef: v4-api-proxy
+      language: json
+      properties:
+          phase: request
+      file: .docgen/examples/simple.json
+    - title: Message API CRD
+      templateRef: v4-api-crd-message
+      language: json
+      properties:
+          phase: request
+      file: .docgen/examples/simple.json

@@ -1,0 +1,23 @@
+before: .docgen/gateway-config/before.md
+after: .docgen/gateway-config/after.md
+snippets:
+    - title: "gravitee.yml"
+      language: YAML
+      content: >-
+          groovy:
+            whitelist:
+              mode: append
+              list:
+                - method com.acme.common.Strings toTitleCase java.lang.String
+                - class com.acme.common.Strings
+    - title: "Environment variables (Helm)"
+      language: YAML
+      content: >-
+          gateway:
+            env:
+              - name: GRAVITEE_GROOVY_WHITELIST_MODE
+                value: append
+              - name: GRAVITEE_GROOVY_WHITELIST_LIST_0
+                value: "method com.acme.common.Strings toTitleCase java.lang.String"
+              - name: GRAVITEE_GROOVY_WHITELIST_LIST_1
+                value: "class com.acme.common.Strings"

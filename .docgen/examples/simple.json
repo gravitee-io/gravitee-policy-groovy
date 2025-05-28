@@ -1,0 +1,5 @@
+{
+    "readContent": false,
+    "overrideContent": false,
+    "script": "response.headers.remove 'X-Powered-By'\nresponse.headers.'X-Gravitee-Gateway-Version' = '0.14.0'"
+}
