@@ -406,6 +406,13 @@ spec:
 
 ## Changelog
 
+#### [3.0.2](https://github.com/gravitee-io/gravitee-policy-groovy/compare/3.0.1...3.0.2) (2025-06-18)
+
+
+##### Bug Fixes
+
+* doc gen ([24bde45](https://github.com/gravitee-io/gravitee-policy-groovy/commit/24bde452c0b94ed1fad55169d8afe1cea00b35cf))
+
 #### [3.0.1](https://github.com/gravitee-io/gravitee-policy-groovy/compare/3.0.0...3.0.1) (2025-01-15)
 
 
