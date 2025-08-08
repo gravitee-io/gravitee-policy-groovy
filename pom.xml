@@ -30,7 +30,7 @@
     <parent>
         <groupId>io.gravitee</groupId>
         <artifactId>gravitee-parent</artifactId>
-        <version>22.0.7</version>
+        <version>22.5.1</version>
     </parent>
 
     <properties>
@@ -42,7 +42,6 @@
         <groovy-sandbox.version>1.30</groovy-sandbox.version>
         <commons-lang3.version>3.18.0</commons-lang3.version>
         <guava.version>30.1.1-jre</guava.version>
-        <maven-assembly-plugin.version>3.6.0</maven-assembly-plugin.version>
         <!-- Property used by the publication job in CI-->
         <publish-folder-path>graviteeio-apim/plugins/policies</publish-folder-path>
     </properties>
@@ -280,23 +279,27 @@
                 <groupId>com.mycila</groupId>
                 <artifactId>license-maven-plugin</artifactId>
                 <configuration>
-                    <excludes>
-                        <exclude>LICENSE.txt</exclude>
-                        <exclude>Jenkinsfile</exclude>
-                        <exclude>**/README</exclude>
-                        <exclude>src/main/packaging/**</exclude>
-                        <exclude>src/test/resources/**</exclude>
-                        <exclude>src/main/resources/**</exclude>
-                        <exclude>src/main/webapp/**</exclude>
-                        <exclude>node_modules/**</exclude>
-                        <exclude>dist/**</exclude>
-                        <exclude>.tmp/**</exclude>
-                        <exclude>bower_components/**</exclude>
-                        <exclude>.*</exclude>
-                        <exclude>.*/**</exclude>
-                        <exclude>**/*.adoc</exclude>
-                        <exclude>**/org/kohsuke/groovy/sandbox/**</exclude>
-                    </excludes>
+                    <licenseSets>
+                        <licenseSet>
+                            <excludes>
+                                <exclude>LICENSE.txt</exclude>
+                                <exclude>Jenkinsfile</exclude>
+                                <exclude>**/README</exclude>
+                                <exclude>src/main/packaging/**</exclude>
+                                <exclude>src/test/resources/**</exclude>
+                                <exclude>src/main/resources/**</exclude>
+                                <exclude>src/main/webapp/**</exclude>
+                                <exclude>node_modules/**</exclude>
+                                <exclude>dist/**</exclude>
+                                <exclude>.tmp/**</exclude>
+                                <exclude>bower_components/**</exclude>
+                                <exclude>.*</exclude>
+                                <exclude>.*/**</exclude>
+                                <exclude>**/*.adoc</exclude>
+                                <exclude>**/org/kohsuke/groovy/sandbox/**</exclude>
+                            </excludes>
+                        </licenseSet>
+                    </licenseSets>
                 </configuration>
             </plugin>
         </plugins>
