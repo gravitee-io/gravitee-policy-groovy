@@ -406,6 +406,13 @@ spec:
 
 ## Changelog
 
+#### [3.0.3](https://github.com/gravitee-io/gravitee-policy-groovy/compare/3.0.2...3.0.3) (2025-08-08)
+
+
+##### Bug Fixes
+
+* **deps:** update dependency org.apache.commons:commons-lang3 to v3.18.0 [security] ([7913dc6](https://github.com/gravitee-io/gravitee-policy-groovy/commit/7913dc60a528a5b17ffa326a27ab8ebb19192986))
+
 #### [3.0.2](https://github.com/gravitee-io/gravitee-policy-groovy/compare/3.0.1...3.0.2) (2025-06-18)
 
 
