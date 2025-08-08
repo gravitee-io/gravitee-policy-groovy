@@ -42,6 +42,9 @@
         <groovy-sandbox.version>1.30</groovy-sandbox.version>
         <commons-lang3.version>3.18.0</commons-lang3.version>
         <guava.version>30.1.1-jre</guava.version>
+
+        <properties-maven-plugin.version>1.2.1</properties-maven-plugin.version>
+
         <!-- Property used by the publication job in CI-->
         <publish-folder-path>graviteeio-apim/plugins/policies</publish-folder-path>
     </properties>
@@ -239,7 +242,7 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>properties-maven-plugin</artifactId>
-                <version>1.0.0</version>
+                <version>${properties-maven-plugin.version}</version>
                 <executions>
                     <execution>
                         <phase>initialize</phase>
