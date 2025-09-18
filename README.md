@@ -407,6 +407,18 @@ spec:
 
 ## Changelog
 
+### [4.0.0](https://github.com/gravitee-io/gravitee-policy-groovy/compare/3.0.3...4.0.0) (2025-09-18)
+
+
+##### Features
+
+* include cause throwable in the execution failure ([1cf1409](https://github.com/gravitee-io/gravitee-policy-groovy/commit/1cf140916aa5e69d36f2bfd4bb78013a3895728d))
+
+
+##### BREAKING CHANGES
+
+* requires APIM version 4.9.0 or later
+
 #### [3.0.3](https://github.com/gravitee-io/gravitee-policy-groovy/compare/3.0.2...3.0.3) (2025-08-08)
 
 
