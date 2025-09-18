@@ -45,10 +45,6 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class GroovyPolicy extends GroovyPolicyV3 implements Policy {
 
-    private static final ExecutionFailure DEFAULT_EXECUTION_FAILURE = new ExecutionFailure(INTERNAL_SERVER_ERROR_500)
-        .key("GROOVY_EXECUTION_FAILURE")
-        .message("Internal Server Error");
-
     /**
      * @see GroovyPolicyConfiguration#getScripts()
      */
@@ -150,11 +146,15 @@ public class GroovyPolicy extends GroovyPolicyV3 implements Policy {
     }
 
     private Maybe<Buffer> runContentAwareScript(HttpExecutionContext ctx, Binding binding, String script) {
-        return GROOVY_SHELL
-            .evaluateRx(script, binding)
+        return GROOVY_SHELL.evaluateRx(script, binding)
             .onErrorResumeNext(e -> {
                 log.error("An error occurred while executing Groovy script", e);
-                return ctx.interruptBodyWith(DEFAULT_EXECUTION_FAILURE);
+                return ctx.interruptBodyWith(
+                    new ExecutionFailure(INTERNAL_SERVER_ERROR_500)
+                        .key("GROOVY_EXECUTION_FAILURE")
+                        .message("Internal Server Error")
+                        .cause(e)
+                );
             })
             .flatMap(content -> {
                 var result = (PolicyResult) binding.getVariable(GroovyBindings.RESULT_VARIABLE_NAME);
@@ -173,12 +173,16 @@ public class GroovyPolicy extends GroovyPolicyV3 implements Policy {
     }
 
     private Completable runScript(HttpExecutionContext ctx, Binding binding, String script) {
-        return GROOVY_SHELL
-            .evaluateRx(script, binding)
+        return GROOVY_SHELL.evaluateRx(script, binding)
             .ignoreElement()
             .onErrorResumeNext(e -> {
                 log.error("An error occurred while executing Groovy script", e);
-                return ctx.interruptWith(DEFAULT_EXECUTION_FAILURE);
+                return ctx.interruptWith(
+                    new ExecutionFailure(INTERNAL_SERVER_ERROR_500)
+                        .key("GROOVY_EXECUTION_FAILURE")
+                        .message("Internal Server Error")
+                        .cause(e)
+                );
             })
             .andThen(
                 Completable.defer(() -> {
@@ -216,9 +220,15 @@ public class GroovyPolicy extends GroovyPolicyV3 implements Policy {
         var script = configuration.getScript();
         var binding = GroovyBindings.bindMessage(ctx, message);
 
-        return GROOVY_SHELL
-            .evaluateRx(script, binding)
-            .onErrorResumeNext(e -> ctx.interruptMessageWith(DEFAULT_EXECUTION_FAILURE))
+        return GROOVY_SHELL.evaluateRx(script, binding)
+            .onErrorResumeNext(e ->
+                ctx.interruptMessageWith(
+                    new ExecutionFailure(INTERNAL_SERVER_ERROR_500)
+                        .key("GROOVY_EXECUTION_FAILURE")
+                        .message("Internal Server Error")
+                        .cause(e)
+                )
+            )
             .flatMap(content -> {
                 var result = (PolicyResult) binding.getVariable(GroovyBindings.RESULT_VARIABLE_NAME);
                 return handleResult(ctx, message, result, content);

@@ -146,11 +146,12 @@ public class SecuredResolver {
         // We only have an annotation name. Just try to find corresponding annotation testing all combinations.
         return annotations
             .stream()
-            .anyMatch(aClass ->
-                aClass.getCanonicalName().equals(name) ||
-                aClass.getName().equals(name) ||
-                aClass.getSimpleName().equals(name) ||
-                aClass.getTypeName().equals(name)
+            .anyMatch(
+                aClass ->
+                    aClass.getCanonicalName().equals(name) ||
+                    aClass.getName().equals(name) ||
+                    aClass.getSimpleName().equals(name) ||
+                    aClass.getTypeName().equals(name)
             );
     }
 
@@ -441,9 +442,10 @@ public class SecuredResolver {
             // Built-in groovy-whitelist will not be loaded if mode is not 'append' (ie: set to 'replace').
             loadBuiltInWhitelist = WHITELIST_MODE.equals(environment.getProperty(WHITELIST_MODE_KEY, WHITELIST_MODE));
 
-            Collection<Object> configWhitelist = EnvironmentUtils
-                .getPropertiesStartingWith((ConfigurableEnvironment) environment, WHITELIST_LIST_KEY)
-                .values();
+            Collection<Object> configWhitelist = EnvironmentUtils.getPropertiesStartingWith(
+                (ConfigurableEnvironment) environment,
+                WHITELIST_LIST_KEY
+            ).values();
 
             for (Object declaration : configWhitelist) {
                 parseDeclaration(String.valueOf(declaration), methods, fields, constructors, annotationClasses);
