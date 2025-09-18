@@ -61,13 +61,17 @@ import org.junit.jupiter.api.Test;
  */
 public class GroovyPolicyV4IntegrationTest {
 
-    private static final JsonObject GIVEN_CONTENT = new JsonObject("""
+    private static final JsonObject GIVEN_CONTENT = new JsonObject(
+        """
         {"message":"Hello World!"}
-        """);
+        """
+    );
 
-    private static final JsonObject EXPECTED_CONTENT = new JsonObject("""
+    private static final JsonObject EXPECTED_CONTENT = new JsonObject(
+        """
         {"message":"Hello Universe!"}
-        """);
+        """
+    );
 
     @GatewayTest
     @Nested

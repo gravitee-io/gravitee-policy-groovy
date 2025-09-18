@@ -76,8 +76,7 @@ public class GroovyPolicyConfiguration implements PolicyConfiguration {
      * @return the list of scripts to run for a v3 API, a singleton list with the script for a v4 API.
      */
     public List<String> getScripts() {
-        return Stream
-            .of(script, onRequestScript, onRequestContentScript, onResponseScript, onResponseContentScript)
+        return Stream.of(script, onRequestScript, onRequestContentScript, onResponseScript, onResponseContentScript)
             .filter(StringUtils::isNotBlank)
             .toList();
     }

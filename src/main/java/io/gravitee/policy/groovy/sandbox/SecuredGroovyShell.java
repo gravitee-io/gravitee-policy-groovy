@@ -135,13 +135,10 @@ public class SecuredGroovyShell {
 
     private Class<?> getOrCreate(String key, String script) throws CompilationFailedException {
         try {
-            return sources.get(
-                key,
-                () -> {
-                    GroovyCodeSource gcs = new GroovyCodeSource(script, key, GroovyShell.DEFAULT_CODE_BASE);
-                    return groovyShell.getClassLoader().parseClass(gcs, true);
-                }
-            );
+            return sources.get(key, () -> {
+                GroovyCodeSource gcs = new GroovyCodeSource(script, key, GroovyShell.DEFAULT_CODE_BASE);
+                return groovyShell.getClassLoader().parseClass(gcs, true);
+            });
         } catch (Exception e) {
             final Throwable cause = e.getCause();
             if (cause instanceof CompilationFailedException) {

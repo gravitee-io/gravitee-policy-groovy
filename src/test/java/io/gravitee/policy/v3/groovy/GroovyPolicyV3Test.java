@@ -130,13 +130,13 @@ public class GroovyPolicyV3Test {
         headers.set("X-Gravitee-Break", "value");
         new GroovyPolicyV3(configuration).onRequest(request, response, executionContext, policyChain);
 
-        verify(policyChain, times(1))
-            .failWith(
-                argThat(result ->
+        verify(policyChain, times(1)).failWith(
+            argThat(
+                result ->
                     result.statusCode() == HttpStatusCode.INTERNAL_SERVER_ERROR_500 &&
                     result.message().equals("Stop request processing due to X-Gravitee-Break header")
-                )
-            );
+            )
+        );
     }
 
     @Test
@@ -211,11 +211,13 @@ public class GroovyPolicyV3Test {
         when(req.headers()).thenReturn(headers);
         when(res.headers()).thenReturn(headers);
 
-        when(configuration.getOnRequestScript())
-            .thenReturn("joined = request.headers.'User-Agent'.join('#')\n " + "request.headers.'requestResult' = joined");
+        when(configuration.getOnRequestScript()).thenReturn(
+            "joined = request.headers.'User-Agent'.join('#')\n " + "request.headers.'requestResult' = joined"
+        );
 
-        when(configuration.getOnResponseScript())
-            .thenReturn("joined = response.headers.'User-Agent'.join('!')\n " + "response.headers.'responseResult' = joined");
+        when(configuration.getOnResponseScript()).thenReturn(
+            "joined = response.headers.'User-Agent'.join('!')\n " + "response.headers.'responseResult' = joined"
+        );
 
         new GroovyPolicyV3(configuration).onRequest(req, res, executionContext, policyChain);
         new GroovyPolicyV3(configuration).onResponse(req, res, executionContext, policyChain);

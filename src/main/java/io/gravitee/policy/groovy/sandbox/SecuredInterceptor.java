@@ -153,8 +153,7 @@ public class SecuredInterceptor extends GroovyInterceptor {
             " " +
             method +
             " " +
-            Arrays
-                .asList(args)
+            Arrays.asList(args)
                 .stream()
                 .map(arg -> arg == null ? Object.class.getCanonicalName() : arg.getClass().getCanonicalName())
                 .collect(Collectors.joining(" "))

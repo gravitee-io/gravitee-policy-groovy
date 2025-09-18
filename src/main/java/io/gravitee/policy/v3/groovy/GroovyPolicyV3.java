@@ -76,8 +76,7 @@ public class GroovyPolicyV3 {
         String script = configuration.getOnResponseContentScript();
 
         if (script != null && !script.trim().isEmpty()) {
-            return TransformableResponseStreamBuilder
-                .on(response)
+            return TransformableResponseStreamBuilder.on(response)
                 .chain(policyChain)
                 .transform(buffer -> {
                     try {
@@ -129,8 +128,7 @@ public class GroovyPolicyV3 {
         String script = configuration.getOnRequestContentScript();
 
         if (script != null && !script.trim().isEmpty()) {
-            return TransformableRequestStreamBuilder
-                .on(request)
+            return TransformableRequestStreamBuilder.on(request)
                 .chain(policyChain)
                 .transform(buffer -> {
                     try {

@@ -339,8 +339,9 @@ class GroovyPolicyTest {
 
         onMessageCaptor.getValue().apply(message).test().awaitDone(10, TimeUnit.SECONDS).assertComplete().assertNoErrors();
 
-        assertThat(message.<String>attribute("wronglyBase64EncodedContent"))
-            .isNotEqualTo(Base64.getEncoder().encodeToString(isoEncodedCharacter));
+        assertThat(message.<String>attribute("wronglyBase64EncodedContent")).isNotEqualTo(
+            Base64.getEncoder().encodeToString(isoEncodedCharacter)
+        );
         assertThat(message.<String>attribute("goodBase64Content")).isEqualTo(Base64.getEncoder().encodeToString(isoEncodedCharacter));
         assertThat(message.<String>attribute("byteArray")).isEqualTo(Arrays.toString(isoEncodedCharacter));
     }

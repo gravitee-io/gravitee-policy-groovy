@@ -156,10 +156,9 @@ public class GroovyPolicyV3IntegrationTest extends AbstractPolicyTest<GroovyPoli
             .test()
             .awaitDone(5, TimeUnit.SECONDS)
             .assertValue(body -> {
-                assertThat(body)
-                    .hasToString(
-                        "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n<auth>\n    <resp>\n        <hdr>E</hdr>\n        <errDesc>internal technical error </errDesc>\n    </resp>\n</auth>"
-                    );
+                assertThat(body).hasToString(
+                    "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n<auth>\n    <resp>\n        <hdr>E</hdr>\n        <errDesc>internal technical error </errDesc>\n    </resp>\n</auth>"
+                );
                 return true;
             })
             .assertComplete()
