@@ -37,7 +37,7 @@
         <gravitee-apim.version>4.9.1</gravitee-apim.version>
         <gravitee-entrypoint-http-post.version>2.1.0</gravitee-entrypoint-http-post.version>
         <gravitee-entrypoint-http-get.version>2.1.0</gravitee-entrypoint-http-get.version>
-        <gravitee-reactor-message.version>8.0.0</gravitee-reactor-message.version>
+        <gravitee-reactor-message.version>8.1.0</gravitee-reactor-message.version>
         <groovy.version>3.0.19</groovy.version>
         <groovy-sandbox.version>1.30</groovy-sandbox.version>
         <commons-lang3.version>3.18.0</commons-lang3.version>
