@@ -1,3 +1,10 @@
+# [4.1.0](https://github.com/gravitee-io/gravitee-policy-groovy/compare/4.0.0...4.1.0) (2025-11-14)
+
+
+### Features
+
+* enable for LLM & MCP Proxy API ([4f67dc6](https://github.com/gravitee-io/gravitee-policy-groovy/commit/4f67dc650c62760cbcee0f758fc33ae160f9e2af))
+
 # [4.0.0](https://github.com/gravitee-io/gravitee-policy-groovy/compare/3.0.3...4.0.0) (2025-09-18)
 
 
