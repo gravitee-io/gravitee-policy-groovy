@@ -40,7 +40,7 @@
         <gravitee-reactor-message.version>8.2.0</gravitee-reactor-message.version>
         <groovy.version>3.0.19</groovy.version>
         <groovy-sandbox.version>1.30</groovy-sandbox.version>
-        <commons-lang3.version>3.18.0</commons-lang3.version>
+        <commons-lang3.version>3.20.0</commons-lang3.version>
         <guava.version>30.1.1-jre</guava.version>
 
         <properties-maven-plugin.version>1.2.1</properties-maven-plugin.version>
