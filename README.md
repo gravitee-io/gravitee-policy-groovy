@@ -17,6 +17,7 @@ This policy is applicable to the following API types:
 * v4 message APIs
 * v4 LLM proxy APIs
 * v4 MCP proxy APIs
+* v4 A2A proxy APIs
 
 **Note:** The Groovy policy is not supported by v4 TCP or Native APIs.
 
@@ -264,6 +265,7 @@ The `groovy` policy can be applied to the following API types and flow phases.
 * `MESSAGE`
 * `MCP PROXY`
 * `LLM PROXY`
+* `A2A PROXY`
 
 ### Supported flow phases:
 
