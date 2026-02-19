@@ -413,6 +413,13 @@ spec:
 
 ## Changelog
 
+### [4.2.0](https://github.com/gravitee-io/gravitee-policy-groovy/compare/4.1.0...4.2.0) (2026-02-19)
+
+
+##### Features
+
+* enable for A2A proxy ([4075422](https://github.com/gravitee-io/gravitee-policy-groovy/commit/4075422734ef219b4b85398727298373c8d25777))
+
 ### [4.1.0](https://github.com/gravitee-io/gravitee-policy-groovy/compare/4.0.0...4.1.0) (2025-11-14)
 
 
