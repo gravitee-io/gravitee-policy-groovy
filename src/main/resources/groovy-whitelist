@@ -2,9 +2,9 @@
 class groovy.json.JsonOutput
 class groovy.json.JsonParserType
 class groovy.json.JsonSlurper
-class groovy.util.slurpersupport.Node
-class groovy.util.slurpersupport.NodeChild
-class groovy.util.XmlSlurper
+class groovy.xml.slurpersupport.Node
+class groovy.xml.slurpersupport.NodeChild
+class groovy.xml.XmlSlurper
 class io.gravitee.am.model.safe.ClientProperties
 class io.gravitee.am.model.safe.DomainProperties
 class io.gravitee.am.model.safe.UserProperties

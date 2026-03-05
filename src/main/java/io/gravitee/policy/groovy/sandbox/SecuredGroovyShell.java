@@ -47,7 +47,7 @@ public class SecuredGroovyShell {
     private static final int CODE_CACHE_EXPIRATION_HOURS = 1;
 
     static {
-        // Do not change this block of code which is required to work with groovy 2.5 and the classloader used
+        // Do not change this block of code which is required to work with the classloader used
         // to load services
         ClassLoader loader = Thread.currentThread().getContextClassLoader();
         Thread.currentThread().setContextClassLoader(GroovyPolicy.class.getClassLoader());
