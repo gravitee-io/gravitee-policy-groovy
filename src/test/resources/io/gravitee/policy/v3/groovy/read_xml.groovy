@@ -1,5 +1,5 @@
 
-import groovy.util.XmlSlurper
+import groovy.xml.XmlSlurper
 import groovy.json.JsonOutput
 
 def xmlSlurper = new XmlSlurper()
