@@ -520,12 +520,20 @@ public class SecuredResolver {
         return clazz.getDeclaredMethod(methodName, argumentClasses);
     }
 
+    private static <T> List<T> safeGetDeclaredMembers(String clazzName, java.util.function.Function<Class<?>, T[]> memberAccessor)
+        throws ClassNotFoundException {
+        Class<?> clazz = ClassUtils.forName(clazzName, SecuredResolver.class.getClassLoader());
+        try {
+            return Arrays.asList(memberAccessor.apply(clazz));
+        } catch (NoClassDefFoundError e) {
+            log.warn("Unable to load members from class [{}], a transitive dependency is missing: {}", clazzName, e.getMessage());
+            return emptyList();
+        }
+    }
+
     private static List<Method> parseAllMethods(String declaration) throws ClassNotFoundException {
         String[] split = declaration.split(" ");
-        String clazzName = split[1];
-        Class<?> clazz = ClassUtils.forName(clazzName, SecuredResolver.class.getClassLoader());
-
-        return Arrays.asList(clazz.getDeclaredMethods());
+        return safeGetDeclaredMembers(split[1], Class::getDeclaredMethods);
     }
 
     private static Field parseField(String declaration) throws ClassNotFoundException, NoSuchFieldException {
@@ -539,10 +547,7 @@ public class SecuredResolver {
 
     private static List<Field> parseAllFields(String declaration) throws ClassNotFoundException {
         String[] split = declaration.split(" ");
-        String clazzName = split[1];
-        Class<?> clazz = ClassUtils.forName(clazzName, SecuredResolver.class.getClassLoader());
-
-        return Arrays.asList(clazz.getDeclaredFields());
+        return safeGetDeclaredMembers(split[1], Class::getDeclaredFields);
     }
 
     private static Constructor<?> parseConstructor(String declaration) throws ClassNotFoundException, NoSuchMethodException {
@@ -571,10 +576,7 @@ public class SecuredResolver {
 
     private static List<Constructor<?>> parseAllConstructors(String declaration) throws ClassNotFoundException {
         String[] split = declaration.split(" ");
-        String clazzName = split[1];
-        Class<?> clazz = ClassUtils.forName(clazzName, SecuredResolver.class.getClassLoader());
-
-        return Arrays.asList(clazz.getDeclaredConstructors());
+        return safeGetDeclaredMembers(split[1], Class::getDeclaredConstructors);
     }
 
     private static Class<?> parseAnnotation(String declaration) throws ClassNotFoundException {
