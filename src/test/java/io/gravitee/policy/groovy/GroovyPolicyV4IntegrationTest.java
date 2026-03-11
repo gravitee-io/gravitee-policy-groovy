@@ -42,8 +42,8 @@ import io.gravitee.plugin.endpoint.mock.MockEndpointConnectorFactory;
 import io.gravitee.plugin.entrypoint.EntrypointConnectorPlugin;
 import io.gravitee.plugin.entrypoint.http.proxy.HttpProxyEntrypointConnectorFactory;
 import io.gravitee.policy.groovy.configuration.GroovyPolicyConfiguration;
+import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonObject;
-import io.vertx.rxjava3.core.buffer.Buffer;
 import io.vertx.rxjava3.core.http.HttpClient;
 import io.vertx.rxjava3.core.http.HttpClientRequest;
 import io.vertx.rxjava3.core.http.HttpClientResponse;
@@ -238,7 +238,7 @@ public class GroovyPolicyV4IntegrationTest {
                 .flatMap(HttpClientRequest::rxSend)
                 .doOnSuccess(response -> assertThat(response.statusCode()).isEqualTo(200))
                 .flatMap(HttpClientResponse::body)
-                .map(Buffer::toString)
+                .map(b -> b.toString())
                 .map(json -> new JsonObject(json).getJsonArray("items"))
                 .doOnSuccess(items -> assertThat(items).hasSize(2))
                 .doOnSuccess(items -> {

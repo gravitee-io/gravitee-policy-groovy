@@ -34,6 +34,8 @@
     </parent>
 
     <properties>
+        <gravitee-bom.version>9.0.0-beta.2</gravitee-bom.version>
+        <maven.compiler.release>21</maven.compiler.release>
         <gravitee-apim.version>4.9.9</gravitee-apim.version>
         <gravitee-entrypoint-http-post.version>2.1.0</gravitee-entrypoint-http-post.version>
         <gravitee-entrypoint-http-get.version>2.1.0</gravitee-entrypoint-http-get.version>

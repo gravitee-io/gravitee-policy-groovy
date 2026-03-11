@@ -27,7 +27,7 @@ import io.gravitee.apim.gateway.tests.sdk.annotations.GatewayTest;
 import io.gravitee.definition.model.ExecutionMode;
 import io.gravitee.gateway.api.http.HttpHeaderNames;
 import io.gravitee.policy.groovy.configuration.GroovyPolicyConfiguration;
-import io.vertx.rxjava3.core.buffer.Buffer;
+import io.vertx.core.buffer.Buffer;
 import io.vertx.rxjava3.core.http.HttpClient;
 import io.vertx.rxjava3.core.http.HttpClientRequest;
 import io.vertx.rxjava3.core.http.HttpClientResponse;
@@ -125,7 +125,7 @@ public class GroovyPolicyV3IntegrationTest extends AbstractPolicyTest<GroovyPoli
                 assertThat(response.headers().get(HttpHeaderNames.CONTENT_TYPE)).isNotNull().isEqualTo("application/json");
                 return response.toFlowable();
             })
-            .map(Buffer::toString)
+            .map(b -> b.toString())
             .test()
             .awaitDone(10, TimeUnit.SECONDS)
             .assertValue(body -> {
@@ -152,7 +152,7 @@ public class GroovyPolicyV3IntegrationTest extends AbstractPolicyTest<GroovyPoli
                 assertThat(response.headers().get(HttpHeaderNames.CONTENT_TYPE)).isNotNull().isEqualTo("application/xml");
                 return response.toFlowable();
             })
-            .map(Buffer::toString)
+            .map(b -> b.toString())
             .test()
             .awaitDone(5, TimeUnit.SECONDS)
             .assertValue(body -> {
