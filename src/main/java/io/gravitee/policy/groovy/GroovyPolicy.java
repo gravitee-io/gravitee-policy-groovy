@@ -26,8 +26,12 @@ import io.gravitee.gateway.api.http.HttpHeaders;
 import io.gravitee.gateway.reactive.api.ExecutionFailure;
 import io.gravitee.gateway.reactive.api.context.HttpExecutionContext;
 import io.gravitee.gateway.reactive.api.context.MessageExecutionContext;
+import io.gravitee.gateway.reactive.api.context.kafka.KafkaExecutionContext;
+import io.gravitee.gateway.reactive.api.context.kafka.KafkaMessageExecutionContext;
 import io.gravitee.gateway.reactive.api.message.Message;
+import io.gravitee.gateway.reactive.api.message.kafka.KafkaMessage;
 import io.gravitee.gateway.reactive.api.policy.Policy;
+import io.gravitee.gateway.reactive.api.policy.kafka.KafkaPolicy;
 import io.gravitee.policy.groovy.PolicyResult.State;
 import io.gravitee.policy.groovy.configuration.GroovyPolicyConfiguration;
 import io.gravitee.policy.groovy.model.GroovyBindings;
@@ -43,7 +47,7 @@ import lombok.extern.slf4j.Slf4j;
  * @author GraviteeSource Team
  */
 @Slf4j
-public class GroovyPolicy extends GroovyPolicyV3 implements Policy {
+public class GroovyPolicy extends GroovyPolicyV3 implements Policy, KafkaPolicy {
 
     /**
      * @see GroovyPolicyConfiguration#getScripts()
@@ -247,5 +251,98 @@ public class GroovyPolicy extends GroovyPolicyV3 implements Policy {
         }
 
         return Maybe.just(message);
+    }
+
+    @Override
+    public Completable onRequest(KafkaExecutionContext ctx) {
+        final String script = isNotBlank(configuration.getOnRequestScript())
+            ? configuration.getOnRequestScript()
+            : configuration.getScript();
+        if (isBlank(script)) {
+            return Completable.complete();
+        }
+        return runKafkaScript(GroovyBindings.bindKafka(ctx), script);
+    }
+
+    @Override
+    public Completable onResponse(KafkaExecutionContext ctx) {
+        final String script = isNotBlank(configuration.getOnResponseScript())
+            ? configuration.getOnResponseScript()
+            : configuration.getScript();
+        if (isBlank(script)) {
+            return Completable.complete();
+        }
+        return runKafkaScript(GroovyBindings.bindKafka(ctx), script);
+    }
+
+    @Override
+    public Completable onMessageRequest(KafkaMessageExecutionContext ctx) {
+        if (isBlank(configuration.getScript())) {
+            return Completable.complete();
+        }
+        return ctx.request().onMessage(message -> runKafkaMessageScript(ctx, message));
+    }
+
+    @Override
+    public Completable onMessageResponse(KafkaMessageExecutionContext ctx) {
+        if (isBlank(configuration.getScript())) {
+            return Completable.complete();
+        }
+        return ctx.response().onMessage(message -> runKafkaMessageScript(ctx, message));
+    }
+
+    // Kafka contexts do not support HTTP-style structured interruption (no interruptWith / ExecutionFailure).
+    // Failures propagate as raw reactive errors. The result code, key, and contentType from PolicyResult
+    // are intentionally not forwarded — Kafka flows have no HTTP status concept.
+    private Completable runKafkaScript(Binding binding, String script) {
+        return GROOVY_SHELL.evaluateRx(script, binding)
+            .ignoreElement()
+            .onErrorResumeNext(e -> {
+                log.error("An error occurred while executing Groovy script", e);
+                return Completable.error(e);
+            })
+            .andThen(
+                Completable.defer(() -> {
+                    var result = (PolicyResult) binding.getVariable(GroovyBindings.RESULT_VARIABLE_NAME);
+                    if (result.getState() == State.FAILURE) {
+                        return Completable.error(new RuntimeException("Groovy script execution failed: " + result.getError()));
+                    }
+                    return Completable.complete();
+                })
+            );
+    }
+
+    // KafkaMessageExecutionContext does not support interruptMessageWith — Kafka contexts have no HTTP-style
+    // structured interruption. Failures propagate as raw reactive errors intentionally.
+    private Maybe<KafkaMessage> runKafkaMessageScript(KafkaMessageExecutionContext ctx, KafkaMessage message) {
+        var script = configuration.getScript();
+        var binding = GroovyBindings.bindKafkaMessage(ctx, message);
+
+        return GROOVY_SHELL.evaluateRx(script, binding)
+            .onErrorResumeNext(e -> {
+                log.error("An error occurred while executing Groovy script on Kafka message", e);
+                return Maybe.error(e);
+            })
+            .flatMap(content -> {
+                var result = (PolicyResult) binding.getVariable(GroovyBindings.RESULT_VARIABLE_NAME);
+                if (result.getState() == State.FAILURE) {
+                    return Maybe.<KafkaMessage>error(new RuntimeException("Groovy script execution failed: " + result.getError()));
+                }
+                if (configuration.isOverrideContent()) {
+                    message.content(content == null ? Buffer.buffer() : Buffer.buffer(content.toString()));
+                }
+                return Maybe.just(message);
+            })
+            // Scripts that return null emit an empty Maybe, bypassing flatMap above.
+            // switchIfEmpty ensures result failure is still checked and the message still propagates.
+            .switchIfEmpty(
+                Maybe.defer(() -> {
+                    var result = (PolicyResult) binding.getVariable(GroovyBindings.RESULT_VARIABLE_NAME);
+                    if (result.getState() == State.FAILURE) {
+                        return Maybe.error(new RuntimeException("Groovy script execution failed: " + result.getError()));
+                    }
+                    return Maybe.just(message);
+                })
+            );
     }
 }
