@@ -263,16 +263,18 @@ The `groovy` policy can be applied to the following API types and flow phases.
 
 * `PROXY`
 * `MESSAGE`
+* `NATIVE KAFKA`
 * `MCP PROXY`
 * `LLM PROXY`
 * `A2A PROXY`
 
 ### Supported flow phases:
 
-* Request
-* Response
+* Interact
 * Publish
 * Subscribe
+* Request
+* Response
 
 ## Compatibility matrix
 Strikethrough text indicates that a version is deprecated.
