@@ -1,0 +1,47 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "properties": {
+        "script": {
+            "title": "Script",
+            "description": "Groovy script to evaluate.",
+            "type": "string",
+            "format": "gio-code-editor",
+            "x-schema-form": {
+                "hidden": true
+            }
+        },
+        "onRequestScript": {
+            "title": "On-request script",
+            "description": "Groovy script to evaluate during the OnRequest phase.",
+            "type": "string",
+            "x-schema-form": {
+                "type": "codemirror",
+                "codemirrorOptions": {
+                    "placeholder": "Define your groovy script here or drag and drop a groovy script file",
+                    "lineWrapping": true,
+                    "lineNumbers": true,
+                    "allowDropFileTypes": true,
+                    "autoCloseTags": true,
+                    "mode": "groovy"
+                }
+            }
+        },
+        "onResponseScript": {
+            "title": "On-response script",
+            "description": "Groovy script to evaluate during the OnResponse phase.",
+            "type": "string",
+            "x-schema-form": {
+                "type": "codemirror",
+                "codemirrorOptions": {
+                    "placeholder": "Define your groovy script here or drag and drop a groovy script file",
+                    "lineWrapping": true,
+                    "lineNumbers": true,
+                    "allowDropFileTypes": true,
+                    "autoCloseTags": true,
+                    "mode": "groovy"
+                }
+            }
+        }
+    }
+}
