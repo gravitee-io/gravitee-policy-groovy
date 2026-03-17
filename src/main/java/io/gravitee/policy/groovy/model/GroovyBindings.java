@@ -17,13 +17,17 @@ package io.gravitee.policy.groovy.model;
 
 import groovy.lang.Binding;
 import io.gravitee.gateway.api.buffer.Buffer;
-import io.gravitee.gateway.reactive.api.context.GenericExecutionContext;
 import io.gravitee.gateway.reactive.api.context.HttpExecutionContext;
 import io.gravitee.gateway.reactive.api.context.MessageExecutionContext;
+import io.gravitee.gateway.reactive.api.context.base.BaseExecutionContext;
+import io.gravitee.gateway.reactive.api.context.kafka.KafkaExecutionContext;
+import io.gravitee.gateway.reactive.api.context.kafka.KafkaMessageExecutionContext;
 import io.gravitee.gateway.reactive.api.message.Message;
+import io.gravitee.gateway.reactive.api.message.kafka.KafkaMessage;
 import io.gravitee.policy.groovy.PolicyResult;
 import io.gravitee.policy.groovy.model.http.BindableHttpRequest;
 import io.gravitee.policy.groovy.model.http.BindableHttpResponse;
+import io.gravitee.policy.groovy.model.message.BindableKafkaMessage;
 import io.gravitee.policy.groovy.model.message.BindableMessage;
 
 /**
@@ -67,7 +71,17 @@ public class GroovyBindings {
         return binding;
     }
 
-    private static Binding bindCommon(GenericExecutionContext ctx) {
+    public static Binding bindKafka(KafkaExecutionContext ctx) {
+        return bindCommon(ctx);
+    }
+
+    public static Binding bindKafkaMessage(KafkaMessageExecutionContext ctx, KafkaMessage message) {
+        var binding = bindCommon(ctx.executionContext());
+        binding.setVariable(MESSAGE_VARIABLE, new BindableKafkaMessage(message));
+        return binding;
+    }
+
+    private static Binding bindCommon(BaseExecutionContext ctx) {
         var binding = new Binding();
         binding.setVariable(CONTEXT_VARIABLE_NAME, new BindableExecutionContext(ctx));
         binding.setVariable(RESULT_VARIABLE_NAME, new PolicyResult());

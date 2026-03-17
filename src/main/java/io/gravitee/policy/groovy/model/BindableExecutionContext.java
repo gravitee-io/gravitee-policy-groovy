@@ -15,10 +15,10 @@
  */
 package io.gravitee.policy.groovy.model;
 
-import io.gravitee.el.TemplateEngine;
-import io.gravitee.gateway.reactive.api.context.GenericExecutionContext;
 import io.gravitee.gateway.reactive.api.context.GenericRequest;
 import io.gravitee.gateway.reactive.api.context.GenericResponse;
+import io.gravitee.gateway.reactive.api.context.base.BaseExecutionContext;
+import io.gravitee.gateway.reactive.api.context.http.HttpBaseExecutionContext;
 import io.gravitee.reporter.api.v4.metric.Metrics;
 import java.util.List;
 import java.util.Map;
@@ -34,7 +34,7 @@ public class BindableExecutionContext {
 
     private static final String CONTEXT_DICTIONARIES_VARIABLE = "dictionaries";
 
-    GenericExecutionContext executionContext;
+    BaseExecutionContext executionContext;
 
     @SuppressWarnings({ "unchecked", "unused" })
     public Map<String, String> getDictionaries() {
@@ -52,12 +52,19 @@ public class BindableExecutionContext {
         throw new UnsupportedOperationException("Groovy scripts do not support accessing this method");
     }
 
+    /**
+     * Returns execution metrics. Only available in HTTP contexts (proxy, message).
+     * Calling this from a Kafka native script will throw {@link UnsupportedOperationException}.
+     */
     public Metrics metrics() {
-        return executionContext.metrics();
+        if (executionContext instanceof HttpBaseExecutionContext httpCtx) {
+            return httpCtx.metrics();
+        }
+        throw new UnsupportedOperationException("Metrics are not available in this execution context");
     }
 
     public Metrics getMetrics() {
-        return executionContext.metrics();
+        return metrics();
     }
 
     public void setAttribute(String s, Object o) {
