@@ -1,3 +1,20 @@
+# [5.0.0-alpha.1](https://github.com/gravitee-io/gravitee-policy-groovy/compare/4.2.0...5.0.0-alpha.1) (2026-03-17)
+
+
+### Features
+
+* bump gravitee orb to 5.5.0 ([15e703a](https://github.com/gravitee-io/gravitee-policy-groovy/commit/15e703acafc67f546fdd2475eb57b894485bc9ff))
+* prettier fix ([bda0bed](https://github.com/gravitee-io/gravitee-policy-groovy/commit/bda0bed72ae209a9c3168774577f60827de64fc2))
+* remove future version to fix docgen ([d6ec18a](https://github.com/gravitee-io/gravitee-policy-groovy/commit/d6ec18ad96170f78062e49d8e0a1716273b12b75))
+* run docgen to update README.md ([773e635](https://github.com/gravitee-io/gravitee-policy-groovy/commit/773e63540fb8fad37d372c223c0d05319b69f57d))
+* update compatability matrix for AM support ([a3d351a](https://github.com/gravitee-io/gravitee-policy-groovy/commit/a3d351aa75b76df623ddf987c0065c9489be6dce))
+* upgrade groovy to 4 to support javaj 25 ([7297dc6](https://github.com/gravitee-io/gravitee-policy-groovy/commit/7297dc6d822e1b8ad7e78b4453edfb76840baca1))
+
+
+### BREAKING CHANGES
+
+* required for java 25
+
 # [4.2.0](https://github.com/gravitee-io/gravitee-policy-groovy/compare/4.1.0...4.2.0) (2026-02-19)
 
 
