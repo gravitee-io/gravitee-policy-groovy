@@ -526,7 +526,7 @@ public class SecuredResolver {
         try {
             return Arrays.asList(memberAccessor.apply(clazz));
         } catch (NoClassDefFoundError e) {
-            log.warn("Unable to load members from class [{}], a transitive dependency is missing: {}", clazzName, e.getMessage());
+            log.error("Unable to load members from class [{}], a transitive dependency is missing: {}", clazzName, e.getMessage());
             return emptyList();
         }
     }
