@@ -415,6 +415,13 @@ spec:
 
 ## Changelog
 
+### [4.3.0](https://github.com/gravitee-io/gravitee-policy-groovy/compare/4.2.0...4.3.0) (2026-03-17)
+
+
+##### Features
+
+* add Kafka support ([#121](https://github.com/gravitee-io/gravitee-policy-groovy/issues/121)) ([f64d7e3](https://github.com/gravitee-io/gravitee-policy-groovy/commit/f64d7e30858efb5558f9bc3257ca2d3881a34135))
+
 ### [4.2.0](https://github.com/gravitee-io/gravitee-policy-groovy/compare/4.1.0...4.2.0) (2026-02-19)
 
 
