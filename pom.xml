@@ -22,7 +22,7 @@
 
     <groupId>io.gravitee.policy</groupId>
     <artifactId>gravitee-policy-groovy</artifactId>
-    <version>4.2.0</version>
+    <version>4.3.0</version>
 
     <name>Gravitee.io APIM - Policy - Groovy</name>
     <description>Run Groovy scripts at any stage of request or message processing</description>
@@ -69,6 +69,12 @@
         <dependency>
             <groupId>io.gravitee.gateway</groupId>
             <artifactId>gravitee-gateway-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.kafka</groupId>
+            <artifactId>kafka-clients</artifactId>
             <scope>provided</scope>
         </dependency>
 

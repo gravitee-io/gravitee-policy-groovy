@@ -1,0 +1,76 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "properties": {
+        "script": {
+            "title": "Script",
+            "description": "Groovy script to evaluate. Used for all Kafka phases (INTERACT, PUBLISH, SUBSCRIBE). For INTERACT, phase-specific scripts below take precedence if set.",
+            "type": "string",
+            "format": "gio-code-editor",
+            "x-schema-form": {
+                "type": "codemirror",
+                "codemirrorOptions": {
+                    "placeholder": "Define your Groovy script here or drag and drop a .groovy file",
+                    "lineWrapping": true,
+                    "lineNumbers": true,
+                    "allowDropFileTypes": true,
+                    "autoCloseTags": true,
+                    "mode": "groovy"
+                }
+            }
+        },
+        "onRequestScript": {
+            "title": "On-request script (INTERACT)",
+            "description": "Groovy script to evaluate during the INTERACT request phase. Overrides the generic script above when set.",
+            "type": "string",
+            "format": "gio-code-editor",
+            "gioConfig": {
+                "displayIf": {
+                    "$eq": {
+                        "context.flowPhase": ["INTERACT"]
+                    }
+                }
+            },
+            "x-schema-form": {
+                "type": "codemirror",
+                "codemirrorOptions": {
+                    "placeholder": "Define your Groovy script here or drag and drop a .groovy file",
+                    "lineWrapping": true,
+                    "lineNumbers": true,
+                    "allowDropFileTypes": true,
+                    "autoCloseTags": true,
+                    "mode": "groovy"
+                }
+            }
+        },
+        "onResponseScript": {
+            "title": "On-response script (INTERACT)",
+            "description": "Groovy script to evaluate during the INTERACT response phase. Overrides the generic script above when set.",
+            "type": "string",
+            "format": "gio-code-editor",
+            "gioConfig": {
+                "displayIf": {
+                    "$eq": {
+                        "context.flowPhase": ["INTERACT"]
+                    }
+                }
+            },
+            "x-schema-form": {
+                "type": "codemirror",
+                "codemirrorOptions": {
+                    "placeholder": "Define your Groovy script here or drag and drop a .groovy file",
+                    "lineWrapping": true,
+                    "lineNumbers": true,
+                    "allowDropFileTypes": true,
+                    "autoCloseTags": true,
+                    "mode": "groovy"
+                }
+            }
+        },
+        "overrideContent": {
+            "title": "Override message content",
+            "description": "Enable to replace the Kafka message content with the value returned by your script (applies to PUBLISH and SUBSCRIBE phases).",
+            "type": "boolean"
+        }
+    }
+}
