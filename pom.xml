@@ -49,6 +49,7 @@
 
         <!-- Property used by the publication job in CI-->
         <publish-folder-path>graviteeio-apim/plugins/policies</publish-folder-path>
+        <gravitee.archrules.skip>true</gravitee.archrules.skip>
     </properties>
 
     <dependencyManagement>
