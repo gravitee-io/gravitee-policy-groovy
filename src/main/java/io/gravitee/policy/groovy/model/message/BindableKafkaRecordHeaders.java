@@ -46,12 +46,13 @@ public class BindableKafkaRecordHeaders extends BindableMessageHeaders {
 
     @Override
     public boolean containsKey(Object key) {
-        return kafkaMessage.recordHeaders().containsKey((String) key);
+        return kafkaMessage.recordHeaders().containsKey(key);
     }
 
     @Override
+    @SuppressWarnings("java:S1168") // Map.get contract: null signals absence; put() relies on this to return the previous value or null.
     public List<String> get(Object key) {
-        Buffer value = kafkaMessage.recordHeaders().get((String) key);
+        Buffer value = kafkaMessage.recordHeaders().get(key);
         if (value == null) {
             return null;
         }

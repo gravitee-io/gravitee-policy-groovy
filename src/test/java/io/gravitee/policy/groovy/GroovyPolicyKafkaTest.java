@@ -215,7 +215,7 @@ class GroovyPolicyKafkaTest {
             onMessageCaptor.getValue().apply(message).test().awaitDone(10, TimeUnit.SECONDS).assertComplete().assertNoErrors();
 
             assertThat(message.recordHeaders()).containsKey("X-Internal-Status");
-            assertThat(message.recordHeaders().get("X-Internal-Status").toString()).isEqualTo("Processed");
+            assertThat(message.recordHeaders().get("X-Internal-Status")).hasToString("Processed");
         }
 
         @Test
@@ -231,7 +231,7 @@ class GroovyPolicyKafkaTest {
 
             // Kafka record headers are single-valued; the Groovy binding keeps the last element.
             assertThat(message.recordHeaders()).containsKey("X-Trace");
-            assertThat(message.recordHeaders().get("X-Trace").toString()).isEqualTo("second");
+            assertThat(message.recordHeaders().get("X-Trace")).hasToString("second");
         }
 
         @Test
