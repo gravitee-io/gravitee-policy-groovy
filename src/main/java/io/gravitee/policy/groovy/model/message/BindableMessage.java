@@ -19,6 +19,7 @@ import io.gravitee.gateway.api.buffer.Buffer;
 import io.gravitee.gateway.api.http.HttpHeaders;
 import io.gravitee.gateway.reactive.api.message.Message;
 import io.gravitee.policy.groovy.model.BindableHttpHeaders;
+import io.gravitee.policy.groovy.model.BindableMessageHeaders;
 import java.util.Base64;
 import java.util.List;
 import java.util.Map;
@@ -94,7 +95,7 @@ public class BindableMessage implements Message {
         return message.headers();
     }
 
-    public BindableHttpHeaders getHeaders() {
+    public BindableMessageHeaders getHeaders() {
         return new BindableHttpHeaders(headers());
     }
 
