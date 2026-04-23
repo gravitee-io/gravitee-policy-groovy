@@ -30,7 +30,9 @@ import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Maybe;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
@@ -200,6 +202,69 @@ class GroovyPolicyKafkaTest {
 
             onMessageCaptor.getValue().apply(message).test().awaitDone(10, TimeUnit.SECONDS).assertError(Throwable.class);
         }
+
+        @Test
+        void should_set_kafka_record_header_with_subscript_string_assignment() {
+            var policy = new GroovyPolicy(buildConfig("set_kafka_message_header_subscript.groovy"));
+
+            when(kafkaMessageRequest.onMessage(onMessageCaptor.capture())).thenReturn(Completable.complete());
+            policy.onMessageRequest(kafkaMessageExecutionContext).test().assertNoValues();
+
+            var message = mockKafkaMessage("topic", "key", Buffer.buffer("payload"));
+
+            onMessageCaptor.getValue().apply(message).test().awaitDone(10, TimeUnit.SECONDS).assertComplete().assertNoErrors();
+
+            assertThat(message.recordHeaders()).containsKey("X-Internal-Status");
+            assertThat(message.recordHeaders().get("X-Internal-Status")).hasToString("Processed");
+        }
+
+        @Test
+        void should_set_kafka_record_header_with_subscript_list_assignment() {
+            var policy = new GroovyPolicy(buildConfig("set_kafka_message_header_subscript_list.groovy"));
+
+            when(kafkaMessageRequest.onMessage(onMessageCaptor.capture())).thenReturn(Completable.complete());
+            policy.onMessageRequest(kafkaMessageExecutionContext).test().assertNoValues();
+
+            var message = mockKafkaMessage("topic", "key", Buffer.buffer("payload"));
+
+            onMessageCaptor.getValue().apply(message).test().awaitDone(10, TimeUnit.SECONDS).assertComplete().assertNoErrors();
+
+            // Kafka record headers are single-valued; the Groovy binding keeps the last element.
+            assertThat(message.recordHeaders()).containsKey("X-Trace");
+            assertThat(message.recordHeaders().get("X-Trace")).hasToString("second");
+        }
+
+        @Test
+        void should_read_kafka_record_header_as_list() {
+            var policy = new GroovyPolicy(buildConfig("read_kafka_message_header.groovy"));
+
+            when(kafkaMessageRequest.onMessage(onMessageCaptor.capture())).thenReturn(Completable.complete());
+            policy.onMessageRequest(kafkaMessageExecutionContext).test().assertNoValues();
+
+            var message = mockKafkaMessage("topic", "key", Buffer.buffer("payload"));
+            message.putRecordHeader("X-Incoming", Buffer.buffer("value-from-broker"));
+
+            onMessageCaptor.getValue().apply(message).test().awaitDone(10, TimeUnit.SECONDS).assertComplete().assertNoErrors();
+
+            assertThat(message.attributes()).containsEntry("echoedHeader", "value-from-broker");
+        }
+
+        @Test
+        void should_remove_kafka_record_header() {
+            var policy = new GroovyPolicy(buildConfig("remove_kafka_message_header.groovy"));
+
+            when(kafkaMessageRequest.onMessage(onMessageCaptor.capture())).thenReturn(Completable.complete());
+            policy.onMessageRequest(kafkaMessageExecutionContext).test().assertNoValues();
+
+            var message = mockKafkaMessage("topic", "key", Buffer.buffer("payload"));
+            message.putRecordHeader("X-Remove-Me", Buffer.buffer("doomed"));
+            message.putRecordHeader("X-Keep", Buffer.buffer("kept"));
+
+            onMessageCaptor.getValue().apply(message).test().awaitDone(10, TimeUnit.SECONDS).assertComplete().assertNoErrors();
+
+            assertThat(message.recordHeaders()).doesNotContainKey("X-Remove-Me");
+            assertThat(message.recordHeaders()).containsKey("X-Keep");
+        }
     }
 
     @Nested
@@ -274,6 +339,7 @@ class GroovyPolicyKafkaTest {
     private static KafkaMessage mockKafkaMessage(String topic, String key, Buffer content) {
         var message = mock(KafkaMessage.class, withSettings().lenient());
         Map<String, Object> attributes = new HashMap<>();
+        Map<String, Buffer> recordHeaders = new LinkedHashMap<>();
 
         when(message.topic()).thenReturn(topic);
         when(message.key()).thenReturn(Buffer.buffer(key));
@@ -281,6 +347,15 @@ class GroovyPolicyKafkaTest {
         when(message.attributes()).thenReturn(attributes);
         when(message.attribute(any(String.class), any())).thenAnswer(invocation -> {
             attributes.put(invocation.getArgument(0), invocation.getArgument(1));
+            return message;
+        });
+        when(message.recordHeaders()).thenAnswer(invocation -> Collections.unmodifiableMap(recordHeaders));
+        when(message.putRecordHeader(any(String.class), any(Buffer.class))).thenAnswer(invocation -> {
+            recordHeaders.put(invocation.getArgument(0), invocation.getArgument(1));
+            return message;
+        });
+        when(message.removeRecordHeader(any(String.class))).thenAnswer(invocation -> {
+            recordHeaders.remove((String) invocation.getArgument(0));
             return message;
         });
 

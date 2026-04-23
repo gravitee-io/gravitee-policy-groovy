@@ -35,9 +35,11 @@ class io.gravitee.policy.groovy.utils.AttributesBasedExecutionContext
 class io.gravitee.policy.groovy.model.BindableExecutionContext
 class io.gravitee.policy.groovy.model.http.BindableHttpRequest
 class io.gravitee.policy.groovy.model.http.BindableHttpResponse
+class io.gravitee.policy.groovy.model.BindableMessageHeaders
 class io.gravitee.policy.groovy.model.BindableHttpHeaders
 class io.gravitee.policy.groovy.model.message.BindableMessage
 class io.gravitee.policy.groovy.model.message.BindableKafkaMessage
+class io.gravitee.policy.groovy.model.message.BindableKafkaRecordHeaders
 class io.gravitee.policy.groovy.model.message.BindableMessageAttributes
 class io.gravitee.gateway.api.buffer.Buffer
 class java.lang.Double

@@ -33,6 +33,11 @@ public class BindableKafkaMessage extends BindableMessage {
         this.kafkaMessage = kafkaMessage;
     }
 
+    @Override
+    public BindableKafkaRecordHeaders getHeaders() {
+        return new BindableKafkaRecordHeaders(kafkaMessage);
+    }
+
     /**
      * Returns the message key as a string. Use {@link #getKeyAsBuffer()} for raw binary access.
      */

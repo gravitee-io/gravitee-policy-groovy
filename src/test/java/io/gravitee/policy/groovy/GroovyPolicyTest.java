@@ -177,6 +177,24 @@ class GroovyPolicyTest {
     }
 
     @Test
+    void should_set_header_on_http_request_with_subscript_assignment() {
+        var policy = new GroovyPolicy(buildConfig("set_request_header_subscript.groovy"));
+
+        when(request.onBody(onBodyCaptor.capture())).thenReturn(Completable.complete());
+        policy.onRequest(ctx).test().assertNoValues();
+
+        var headers = HttpHeaders.create();
+        when(request.headers()).thenReturn(headers);
+
+        ((Maybe<Buffer>) onBodyCaptor.getValue().apply(Maybe.just(Buffer.buffer()))).test()
+            .awaitDone(10, TimeUnit.SECONDS)
+            .assertComplete()
+            .assertNoErrors();
+
+        assertThat(headers.get("x-context")).isEqualTo("test");
+    }
+
+    @Test
     void should_set_header_on_http_response() {
         var policy = new GroovyPolicy(buildConfig("set_response_header.groovy"));
 
@@ -282,6 +300,32 @@ class GroovyPolicyTest {
         onMessageCaptor.getValue().apply(message).test().awaitDone(10, TimeUnit.SECONDS).assertComplete().assertNoErrors();
 
         assertThat(message.headers().get("x-context")).isEqualTo("test");
+    }
+
+    @Test
+    void should_set_message_request_header_with_subscript_string_assignment() {
+        var policy = new GroovyPolicy(buildConfig("set_message_header_subscript.groovy"));
+        var message = DefaultMessage.builder().headers(HttpHeaders.create()).build();
+
+        when(request.onMessage(onMessageCaptor.capture())).thenReturn(Completable.complete());
+        policy.onMessageRequest(ctx).test().assertNoValues();
+
+        onMessageCaptor.getValue().apply(message).test().awaitDone(10, TimeUnit.SECONDS).assertComplete().assertNoErrors();
+
+        assertThat(message.headers().get("x-context")).isEqualTo("test");
+    }
+
+    @Test
+    void should_set_message_request_header_with_subscript_list_assignment() {
+        var policy = new GroovyPolicy(buildConfig("set_message_header_subscript_list.groovy"));
+        var message = DefaultMessage.builder().headers(HttpHeaders.create()).build();
+
+        when(request.onMessage(onMessageCaptor.capture())).thenReturn(Completable.complete());
+        policy.onMessageRequest(ctx).test().assertNoValues();
+
+        onMessageCaptor.getValue().apply(message).test().awaitDone(10, TimeUnit.SECONDS).assertComplete().assertNoErrors();
+
+        assertThat(message.headers().getAll("x-context")).containsExactly("alpha", "beta");
     }
 
     @Test

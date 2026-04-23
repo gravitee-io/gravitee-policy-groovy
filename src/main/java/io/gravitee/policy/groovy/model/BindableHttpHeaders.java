@@ -17,17 +17,14 @@ package io.gravitee.policy.groovy.model;
 
 import io.gravitee.gateway.api.http.HttpHeaders;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import javax.annotation.Nonnull;
 
 /**
  * @author David BRASSELY (david.brassely at graviteesource.com)
  * @author GraviteeSource Team
  */
-public class BindableHttpHeaders implements Map<String, List<String>> {
+public class BindableHttpHeaders extends BindableMessageHeaders {
 
     private final HttpHeaders headers;
 
@@ -51,20 +48,8 @@ public class BindableHttpHeaders implements Map<String, List<String>> {
     }
 
     @Override
-    public boolean containsValue(Object value) {
-        throw new IllegalStateException();
-    }
-
-    @Override
     public List<String> get(Object key) {
         return headers.getAll((String) key);
-    }
-
-    @SuppressWarnings("unused")
-    public List<String> put(String key, String value) {
-        List<String> oldValue = get(key);
-        headers.set(key, List.of(value));
-        return oldValue;
     }
 
     @Override
@@ -82,27 +67,19 @@ public class BindableHttpHeaders implements Map<String, List<String>> {
     }
 
     @Override
-    public void putAll(@Nonnull Map<? extends String, ? extends List<String>> all) {
-        throw new UnsupportedOperationException("Groovy scripts do not support accessing this method");
-    }
-
-    @Override
     public void clear() {
-        headers.clear();
+        try {
+            headers.clear();
+        } catch (UnsupportedOperationException unsupported) {
+            // Some backing header lists are unmodifiable and reject bulk clear; per-name remove works.
+            for (String name : new ArrayList<>(headers.names())) {
+                headers.remove(name);
+            }
+        }
     }
 
     @Override
     public Set<String> keySet() {
         return headers.names();
-    }
-
-    @Override
-    public Collection<List<String>> values() {
-        throw new UnsupportedOperationException("Groovy scripts do not support accessing this method");
-    }
-
-    @Override
-    public Set<Entry<String, List<String>>> entrySet() {
-        throw new UnsupportedOperationException("Groovy scripts do not support accessing this method");
     }
 }
