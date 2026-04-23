@@ -415,6 +415,13 @@ spec:
 
 ## Changelog
 
+#### [4.3.1](https://github.com/gravitee-io/gravitee-policy-groovy/compare/4.3.0...4.3.1) (2026-04-23)
+
+
+##### Bug Fixes
+
+* support Groovy subscript header assignment on HTTP and Kafka messages ([#124](https://github.com/gravitee-io/gravitee-policy-groovy/issues/124)) ([ae2367d](https://github.com/gravitee-io/gravitee-policy-groovy/commit/ae2367d37c036597853dbb97a2ce87ab15498f7c))
+
 ### [4.3.0](https://github.com/gravitee-io/gravitee-policy-groovy/compare/4.2.0...4.3.0) (2026-03-17)
 
 
