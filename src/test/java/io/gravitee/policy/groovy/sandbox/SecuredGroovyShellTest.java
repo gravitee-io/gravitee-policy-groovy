@@ -15,11 +15,18 @@
  */
 package io.gravitee.policy.groovy.sandbox;
 
+import static io.gravitee.policy.groovy.sandbox.SecuredGroovyShell.SCRIPT_TIMEOUT_DEFAULT_SECONDS;
+import static io.gravitee.policy.groovy.sandbox.SecuredGroovyShell.SCRIPT_TIMEOUT_MAX_SECONDS;
+import static io.gravitee.policy.groovy.sandbox.SecuredGroovyShell.SCRIPT_TIMEOUT_MIN_SECONDS;
+import static io.gravitee.policy.groovy.sandbox.SecuredGroovyShell.SCRIPT_TIMEOUT_PROPERTY;
 import static io.gravitee.policy.groovy.sandbox.SecuredResolver.WHITELIST_LIST_KEY;
 import static io.gravitee.policy.groovy.sandbox.SecuredResolver.WHITELIST_MODE_KEY;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import groovy.lang.Binding;
+import java.util.concurrent.TimeoutException;
 import org.codehaus.groovy.control.MultipleCompilationErrorsException;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -43,6 +50,57 @@ public class SecuredGroovyShellTest {
     public void init() {
         SecuredResolver.destroy();
         SecuredResolver.initialize(null);
+    }
+
+    @After
+    public void clearTimeoutProperty() {
+        System.clearProperty(SCRIPT_TIMEOUT_PROPERTY);
+    }
+
+    @Test
+    public void pen88ResolveScriptTimeoutReturnsDefaultWhenPropertyNotSet() {
+        System.clearProperty(SCRIPT_TIMEOUT_PROPERTY);
+        assertThat(SecuredGroovyShell.resolveScriptTimeoutSeconds()).isEqualTo(SCRIPT_TIMEOUT_DEFAULT_SECONDS);
+    }
+
+    @Test
+    public void pen88ResolveScriptTimeoutClampsToMinWhenValueTooLow() {
+        System.setProperty(SCRIPT_TIMEOUT_PROPERTY, "0");
+        assertThat(SecuredGroovyShell.resolveScriptTimeoutSeconds()).isEqualTo(SCRIPT_TIMEOUT_MIN_SECONDS);
+    }
+
+    @Test
+    public void pen88ResolveScriptTimeoutClampsToMaxWhenValueTooHigh() {
+        System.setProperty(SCRIPT_TIMEOUT_PROPERTY, "999");
+        assertThat(SecuredGroovyShell.resolveScriptTimeoutSeconds()).isEqualTo(SCRIPT_TIMEOUT_MAX_SECONDS);
+    }
+
+    @Test
+    public void pen88ResolveScriptTimeoutAcceptsValidValue() {
+        System.setProperty(SCRIPT_TIMEOUT_PROPERTY, "10");
+        assertThat(SecuredGroovyShell.resolveScriptTimeoutSeconds()).isEqualTo(10L);
+    }
+
+    @Test(expected = TimeoutException.class)
+    public void pen88InfiniteLoopIsInterruptedByTimedInterrupt() {
+        System.setProperty(SCRIPT_TIMEOUT_PROPERTY, "1");
+        SecuredGroovyShell shell = new SecuredGroovyShell();
+        shell.evaluate("while (true) { /* spin */ }", new Binding());
+    }
+
+    @Test(expected = TimeoutException.class)
+    public void pen88LongRunningLoopIsInterruptedByTimedInterrupt() {
+        System.setProperty(SCRIPT_TIMEOUT_PROPERTY, "1");
+        SecuredGroovyShell shell = new SecuredGroovyShell();
+        shell.evaluate("for (long i = 0; i < Long.MAX_VALUE; i++) {}", new Binding());
+    }
+
+    @Test
+    public void pen88LegitimateScriptCompletesWithinTimeout() {
+        System.setProperty(SCRIPT_TIMEOUT_PROPERTY, "5");
+        SecuredGroovyShell shell = new SecuredGroovyShell();
+        Object result = shell.evaluate("1 + 1", new Binding());
+        assertThat(result).isEqualTo(2);
     }
 
     @Test
