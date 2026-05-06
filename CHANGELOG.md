@@ -1,3 +1,10 @@
+## [4.3.2](https://github.com/gravitee-io/gravitee-policy-groovy/compare/4.3.1...4.3.2) (2026-05-06)
+
+
+### Bug Fixes
+
+* hide overrideContent toggle for INTERACT phase in native Kafka ([#126](https://github.com/gravitee-io/gravitee-policy-groovy/issues/126)) ([82adeb1](https://github.com/gravitee-io/gravitee-policy-groovy/commit/82adeb1aa0884bafa4ae3e1c38b682c67c5169f1))
+
 ## [4.3.1](https://github.com/gravitee-io/gravitee-policy-groovy/compare/4.3.0...4.3.1) (2026-04-23)
 
 
