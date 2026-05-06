@@ -70,7 +70,14 @@
         "overrideContent": {
             "title": "Override message content",
             "description": "Enable to replace the Kafka message content with the value returned by your script (applies to PUBLISH and SUBSCRIBE phases).",
-            "type": "boolean"
+            "type": "boolean",
+            "gioConfig": {
+                "displayIf": {
+                    "$eq": {
+                        "context.flowPhase": ["PUBLISH", "SUBSCRIBE"]
+                    }
+                }
+            }
         }
     }
 }
