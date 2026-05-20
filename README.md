@@ -415,6 +415,13 @@ spec:
 
 ## Changelog
 
+#### [4.3.3](https://github.com/gravitee-io/gravitee-policy-groovy/compare/4.3.2...4.3.3) (2026-05-20)
+
+
+##### Bug Fixes
+
+* **groovy:** limit script execution time and always run scripts off the event loop ([ad10d44](https://github.com/gravitee-io/gravitee-policy-groovy/commit/ad10d440813034c250912ff8186d884e045724fe))
+
 #### [4.3.2](https://github.com/gravitee-io/gravitee-policy-groovy/compare/4.3.1...4.3.2) (2026-05-06)
 
 
