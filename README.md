@@ -426,6 +426,13 @@ spec:
 
 ## Changelog
 
+#### [4.3.4](https://github.com/gravitee-io/gravitee-policy-groovy/compare/4.3.3...4.3.4) (2026-06-09)
+
+
+##### Bug Fixes
+
+* **docs:** document native Kafka support in policy overview ([#128](https://github.com/gravitee-io/gravitee-policy-groovy/issues/128)) ([4ca046a](https://github.com/gravitee-io/gravitee-policy-groovy/commit/4ca046a88084bb94f2c29ed3f7ead305ca02c2bd))
+
 #### [4.3.3](https://github.com/gravitee-io/gravitee-policy-groovy/compare/4.3.2...4.3.3) (2026-05-20)
 
 
