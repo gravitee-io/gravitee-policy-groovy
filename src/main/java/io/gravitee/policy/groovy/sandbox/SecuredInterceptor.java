@@ -15,14 +15,16 @@
  */
 package io.gravitee.policy.groovy.sandbox;
 
+import groovy.lang.GroovyRuntimeException;
+import groovy.lang.MetaClass;
 import groovy.lang.Script;
 import io.gravitee.common.util.MultiValueMap;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.codehaus.groovy.runtime.InvokerHelper;
+import org.codehaus.groovy.runtime.ScriptBytecodeAdapter;
 import org.kohsuke.groovy.sandbox.GroovyInterceptor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * @author Jeoffrey HAEYAERT (jeoffrey.haeyaert at graviteesource.com)
@@ -70,7 +72,17 @@ public class SecuredInterceptor extends GroovyInterceptor {
     @Override
     public Object onSuperCall(Invoker invoker, Class senderType, Object receiver, String method, Object... args) throws Throwable {
         if (SecuredResolver.getInstance().isMethodAllowed(receiver, method, args)) {
-            return super.onSuperCall(invoker, senderType, receiver, method, args);
+            // groovy-sandbox's default super-call dispatch resolves the method against
+            // senderType.getSuperclass(). Since Groovy 4 the meta method index for super calls became
+            // strict (methodsForSuper(sender) only holds sender's super methods), so passing the
+            // superclass fails to resolve inherited methods (MissingMethodException). Invoke the super
+            // method ourselves using senderType so resolution starts at the proper superclass.
+            try {
+                MetaClass metaClass = InvokerHelper.getMetaClass(receiver.getClass());
+                return metaClass.invokeMethod(senderType, receiver, method, args, true, true);
+            } catch (GroovyRuntimeException gre) {
+                throw ScriptBytecodeAdapter.unwrap(gre);
+            }
         }
 
         throw new SecurityException("Failed to resolve method [ " + prettyPrint(receiver, method, args) + " ]");
