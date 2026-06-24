@@ -427,6 +427,23 @@ spec:
 
 ## Changelog
 
+### [5.0.0](https://github.com/gravitee-io/gravitee-policy-groovy/compare/4.3.4...5.0.0) (2026-06-24)
+
+
+##### Features
+
+* upgrade to Groovy 4 to support Java 25 ([c5f86ef](https://github.com/gravitee-io/gravitee-policy-groovy/commit/c5f86ef085184ea4ca9ee40abad2da5d299965b5))
+
+
+##### BREAKING CHANGES
+
+* Groovy 4 is required (enables Java 25 support).
+
+Also includes the sandbox super-call fix (onSuperCall now dispatches via
+senderType, since Groovy 4 made the super-call meta method index strict and
+groovy-sandbox failed to resolve inherited methods) and the XmlSlurper package
+move (groovy.util -> groovy.xml).
+
 #### [4.3.4](https://github.com/gravitee-io/gravitee-policy-groovy/compare/4.3.3...4.3.4) (2026-06-09)
 
 
