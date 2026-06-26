@@ -32,6 +32,7 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.groovy.json.internal.FastStringUtils;
+import org.codehaus.groovy.ast.expr.PropertyExpression;
 import org.codehaus.groovy.ast.tools.GeneralUtils;
 import org.codehaus.groovy.control.CompilationFailedException;
 import org.codehaus.groovy.control.CompilerConfiguration;
@@ -96,7 +97,7 @@ public class SecuredGroovyShell {
             "value",
             scriptTimeoutSeconds,
             "unit",
-            GeneralUtils.propX(GeneralUtils.classX(TimeUnit.class), "SECONDS")
+            new PropertyExpression(GeneralUtils.classX(TimeUnit.class), "SECONDS")
         );
         conf.addCompilationCustomizers(new ASTTransformationCustomizer(timedInterruptParams, TimedInterrupt.class));
 
