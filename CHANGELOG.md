@@ -1,3 +1,12 @@
+## [5.0.1](https://github.com/gravitee-io/gravitee-policy-groovy/compare/5.0.0...5.0.1) (2026-06-26)
+
+
+### Bug Fixes
+
+* adapt whitelist for groovy 4 ([c779d30](https://github.com/gravitee-io/gravitee-policy-groovy/commit/c779d30a1794f38852d1cc6cd54d3a4244897009))
+* exclude groovy2 from the dependencies ([c3ebdf3](https://github.com/gravitee-io/gravitee-policy-groovy/commit/c3ebdf3c0256f31bb54ad0f91d7f7b49cd754434))
+* relay on PropertyExpression constructor to avoid NoSuchMethod exception ([a3f095e](https://github.com/gravitee-io/gravitee-policy-groovy/commit/a3f095e7292e3fc08e24ceceae3a8059eb9389e7))
+
 # [5.0.0](https://github.com/gravitee-io/gravitee-policy-groovy/compare/4.3.4...5.0.0) (2026-06-24)
 
 
