@@ -37,7 +37,6 @@ import org.apache.commons.lang3.reflect.FieldUtils;
 import org.apache.commons.lang3.reflect.MethodUtils;
 import org.apache.groovy.dateutil.extensions.DateUtilExtensions;
 import org.apache.groovy.dateutil.extensions.DateUtilStaticExtensions;
-import org.codehaus.groovy.runtime.DateGroovyMethods;
 import org.codehaus.groovy.runtime.DefaultGroovyMethods;
 import org.codehaus.groovy.runtime.EncodingGroovyMethods;
 import org.codehaus.groovy.runtime.StringGroovyMethods;
@@ -91,7 +90,6 @@ public class SecuredResolver {
         DefaultGroovyMethods.class,
         StringGroovyMethods.class,
         EncodingGroovyMethods.class,
-        DateGroovyMethods.class,
         DateUtilExtensions.class,
         DateUtilStaticExtensions.class,
     };
