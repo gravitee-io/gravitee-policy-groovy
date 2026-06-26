@@ -24,7 +24,6 @@ import groovy.lang.Script;
 import groovy.transform.TimedInterrupt;
 import io.gravitee.policy.groovy.GroovyPolicy;
 import io.gravitee.policy.groovy.utils.Sha1;
-import io.reactivex.rxjava3.annotations.NonNull;
 import io.reactivex.rxjava3.core.Maybe;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 import java.time.Duration;
