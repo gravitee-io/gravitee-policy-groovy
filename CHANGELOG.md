@@ -1,3 +1,10 @@
+## [4.3.5](https://github.com/gravitee-io/gravitee-policy-groovy/compare/4.3.4...4.3.5) (2026-07-07)
+
+
+### Bug Fixes
+
+* declare default schema explicitly in plugin manifest ([96faea6](https://github.com/gravitee-io/gravitee-policy-groovy/commit/96faea68b0edcd1266971b8efe2da00e1c6faec0))
+
 ## [4.3.4](https://github.com/gravitee-io/gravitee-policy-groovy/compare/4.3.3...4.3.4) (2026-06-09)
 
 
