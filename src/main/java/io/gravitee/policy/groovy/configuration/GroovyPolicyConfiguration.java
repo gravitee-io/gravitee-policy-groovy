@@ -38,6 +38,13 @@ public class GroovyPolicyConfiguration implements PolicyConfiguration {
 
     private boolean overrideContent;
 
+    /**
+     * When {@code true}, scripts that cannot be fully covered by the execution timeout instrumentation
+     * (declaring interfaces or annotations) are rejected at compilation, guaranteeing that no part of the
+     * script can escape the timeout.
+     */
+    private boolean strictExecutionTimeout;
+
     private String script;
 
     private String onRequestScript;

@@ -367,6 +367,49 @@ class GroovyPolicyTest {
         assertThat(message.attributes()).containsEntry("count", 100);
     }
 
+    @Test
+    void should_run_script_declaring_interface_by_default() {
+        var policy = new GroovyPolicy(buildConfig("declare_interface.groovy"));
+
+        when(request.onBody(onBodyCaptor.capture())).thenReturn(Completable.complete());
+        policy.onRequest(ctx).test().assertNoValues();
+
+        var headers = HttpHeaders.create().set("x-context", "test");
+        when(request.headers()).thenReturn(headers);
+
+        ((Maybe<Buffer>) onBodyCaptor.getValue().apply(Maybe.just(Buffer.buffer()))).test()
+            .awaitDone(10, TimeUnit.SECONDS)
+            .assertComplete()
+            .assertNoErrors();
+
+        assertThat(headers.size()).isZero();
+    }
+
+    @Test
+    void should_fail_to_run_script_declaring_interface_when_strict_execution_timeout_is_enabled() {
+        var config = GroovyPolicyConfiguration.builder()
+            .script(loadScript("declare_interface.groovy"))
+            .readContent(true)
+            .strictExecutionTimeout(true)
+            .build();
+        var policy = new GroovyPolicy(config);
+
+        when(request.onBody(onBodyCaptor.capture())).thenReturn(Completable.complete());
+        policy.onRequest(ctx).test().assertNoValues();
+
+        ((Maybe<Buffer>) onBodyCaptor.getValue().apply(Maybe.just(Buffer.buffer()))).test()
+            .awaitDone(10, TimeUnit.SECONDS)
+            .assertError(error -> {
+                assertThat(error).isInstanceOf(InterruptionFailureException.class);
+                InterruptionFailureException failureException = (InterruptionFailureException) error;
+                ExecutionFailure executionFailure = failureException.getExecutionFailure();
+                assertThat(executionFailure).isNotNull();
+                assertThat(executionFailure.key()).isEqualTo("GROOVY_EXECUTION_FAILURE");
+                assertThat(executionFailure.statusCode()).isEqualTo(INTERNAL_SERVER_ERROR_500);
+                return true;
+            });
+    }
+
     private static GroovyPolicyConfiguration buildConfig(String script) {
         return GroovyPolicyConfiguration.builder().script(loadScript(script)).readContent(true).build();
     }

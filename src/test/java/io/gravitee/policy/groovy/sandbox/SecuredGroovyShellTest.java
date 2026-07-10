@@ -15,11 +15,18 @@
  */
 package io.gravitee.policy.groovy.sandbox;
 
+import static io.gravitee.policy.groovy.sandbox.SecuredGroovyShell.SCRIPT_TIMEOUT_DEFAULT_SECONDS;
+import static io.gravitee.policy.groovy.sandbox.SecuredGroovyShell.SCRIPT_TIMEOUT_MAX_SECONDS;
+import static io.gravitee.policy.groovy.sandbox.SecuredGroovyShell.SCRIPT_TIMEOUT_MIN_SECONDS;
+import static io.gravitee.policy.groovy.sandbox.SecuredGroovyShell.SCRIPT_TIMEOUT_PROPERTY;
 import static io.gravitee.policy.groovy.sandbox.SecuredResolver.WHITELIST_LIST_KEY;
 import static io.gravitee.policy.groovy.sandbox.SecuredResolver.WHITELIST_MODE_KEY;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import groovy.lang.Binding;
+import java.util.concurrent.TimeoutException;
 import org.codehaus.groovy.control.MultipleCompilationErrorsException;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -43,6 +50,104 @@ public class SecuredGroovyShellTest {
     public void init() {
         SecuredResolver.destroy();
         SecuredResolver.initialize(null);
+    }
+
+    @After
+    public void clearTimeoutProperty() {
+        System.clearProperty(SCRIPT_TIMEOUT_PROPERTY);
+    }
+
+    @Test
+    public void pen88ResolveScriptTimeoutReturnsDefaultWhenPropertyNotSet() {
+        System.clearProperty(SCRIPT_TIMEOUT_PROPERTY);
+        assertThat(SecuredGroovyShell.resolveScriptTimeoutSeconds()).isEqualTo(SCRIPT_TIMEOUT_DEFAULT_SECONDS);
+    }
+
+    @Test
+    public void pen88ResolveScriptTimeoutClampsToMinWhenValueTooLow() {
+        System.setProperty(SCRIPT_TIMEOUT_PROPERTY, "0");
+        assertThat(SecuredGroovyShell.resolveScriptTimeoutSeconds()).isEqualTo(SCRIPT_TIMEOUT_MIN_SECONDS);
+    }
+
+    @Test
+    public void pen88ResolveScriptTimeoutClampsToMaxWhenValueTooHigh() {
+        System.setProperty(SCRIPT_TIMEOUT_PROPERTY, "999");
+        assertThat(SecuredGroovyShell.resolveScriptTimeoutSeconds()).isEqualTo(SCRIPT_TIMEOUT_MAX_SECONDS);
+    }
+
+    @Test
+    public void pen88ResolveScriptTimeoutAcceptsValidValue() {
+        System.setProperty(SCRIPT_TIMEOUT_PROPERTY, "10");
+        assertThat(SecuredGroovyShell.resolveScriptTimeoutSeconds()).isEqualTo(10L);
+    }
+
+    @Test(expected = TimeoutException.class)
+    public void pen88InfiniteLoopIsInterruptedByTimedInterrupt() {
+        System.setProperty(SCRIPT_TIMEOUT_PROPERTY, "1");
+        SecuredGroovyShell shell = new SecuredGroovyShell();
+        shell.evaluate("while (true) { /* spin */ }", new Binding());
+    }
+
+    @Test(expected = TimeoutException.class)
+    public void pen88LongRunningLoopIsInterruptedByTimedInterrupt() {
+        System.setProperty(SCRIPT_TIMEOUT_PROPERTY, "1");
+        SecuredGroovyShell shell = new SecuredGroovyShell();
+        shell.evaluate("for (long i = 0; i < Long.MAX_VALUE; i++) {}", new Binding());
+    }
+
+    @Test
+    public void pen88LegitimateScriptCompletesWithinTimeout() {
+        System.setProperty(SCRIPT_TIMEOUT_PROPERTY, "5");
+        SecuredGroovyShell shell = new SecuredGroovyShell();
+        Object result = shell.evaluate("1 + 1", new Binding());
+        assertThat(result).isEqualTo(2);
+    }
+
+    private static final String SCRIPT_DECLARING_INTERFACE =
+        "interface Operators { Map OPERATORS = [eq: '='] }                 \n" +
+        "class Criteria implements Operators { String fieldName }          \n" +
+        "def criteria = new Criteria(fieldName: 'name')                    \n" +
+        "assert Operators.OPERATORS['eq'] == '='                           \n" +
+        "assert criteria.fieldName == 'name'                               \n" +
+        "assert criteria.OPERATORS['eq'] == '='";
+
+    @Test
+    public void scriptDeclaringInterfaceCompilesAndRunsByDefault() {
+        new SecuredGroovyShell().evaluate(SCRIPT_DECLARING_INTERFACE, new Binding());
+    }
+
+    @Test
+    public void scriptDeclaringAnnotationCompilesAndRunsByDefault() {
+        String script = "@interface Marker { }                             \n" + "assert 1 + 1 == 2";
+        new SecuredGroovyShell().evaluate(script, new Binding());
+    }
+
+    @Test(expected = TimeoutException.class)
+    public void defaultModeKeepsInfiniteLoopInterruptedByTimedInterrupt() {
+        System.setProperty(SCRIPT_TIMEOUT_PROPERTY, "1");
+        String script = "interface Operators { Map OPERATORS = [eq: '='] } \n" + "while (true) { /* spin */ }";
+        new SecuredGroovyShell().evaluate(script, new Binding());
+    }
+
+    @Test(expected = TimeoutException.class)
+    public void defaultModeKeepsInfiniteLoopInClassMethodInterruptedByTimedInterrupt() {
+        System.setProperty(SCRIPT_TIMEOUT_PROPERTY, "1");
+        String script =
+            "interface Operators { Map OPERATORS = [eq: '='] }             \n" +
+            "class Spinner implements Operators { def spin() { while (true) { } } }\n" +
+            "new Spinner().spin()";
+        new SecuredGroovyShell().evaluate(script, new Binding());
+    }
+
+    @Test
+    public void strictTimeoutDoesNotAffectRegularScripts() {
+        Object result = new SecuredGroovyShell(true).evaluate("1 + 1", new Binding());
+        assertThat(result).isEqualTo(2);
+    }
+
+    @Test(expected = MultipleCompilationErrorsException.class)
+    public void scriptDeclaringInterfaceFailsToCompileWithStrictTimeout() {
+        new SecuredGroovyShell(true).evaluate(SCRIPT_DECLARING_INTERFACE, new Binding());
     }
 
     @Test

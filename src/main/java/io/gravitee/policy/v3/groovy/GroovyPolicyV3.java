@@ -50,10 +50,24 @@ public class GroovyPolicyV3 {
 
     protected final GroovyPolicyConfiguration configuration;
 
-    protected static final SecuredGroovyShell GROOVY_SHELL = new SecuredGroovyShell();
+    protected static final SecuredGroovyShell GROOVY_SHELL = new SecuredGroovyShell(false);
+
+    /**
+     * Lazily created so gateways with no policy opting into the strict execution timeout don't pay for a
+     * second shell. Each shell keeps its own compiled-script cache, as the same script compiles differently
+     * in each mode.
+     */
+    private static class StrictGroovyShellHolder {
+
+        private static final SecuredGroovyShell INSTANCE = new SecuredGroovyShell(true);
+    }
 
     public GroovyPolicyV3(GroovyPolicyConfiguration configuration) {
         this.configuration = configuration;
+    }
+
+    protected SecuredGroovyShell groovyShell() {
+        return configuration.isStrictExecutionTimeout() ? StrictGroovyShellHolder.INSTANCE : GROOVY_SHELL;
     }
 
     @OnRequest
@@ -190,7 +204,7 @@ public class GroovyPolicyV3 {
                 binding.setVariable(RESULT_VARIABLE_NAME, new PolicyResult());
 
                 // And run script
-                GROOVY_SHELL.evaluate(script, binding);
+                groovyShell().evaluate(script, binding);
 
                 PolicyResult result = (PolicyResult) binding.getVariable(RESULT_VARIABLE_NAME);
 
@@ -229,7 +243,7 @@ public class GroovyPolicyV3 {
         binding.setVariable(RESULT_VARIABLE_NAME, new PolicyResult());
 
         // And run script
-        String content = GROOVY_SHELL.evaluate(script, binding);
+        String content = groovyShell().evaluate(script, binding);
 
         PolicyResult result = (PolicyResult) binding.getVariable(RESULT_VARIABLE_NAME);
         if (result.getState() == PolicyResult.State.FAILURE) {
