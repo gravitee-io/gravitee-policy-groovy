@@ -37,6 +37,12 @@
                 "hidden": true
             }
         },
+        "strictExecutionTimeout": {
+            "title": "Strict execution timeout",
+            "description": "Rejects scripts that cannot be fully covered by the execution timeout protection, such as scripts declaring Groovy interfaces or annotations. Enabling this option improves security by guaranteeing that no part of the script can escape the execution timeout. Recommended if your script does not declare interfaces.",
+            "type": "boolean",
+            "default": false
+        },
         "onRequestScript": {
             "title": "On-request script",
             "description": "Groovy script to evaluate during the OnRequest phase.",

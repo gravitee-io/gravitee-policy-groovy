@@ -62,7 +62,7 @@ public class GroovyPolicy extends GroovyPolicyV3 implements Policy, KafkaPolicy 
 
         // Precompile all the scripts on a io schedulers to get ready when necessary.
         scriptFlowable
-            .doOnNext(GROOVY_SHELL::compile)
+            .doOnNext(script -> groovyShell().compile(script))
             .subscribeOn(Schedulers.io())
             .doOnError(e -> log.warn("Error while compiling script. Ignoring", e))
             .onErrorComplete()
@@ -152,7 +152,8 @@ public class GroovyPolicy extends GroovyPolicyV3 implements Policy, KafkaPolicy 
     }
 
     private Maybe<Buffer> runContentAwareScript(HttpExecutionContext ctx, Binding binding, String script) {
-        return GROOVY_SHELL.evaluateRx(script, binding)
+        return groovyShell()
+            .evaluateRx(script, binding)
             .onErrorResumeNext(e -> {
                 log.error(SCRIPT_EXECUTION_ERROR_MESSAGE, e);
                 return ctx.interruptBodyWith(
@@ -179,7 +180,8 @@ public class GroovyPolicy extends GroovyPolicyV3 implements Policy, KafkaPolicy 
     }
 
     private Completable runScript(HttpExecutionContext ctx, Binding binding, String script) {
-        return GROOVY_SHELL.evaluateRx(script, binding)
+        return groovyShell()
+            .evaluateRx(script, binding)
             .ignoreElement()
             .onErrorResumeNext(e -> {
                 log.error(SCRIPT_EXECUTION_ERROR_MESSAGE, e);
@@ -226,7 +228,8 @@ public class GroovyPolicy extends GroovyPolicyV3 implements Policy, KafkaPolicy 
         var script = configuration.getScript();
         var binding = GroovyBindings.bindMessage(ctx, message);
 
-        return GROOVY_SHELL.evaluateRx(script, binding)
+        return groovyShell()
+            .evaluateRx(script, binding)
             .onErrorResumeNext(e ->
                 ctx.interruptMessageWith(
                     new ExecutionFailure(INTERNAL_SERVER_ERROR_500)
@@ -294,7 +297,8 @@ public class GroovyPolicy extends GroovyPolicyV3 implements Policy, KafkaPolicy 
     }
 
     private Completable runKafkaScript(KafkaExecutionContext ctx, Binding binding, String script) {
-        return GROOVY_SHELL.evaluateRx(script, binding)
+        return groovyShell()
+            .evaluateRx(script, binding)
             .ignoreElement()
             .onErrorResumeNext(e -> {
                 log.error(SCRIPT_EXECUTION_ERROR_MESSAGE, e);
@@ -315,7 +319,8 @@ public class GroovyPolicy extends GroovyPolicyV3 implements Policy, KafkaPolicy 
         var script = configuration.getScript();
         var binding = GroovyBindings.bindKafkaMessage(ctx, message);
 
-        return GROOVY_SHELL.evaluateRx(script, binding)
+        return groovyShell()
+            .evaluateRx(script, binding)
             .onErrorResumeNext(e -> {
                 log.error("An error occurred while executing Groovy script on Kafka message", e);
                 return ctx.executionContext().interruptWith(Errors.UNKNOWN_SERVER_ERROR).toMaybe();
