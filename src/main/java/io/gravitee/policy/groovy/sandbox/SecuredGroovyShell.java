@@ -21,21 +21,15 @@ import groovy.lang.Binding;
 import groovy.lang.GroovyCodeSource;
 import groovy.lang.GroovyShell;
 import groovy.lang.Script;
-import groovy.transform.TimedInterrupt;
 import io.gravitee.policy.groovy.GroovyPolicy;
 import io.gravitee.policy.groovy.utils.Sha1;
+import io.reactivex.rxjava3.annotations.NonNull;
 import io.reactivex.rxjava3.core.Maybe;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 import java.time.Duration;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.groovy.json.internal.FastStringUtils;
-import org.codehaus.groovy.ast.expr.PropertyExpression;
-import org.codehaus.groovy.ast.tools.GeneralUtils;
 import org.codehaus.groovy.control.CompilationFailedException;
 import org.codehaus.groovy.control.CompilerConfiguration;
-import org.codehaus.groovy.control.customizers.ASTTransformationCustomizer;
 import org.codehaus.groovy.control.customizers.SecureASTCustomizer;
 import org.codehaus.groovy.runtime.InvokerHelper;
 import org.kohsuke.groovy.sandbox.GroovyInterceptor;
@@ -45,15 +39,7 @@ import org.kohsuke.groovy.sandbox.SandboxTransformer;
  * @author Jeoffrey HAEYAERT (jeoffrey.haeyaert at graviteesource.com)
  * @author GraviteeSource Team
  */
-@Slf4j
 public class SecuredGroovyShell {
-
-    /** Maximum script execution time in seconds; clamped to [{@value #SCRIPT_TIMEOUT_MIN_SECONDS}, {@value #SCRIPT_TIMEOUT_MAX_SECONDS}]. */
-    static final String SCRIPT_TIMEOUT_PROPERTY = "gravitee.policy.groovy.script.timeout.seconds";
-
-    static final long SCRIPT_TIMEOUT_DEFAULT_SECONDS = 5L;
-    static final long SCRIPT_TIMEOUT_MIN_SECONDS = 1L;
-    static final long SCRIPT_TIMEOUT_MAX_SECONDS = 30L;
 
     /**
      * Number of hours to keep compiled script in cache after the last time it was accessed.
@@ -89,26 +75,15 @@ public class SecuredGroovyShell {
         secureASTCustomizer.setPackageAllowed(false);
         conf.addCompilationCustomizers(secureASTCustomizer);
 
-        long scriptTimeoutSeconds = resolveScriptTimeoutSeconds();
-        log.debug("Groovy script execution timeout set to {} second(s) (property: {})", scriptTimeoutSeconds, SCRIPT_TIMEOUT_PROPERTY);
-
-        Map<String, Object> timedInterruptParams = Map.of(
-            "value",
-            scriptTimeoutSeconds,
-            "unit",
-            new PropertyExpression(GeneralUtils.classX(TimeUnit.class), "SECONDS")
-        );
-        conf.addCompilationCustomizers(new ASTTransformationCustomizer(timedInterruptParams, TimedInterrupt.class));
+        // TODO: Use time interrupt to avoid long running scripts.
+        // Note: groovy scripts are currently run on vertx threads. Should be executed outside vertx to prevent possible server crash.
+        // ASTTransformationCustomizer timeInterrupt = new ASTTransformationCustomizer(Maps.of("value", 1L, "unit", propX(classX(TimeUnit.class), "SECONDS")), TimedInterrupt.class);
+        // conf.addCompilationCustomizers(timeInterrupt);
 
         this.groovyShell = new GroovyShell(conf);
 
         // Create a groovy interceptor to intercept all calls and check if they are allowed or not.
         this.groovyInterceptor = new SecuredInterceptor();
-    }
-
-    static long resolveScriptTimeoutSeconds() {
-        long value = Long.getLong(SCRIPT_TIMEOUT_PROPERTY, SCRIPT_TIMEOUT_DEFAULT_SECONDS);
-        return Math.max(SCRIPT_TIMEOUT_MIN_SECONDS, Math.min(SCRIPT_TIMEOUT_MAX_SECONDS, value));
     }
 
     /**
@@ -128,9 +103,14 @@ public class SecuredGroovyShell {
 
     public <T> Maybe<T> evaluateRx(String script, Binding binding) {
         final String key = getKey(script);
-        return Maybe.<T>fromCallable(() -> evaluate(key, script, binding))
-            .subscribeOn(Schedulers.io())
-            .observeOn(Schedulers.computation());
+        final boolean compiled = sources.getIfPresent(key) != null;
+        final Maybe<@NonNull T> groovyEval = Maybe.fromCallable(() -> evaluate(key, script, binding));
+
+        if (!compiled) {
+            return groovyEval.subscribeOn(Schedulers.io()).observeOn(Schedulers.computation());
+        }
+
+        return groovyEval;
     }
 
     private <T> T evaluate(String key, String script, Binding binding) {
