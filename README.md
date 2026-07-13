@@ -442,6 +442,13 @@ spec:
 
 ## Changelog
 
+#### [5.0.4](https://github.com/gravitee-io/gravitee-policy-groovy/compare/5.0.3...5.0.4) (2026-07-13)
+
+
+##### Bug Fixes
+
+* **groovy:** reintroduce script execution timeout with interface-safe default ([17e9f3d](https://github.com/gravitee-io/gravitee-policy-groovy/commit/17e9f3d8007fd94314efd79f58b4051e07a91b5f))
+
 #### [5.0.3](https://github.com/gravitee-io/gravitee-policy-groovy/compare/5.0.2...5.0.3) (2026-07-10)
 
 
