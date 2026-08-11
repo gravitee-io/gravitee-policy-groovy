@@ -5,7 +5,6 @@
         "scope": {
             "title": "Scope",
             "type": "string",
-            "default": "REQUEST",
             "enum": ["REQUEST", "RESPONSE"],
             "x-schema-form": {
                 "hidden": true
