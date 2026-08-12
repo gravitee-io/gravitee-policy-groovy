@@ -1,3 +1,10 @@
+## [4.3.7](https://github.com/gravitee-io/gravitee-policy-groovy/compare/4.3.6...4.3.7) (2026-08-12)
+
+
+### Bug Fixes
+
+* remove default value for deprecated scope field in Groovy policy schema ([1da8187](https://github.com/gravitee-io/gravitee-policy-groovy/commit/1da8187c462a2f7a59a819575689aee783cbf77d))
+
 ## [4.3.6](https://github.com/gravitee-io/gravitee-policy-groovy/compare/4.3.5...4.3.6) (2026-07-10)
 
 
