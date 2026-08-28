@@ -103,13 +103,22 @@ public class SecuredResolver {
 
     private final Map<Class<?>, List<Method>> methodsByTypeAndSuperTypes;
     private final Map<String, Boolean> resolved;
+    private final SandboxDiagnostics diagnostics;
 
     private static SecuredResolver instance;
 
     public static synchronized void initialize(@Nullable Environment environment) {
+        initialize(environment, false);
+    }
+
+    private static synchronized void initialize(@Nullable Environment environment, boolean lazy) {
         if (!isInitialized()) {
             loadWhitelist(environment);
             instance = new SecuredResolver();
+
+            if (lazy) {
+                SandboxDiagnostics.lazyInitialization(environment);
+            }
         }
     }
 
@@ -119,6 +128,7 @@ public class SecuredResolver {
 
     public static synchronized void destroy() {
         if (isInitialized()) {
+            SandboxDiagnostics.destroyed(instance.diagnostics.generation());
             methodsByType.clear();
             fieldsByType.clear();
             constructorsByType.clear();
@@ -129,7 +139,7 @@ public class SecuredResolver {
 
     public static SecuredResolver getInstance() {
         if (!isInitialized()) {
-            initialize(null);
+            initialize(null, true);
         }
 
         return instance;
@@ -138,6 +148,7 @@ public class SecuredResolver {
     private SecuredResolver() {
         resolved = new ConcurrentHashMap<>();
         methodsByTypeAndSuperTypes = new ConcurrentHashMap<>();
+        diagnostics = new SandboxDiagnostics(methodsByType, fieldsByType, constructorsByType, annotations);
     }
 
     public boolean isAnnotationAllowed(String name) {
@@ -157,7 +168,13 @@ public class SecuredResolver {
         String key = getKey(clazz, "<init>", constructorArgs);
 
         if (resolved.containsKey(key)) {
-            return resolved.get(key);
+            boolean cachedDecision = resolved.get(key);
+
+            if (!cachedDecision) {
+                diagnostics.reportDenial(methodsByType, clazz, key, true);
+            }
+
+            return cachedDecision;
         }
 
         if (isGroovyScriptDefinedClass(clazz)) {
@@ -170,6 +187,10 @@ public class SecuredResolver {
 
         boolean constructorAllowed = constructorsByType.getOrDefault(clazz, emptyList()).contains(constructor);
         resolved.put(key, constructorAllowed);
+
+        if (!constructorAllowed) {
+            diagnostics.reportDenial(methodsByType, clazz, key, false);
+        }
 
         return constructorAllowed;
     }
@@ -246,7 +267,13 @@ public class SecuredResolver {
         String key = getKey(objectClass, methodName, methodArgs);
 
         if (resolved.containsKey(key)) {
-            return resolved.get(key);
+            boolean cachedDecision = resolved.get(key);
+
+            if (!cachedDecision) {
+                diagnostics.reportDenial(methodsByType, objectClass, key, true);
+            }
+
+            return cachedDecision;
         }
 
         if (object instanceof Number && NUMBER_MATH_METHOD_NAMES.contains(methodName)) {
@@ -260,6 +287,10 @@ public class SecuredResolver {
         boolean methodAllowed =
             isMethodAllowed(objectClass, methodName, argumentClasses) || isDGMAllowed(objectClass, methodName, argumentClasses);
         resolved.put(key, methodAllowed);
+
+        if (!methodAllowed) {
+            diagnostics.reportDenial(methodsByType, objectClass, key, false);
+        }
 
         return methodAllowed;
     }
@@ -444,6 +475,10 @@ public class SecuredResolver {
                 (ConfigurableEnvironment) environment,
                 WHITELIST_LIST_KEY
             ).values();
+
+            if (!configWhitelist.isEmpty()) {
+                SandboxDiagnostics.configuredWhitelistDetected();
+            }
 
             for (Object declaration : configWhitelist) {
                 parseDeclaration(String.valueOf(declaration), methods, fields, constructors, annotationClasses);
