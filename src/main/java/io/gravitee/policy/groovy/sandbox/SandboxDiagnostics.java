@@ -15,10 +15,6 @@
  */
 package io.gravitee.policy.groovy.sandbox;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,9 +35,6 @@ import org.springframework.lang.Nullable;
  */
 class SandboxDiagnostics {
 
-    /** The runtime class is absent from the whitelist index although another class with the same name is in it. */
-    static final String MARKER_CLASSLOADER_MISMATCH = "[APIM-14800/classloader-mismatch]";
-
     /** The denial was served from the cache, whose keys carry no classloader identity. */
     static final String MARKER_CACHED_DENIAL = "[APIM-14800/cached-denial]";
 
@@ -50,34 +43,21 @@ class SandboxDiagnostics {
 
     private static final Logger log = LoggerFactory.getLogger("io.gravitee.policy.groovy.sandbox.diagnostics");
 
-    /**
-     * Once an anomaly occurs it usually occurs on every single request. Reports are therefore deduplicated, and the
-     * number of distinct reports an already degraded gateway can accumulate is bounded.
-     */
-    private static final int MAX_REPORTED_ANOMALIES = 500;
-
     private static final AtomicInteger GENERATIONS = new AtomicInteger();
 
     private final int generation;
-    private final Map<String, Class<?>> whitelistedClassesByName;
-    private final Set<String> reportedAnomalies = ConcurrentHashMap.newKeySet();
 
     SandboxDiagnostics(Whitelist whitelist) {
         this.generation = GENERATIONS.incrementAndGet();
-        this.whitelistedClassesByName = indexByName(
-            whitelist.methodsByType().keySet(),
-            whitelist.fieldsByType().keySet(),
-            whitelist.constructorsByType().keySet()
-        );
 
         log.info(
-            "Groovy sandbox whitelist generation {} loaded by [{}]: {} types with methods, {} with fields, {} with constructors, {} annotations",
+            "Groovy sandbox whitelist generation {} loaded by [{}]: {} methods, {} fields, {} constructors, {} annotation names",
             generation,
             describe(SecuredResolver.class.getClassLoader()),
-            whitelist.methodsByType().size(),
-            whitelist.fieldsByType().size(),
-            whitelist.constructorsByType().size(),
-            whitelist.annotations().size()
+            whitelist.methods().size(),
+            whitelist.fields().size(),
+            whitelist.constructors().size(),
+            whitelist.annotationNames().size()
         );
     }
 
@@ -104,34 +84,14 @@ class SandboxDiagnostics {
     }
 
     /**
-     * Describes the state the sandbox was in when it denied a member. Called on the denial path only; the outcome is
-     * already decided and is never affected by what happens here.
+     * Notes a denial served from the decision cache. The cache is keyed by class name only, so this is where a class
+     * would inherit a decision taken for a different class carrying the same name.
      *
      * @param deniedClass the runtime class the member was resolved against.
-     * @param cacheKey the key the decision was stored under, which carries the class name but no classloader identity.
+     * @param cacheKey the key the decision was stored under.
      * @param fromCache whether the denial was served from the cache rather than freshly computed.
      */
     void reportDenial(Class<?> deniedClass, String cacheKey, boolean fromCache) {
-        if (!log.isWarnEnabled()) {
-            return;
-        }
-
-        Class<?> whitelisted = whitelistedClassesByName.get(deniedClass.getName());
-
-        if (whitelisted != null && whitelisted != deniedClass) {
-            report(
-                MARKER_CLASSLOADER_MISMATCH,
-                deniedClass,
-                "{} [{}] denied although it is whitelisted: the runtime class comes from [{}] whereas the whitelist was " +
-                    "built from [{}], and the resolver was loaded by [{}]",
-                deniedClass.getName(),
-                describe(deniedClass.getClassLoader()),
-                describe(whitelisted.getClassLoader()),
-                describe(SecuredResolver.class.getClassLoader())
-            );
-            return;
-        }
-
         if (fromCache && log.isDebugEnabled()) {
             log.debug(
                 "{} [{}] denied from cache key [{}], which carries no classloader identity",
@@ -140,49 +100,6 @@ class SandboxDiagnostics {
                 cacheKey
             );
         }
-    }
-
-    /**
-     * Emits the first occurrence of an anomaly as a warning, and the repeats as debug, so that a gateway stuck in a
-     * degraded state does not drown its own logs.
-     */
-    private void report(String marker, Class<?> deniedClass, String message, Object... arguments) {
-        boolean firstOccurrence = isFirstOccurrence(marker, deniedClass);
-
-        if (!firstOccurrence && !log.isDebugEnabled()) {
-            return;
-        }
-
-        Object[] markedArguments = new Object[arguments.length + 1];
-        markedArguments[0] = marker;
-        System.arraycopy(arguments, 0, markedArguments, 1, arguments.length);
-
-        if (firstOccurrence) {
-            log.warn(message, markedArguments);
-        } else {
-            log.debug(message, markedArguments);
-        }
-    }
-
-    private boolean isFirstOccurrence(String marker, Class<?> deniedClass) {
-        if (reportedAnomalies.size() >= MAX_REPORTED_ANOMALIES) {
-            return false;
-        }
-
-        return reportedAnomalies.add(marker + '|' + deniedClass.getName() + '|' + describe(deniedClass.getClassLoader()));
-    }
-
-    @SafeVarargs
-    private static Map<String, Class<?>> indexByName(Set<Class<?>>... whitelistedTypes) {
-        Map<String, Class<?>> byName = new HashMap<>();
-
-        for (Set<Class<?>> types : whitelistedTypes) {
-            for (Class<?> type : types) {
-                byName.putIfAbsent(type.getName(), type);
-            }
-        }
-
-        return Map.copyOf(byName);
     }
 
     /**
