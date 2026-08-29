@@ -22,21 +22,18 @@ import org.springframework.core.env.Environment;
 import org.springframework.lang.Nullable;
 
 /**
- * Reports the anomalous states that can make {@link SecuredResolver} deny a whitelisted member (APIM-14800).
+ * Traces the life of the Groovy sandbox whitelist (APIM-14800).
  * <p/>
- * The failure is intermittent, isolated to a single gateway instance and only cleared by recycling it, and several
- * distinct code paths can produce it. This class exists to tell them apart from production logs, so it observes and
- * never decides: it is called on the denial path only, and takes no part in any authorization outcome.
+ * The defects behind APIM-14800 were hard to pin down partly because nothing said when the whitelist was built,
+ * rebuilt or dropped. This keeps that visible: a gateway that keeps rebuilding its whitelist, or that rebuilds it
+ * outside of the policy activation, is worth looking at.
  * <p/>
- * Its output goes to the dedicated <code>io.gravitee.policy.groovy.sandbox.diagnostics</code> logger, so that support
- * can raise its verbosity without touching the rest of the policy.
+ * Output goes to the dedicated <code>io.gravitee.policy.groovy.sandbox.diagnostics</code> logger, so that support can
+ * raise its verbosity without touching the rest of the policy.
  *
  * @author GraviteeSource Team
  */
 class SandboxDiagnostics {
-
-    /** The denial was served from the cache, whose keys carry no classloader identity. */
-    static final String MARKER_CACHED_DENIAL = "[APIM-14800/cached-denial]";
 
     /** The whitelist was (re)built by the lazy getInstance() path rather than by GroovyInitializer.onActivation(). */
     static final String MARKER_LAZY_INITIALIZATION = "[APIM-14800/lazy-initialization]";
@@ -81,25 +78,6 @@ class SandboxDiagnostics {
 
     int generation() {
         return generation;
-    }
-
-    /**
-     * Notes a denial served from the decision cache. The cache is keyed by class name only, so this is where a class
-     * would inherit a decision taken for a different class carrying the same name.
-     *
-     * @param deniedClass the runtime class the member was resolved against.
-     * @param cacheKey the key the decision was stored under.
-     * @param fromCache whether the denial was served from the cache rather than freshly computed.
-     */
-    void reportDenial(Class<?> deniedClass, String cacheKey, boolean fromCache) {
-        if (fromCache && log.isDebugEnabled()) {
-            log.debug(
-                "{} [{}] denied from cache key [{}], which carries no classloader identity",
-                MARKER_CACHED_DENIAL,
-                deniedClass.getName(),
-                cacheKey
-            );
-        }
     }
 
     /**

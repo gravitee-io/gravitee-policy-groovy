@@ -26,6 +26,7 @@ import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
 import groovy.lang.Binding;
+import groovy.lang.GroovyClassLoader;
 import io.gravitee.policy.api.PolicyContextProvider;
 import io.gravitee.policy.groovy.GroovyInitializer;
 import io.gravitee.policy.groovy.model.http.BindableHttpRequest;
@@ -117,6 +118,26 @@ class SandboxDiagnosticsTest {
         assertThat(SecuredResolver.getInstance().isGetPropertyAllowed(foreign, "content")).isTrue();
 
         assertThat(messages(Level.WARN)).isEmpty();
+    }
+
+    @Test
+    @DisplayName("A class declared by a script cannot make a same-named java class reachable through the decision cache")
+    void shouldNotLetAScriptDefinedClassUnlockASameNamedJavaClass() throws Exception {
+        SecuredResolver.initialize(null);
+
+        Class<?> declaredByScript = new GroovyClassLoader().parseClass(
+            "package io.gravitee.policy.groovy.sandbox\nclass CacheCollisionProbe { def probe() { 'from groovy' } }"
+        );
+
+        assertThat(declaredByScript).isNotSameAs(CacheCollisionProbe.class);
+        assertThat(declaredByScript.getName()).isEqualTo(CacheCollisionProbe.class.getName());
+
+        // Classes declared inside a script are unconditionally allowed, and that decision gets cached.
+        assertThat(SecuredResolver.getInstance().isMethodAllowed(declaredByScript, "probe")).isTrue();
+
+        assertThat(SecuredResolver.getInstance().isMethodAllowed(new CacheCollisionProbe(), "probe"))
+            .as("the java class is not whitelisted and must stay out of reach")
+            .isFalse();
     }
 
     @Test
