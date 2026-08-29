@@ -27,7 +27,6 @@ import java.lang.reflect.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.reflect.ConstructorUtils;
@@ -94,8 +93,21 @@ public class SecuredResolver {
 
     private static final List<String> ALLOWED_ARRAY_NATIVE_METHODS = Arrays.asList("getAt", "putAt", "getLength");
 
+    private static final Class<?>[] NO_ARGUMENTS = {};
+
     private final Whitelist whitelist;
-    private final Map<String, Boolean> resolved;
+    /**
+     * Decisions already taken, keyed first by the receiving class itself. A ClassValue keys by identity, so two classes
+     * sharing a name cannot inherit each other's decisions, and it holds nothing strongly, so a redeployed classloader
+     * is still collected.
+     */
+    private final ClassValue<Map<String, Boolean>> resolved = new ClassValue<>() {
+        @Override
+        protected Map<String, Boolean> computeValue(Class<?> type) {
+            return new ConcurrentHashMap<>();
+        }
+    };
+
     private final SandboxDiagnostics diagnostics;
 
     /**
@@ -153,7 +165,6 @@ public class SecuredResolver {
 
     private SecuredResolver(Whitelist whitelist) {
         this.whitelist = whitelist;
-        this.resolved = new ConcurrentHashMap<>();
         this.diagnostics = new SandboxDiagnostics(whitelist);
     }
 
@@ -162,46 +173,40 @@ public class SecuredResolver {
     }
 
     public boolean isConstructorAllowed(Class<?> clazz, Object... constructorArgs) {
-        String key = getKey(clazz, "<init>", constructorArgs);
+        Map<String, Boolean> decisions = resolved.get(clazz);
+        Class<?>[] argumentClasses = getClasses(constructorArgs);
+        String key = memberKey("<init>", argumentClasses);
+        Boolean cachedDecision = decisions.get(key);
 
-        if (resolved.containsKey(key)) {
-            boolean cachedDecision = resolved.get(key);
-
-            if (!cachedDecision) {
-                diagnostics.reportDenial(clazz, key, true);
-            }
-
+        if (cachedDecision != null) {
             return cachedDecision;
         }
 
         if (isGroovyScriptDefinedClass(clazz)) {
-            resolved.put(key, true);
+            decisions.put(key, true);
             return true;
         }
 
-        Class<?>[] argumentClasses = getClasses(constructorArgs);
         Constructor<?> constructor = ConstructorUtils.getMatchingAccessibleConstructor(clazz, argumentClasses);
 
         boolean constructorAllowed = whitelist.allows(constructor);
-        resolved.put(key, constructorAllowed);
-
-        if (!constructorAllowed) {
-            diagnostics.reportDenial(clazz, key, false);
-        }
+        decisions.put(key, constructorAllowed);
 
         return constructorAllowed;
     }
 
     public boolean isGetPropertyAllowed(Object object, String propertyName) {
         Class<?> objectClass = object instanceof Class ? (Class<?>) object : object.getClass();
-        String key = getKey(object, propertyName, new Object[0]);
+        Map<String, Boolean> decisions = resolved.get(objectClass);
+        String key = memberKey(propertyName, NO_ARGUMENTS);
+        Boolean cachedDecision = decisions.get(key);
 
-        if (resolved.containsKey(key)) {
-            return resolved.get(key);
+        if (cachedDecision != null) {
+            return cachedDecision;
         }
 
         if (isGroovyScriptDefinedClass(objectClass)) {
-            resolved.put(key, true);
+            decisions.put(key, true);
             return true;
         }
 
@@ -211,7 +216,7 @@ public class SecuredResolver {
         for (String prefix : getPrefixes) {
             String getter = prefix + StringUtils.capitalize(propertyName);
             if (isMethodAllowed(object, getter)) {
-                resolved.put(key, true);
+                decisions.put(key, true);
                 return true;
             }
         }
@@ -220,7 +225,7 @@ public class SecuredResolver {
         Field field = FieldUtils.getDeclaredField(objectClass, propertyName);
 
         if (whitelist.allows(field)) {
-            resolved.put(key, true);
+            decisions.put(key, true);
             return true;
         }
 
@@ -229,14 +234,16 @@ public class SecuredResolver {
 
     public boolean isSetPropertyAllowed(Object object, String propertyName, Object propertyValue) {
         Class<?> objectClass = object instanceof Class ? (Class<?>) object : object.getClass();
-        String key = getKey(object, propertyName, new Object[0]);
+        Map<String, Boolean> decisions = resolved.get(objectClass);
+        String key = memberKey(propertyName, NO_ARGUMENTS);
+        Boolean cachedDecision = decisions.get(key);
 
-        if (resolved.containsKey(key)) {
-            return resolved.get(key);
+        if (cachedDecision != null) {
+            return cachedDecision;
         }
 
         if (isGroovyScriptDefinedClass(objectClass)) {
-            resolved.put(key, true);
+            decisions.put(key, true);
             return true;
         }
 
@@ -244,7 +251,7 @@ public class SecuredResolver {
         String getter = "set" + StringUtils.capitalize(propertyName);
 
         if (isMethodAllowed(object, getter, propertyValue)) {
-            resolved.put(key, true);
+            decisions.put(key, true);
             return true;
         }
 
@@ -252,7 +259,7 @@ public class SecuredResolver {
         Field field = FieldUtils.getDeclaredField(objectClass, propertyName);
 
         if (whitelist.allows(field)) {
-            resolved.put(key, true);
+            decisions.put(key, true);
             return true;
         }
 
@@ -261,33 +268,24 @@ public class SecuredResolver {
 
     public boolean isMethodAllowed(Object object, String methodName, Object... methodArgs) {
         Class<?> objectClass = object instanceof Class ? (Class<?>) object : object.getClass();
-        String key = getKey(objectClass, methodName, methodArgs);
+        Map<String, Boolean> decisions = resolved.get(objectClass);
+        Class<?>[] argumentClasses = getClasses(methodArgs);
+        String key = memberKey(methodName, argumentClasses);
+        Boolean cachedDecision = decisions.get(key);
 
-        if (resolved.containsKey(key)) {
-            boolean cachedDecision = resolved.get(key);
-
-            if (!cachedDecision) {
-                diagnostics.reportDenial(objectClass, key, true);
-            }
-
+        if (cachedDecision != null) {
             return cachedDecision;
         }
 
         if (object instanceof Number && NUMBER_MATH_METHOD_NAMES.contains(methodName)) {
             // Synthetic methods like Integer.plus(Integer).
-            resolved.put(key, true);
+            decisions.put(key, true);
             return true;
         }
 
-        Class<?>[] argumentClasses = getClasses(methodArgs);
-
         boolean methodAllowed =
             isMethodAllowed(objectClass, methodName, argumentClasses) || isDGMAllowed(objectClass, methodName, argumentClasses);
-        resolved.put(key, methodAllowed);
-
-        if (!methodAllowed) {
-            diagnostics.reportDenial(objectClass, key, false);
-        }
+        decisions.put(key, methodAllowed);
 
         return methodAllowed;
     }
@@ -392,10 +390,12 @@ public class SecuredResolver {
         return clazz.getClassLoader() instanceof GroovyClassLoader && clazz != Script.class;
     }
 
-    private String getKey(Object object, String methodName, Object[] methodArgs) {
-        Class<?>[] argumentClasses = getClasses(methodArgs);
-
-        return (object instanceof Class<?> ? object : object.getClass()) + "#" + methodName + Arrays.toString(argumentClasses);
+    /**
+     * Identifies a member within one class. The receiving class is the ClassValue key, so it deliberately does not
+     * appear here.
+     */
+    private static String memberKey(String memberName, Class<?>[] argumentClasses) {
+        return memberName + Arrays.toString(argumentClasses);
     }
 
     /**
