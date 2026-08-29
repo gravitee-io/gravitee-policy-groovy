@@ -19,6 +19,7 @@ import io.gravitee.policy.api.PolicyContext;
 import io.gravitee.policy.api.PolicyContextProvider;
 import io.gravitee.policy.api.PolicyContextProviderAware;
 import io.gravitee.policy.groovy.sandbox.SecuredResolver;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.springframework.core.env.Environment;
 
 /**
@@ -27,11 +28,20 @@ import org.springframework.core.env.Environment;
  */
 public class GroovyInitializer implements PolicyContext, PolicyContextProviderAware {
 
+    /**
+     * How many deployments currently rely on the sandbox. When the plugin classes are shared, one API being undeployed
+     * must not take the whitelist away from the others still serving traffic. In legacy mode each API gets its own copy
+     * of this class, hence its own counter and its own resolver, and the previous behaviour is unchanged.
+     */
+    private static final AtomicInteger ACTIVATIONS = new AtomicInteger();
+
     private Environment environment;
     private boolean classLoaderLegacyMode = true;
 
     @Override
     public void onActivation() {
+        ACTIVATIONS.incrementAndGet();
+
         if (classLoaderLegacyMode || !SecuredResolver.isInitialized()) {
             SecuredResolver.initialize(this.environment);
         }
@@ -39,7 +49,11 @@ public class GroovyInitializer implements PolicyContext, PolicyContextProviderAw
 
     @Override
     public void onDeactivation() {
-        if (classLoaderLegacyMode) {
+        // Floored at zero so that a deactivation without a matching activation cannot make the counter go negative and
+        // keep the whitelist alive for ever.
+        int remaining = ACTIVATIONS.updateAndGet(activations -> Math.max(0, activations - 1));
+
+        if (classLoaderLegacyMode && remaining == 0) {
             SecuredResolver.destroy();
         }
     }
