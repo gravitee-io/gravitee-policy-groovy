@@ -43,15 +43,15 @@ import org.springframework.core.env.Environment;
 import org.springframework.mock.env.MockEnvironment;
 
 /**
- * Acceptance tests for the APIM-14800 diagnostics instrumentation.
+ * Acceptance tests for APIM-14800.
  * <p/>
- * The sandbox intermittently denies a whitelisted property (typically <code>request.content</code>) on a gateway
- * instance, and the reporter could not reproduce it end-to-end. Several distinct code paths in {@link SecuredResolver}
- * can produce that symptom, so before changing any authorization logic we instrument the denial path well enough to
- * tell them apart from production logs.
+ * The sandbox intermittently denied a whitelisted property — typically <code>request.content</code> — on a single
+ * gateway instance, and only recycling it helped. These tests pin down the behaviours that made that possible: a class
+ * reached through a foreign classloader must be judged like the class the whitelist was built from, a resolver handed
+ * out before a destroy() must keep working, and a configured whitelist must survive a rebuild.
  * <p/>
- * These tests assert on the diagnostics log output only: the instrumentation must never change an authorization
- * decision. The behavioural safety net remains {@link SecuredGroovyShellTest}, which must stay untouched and green.
+ * The behavioural safety net remains {@link SecuredGroovyShellTest}, which must stay untouched and green: it is what
+ * proves these fixes do not widen what the sandbox allows.
  *
  * @author GraviteeSource Team
  */
@@ -59,10 +59,7 @@ class SandboxDiagnosticsTest {
 
     private static final String DIAGNOSTICS_LOGGER = "io.gravitee.policy.groovy.sandbox.diagnostics";
 
-    /** Markers carried by the diagnostics messages, duplicated here on purpose so the tests do not depend on production constants. */
-    private static final String CLASSLOADER_MISMATCH = "[APIM-14800/classloader-mismatch]";
-
-    private static final String CACHED_DENIAL = "[APIM-14800/cached-denial]";
+    /** Marker carried by the diagnostics messages, duplicated here on purpose so the tests do not depend on production constants. */
     private static final String LAZY_INITIALIZATION = "[APIM-14800/lazy-initialization]";
 
     private static final String BINDABLE_HTTP_REQUEST = BindableHttpRequest.class.getName();
@@ -92,8 +89,8 @@ class SandboxDiagnosticsTest {
     }
 
     @Test
-    @DisplayName("H2: a whitelisted class loaded by a foreign classloader is denied and reported with both classloader identities")
-    void shouldReportClassloaderMismatchOnDenial() throws Exception {
+    @DisplayName("A whitelisted class reached through a foreign classloader is allowed, whichever order it is reached in")
+    void shouldAllowAWhitelistedClassLoadedByAForeignClassloader() throws Exception {
         SecuredResolver.initialize(null);
         appender.list.clear();
 
@@ -101,36 +98,25 @@ class SandboxDiagnosticsTest {
         assertThat(foreign).isNotSameAs(BindableHttpRequest.class);
         assertThat(foreign.getName()).isEqualTo(BINDABLE_HTTP_REQUEST);
 
-        SecuredResolver.getInstance().isGetPropertyAllowed(foreign, "content");
+        // Foreign first: this is the order that used to deny, and then poison the cache for the legitimate class.
+        assertThat(SecuredResolver.getInstance().isGetPropertyAllowed(foreign, "content")).isTrue();
+        assertThat(SecuredResolver.getInstance().isGetPropertyAllowed(BindableHttpRequest.class, "content")).isTrue();
 
-        assertThat(messages(Level.WARN))
-            .singleElement()
-            .satisfies(message -> {
-                assertThat(message).contains(CLASSLOADER_MISMATCH).contains(BINDABLE_HTTP_REQUEST);
-                assertThat(message)
-                    .as("both the runtime and the whitelist classloader identities must be reported")
-                    .contains(classLoaderIdentity(foreign.getClassLoader()))
-                    .contains(classLoaderIdentity(BindableHttpRequest.class.getClassLoader()));
-            });
+        assertThat(messages(Level.WARN)).isEmpty();
     }
 
     @Test
-    @DisplayName("H4: a denial served from the FQCN-keyed cache is reported as such")
-    void shouldReportCachedDenial() throws Exception {
+    @DisplayName("Reaching the legitimate class first does not change the outcome for a foreign copy")
+    void shouldAllowAForeignCopyReachedAfterTheLegitimateClass() throws Exception {
         SecuredResolver.initialize(null);
-        Class<?> foreign = foreignCopyOfBindableHttpRequest();
-
-        // Poison the cache: the foreign class is denied and cached under a key built from the FQCN only.
-        assertThat(SecuredResolver.getInstance().isGetPropertyAllowed(foreign, "content")).isFalse();
         appender.list.clear();
 
-        // Documents the current defect: the legitimate class now inherits the cached denial.
-        // This assertion is expected to fail once the resolver itself is fixed, which is the point.
-        assertThat(SecuredResolver.getInstance().isGetPropertyAllowed(BindableHttpRequest.class, "content")).isFalse();
+        Class<?> foreign = foreignCopyOfBindableHttpRequest();
 
-        assertThat(messages(Level.DEBUG)).anySatisfy(message ->
-            assertThat(message).contains(CACHED_DENIAL).contains(BINDABLE_HTTP_REQUEST)
-        );
+        assertThat(SecuredResolver.getInstance().isGetPropertyAllowed(BindableHttpRequest.class, "content")).isTrue();
+        assertThat(SecuredResolver.getInstance().isGetPropertyAllowed(foreign, "content")).isTrue();
+
+        assertThat(messages(Level.WARN)).isEmpty();
     }
 
     @Test
@@ -149,7 +135,7 @@ class SandboxDiagnosticsTest {
     }
 
     @Test
-    @DisplayName("H3: an initialization triggered by the lazy getInstance() path is reported")
+    @DisplayName("A whitelist rebuilt outside of the policy activation is still traced, since it is worth knowing about")
     void shouldReportLazyInitialization() {
         appender.list.clear();
 
@@ -227,23 +213,6 @@ class SandboxDiagnosticsTest {
         );
 
         assertThat(messages(Level.WARN)).isEmpty();
-    }
-
-    @Test
-    @DisplayName("Repeated denials on the same class are reported once, so a degraded gateway does not flood its logs")
-    void shouldReportEachAnomalyOnce() throws Exception {
-        SecuredResolver.initialize(null);
-        appender.list.clear();
-
-        Class<?> foreign = foreignCopyOfBindableHttpRequest();
-        for (String property : List.of("content", "path", "host", "uri", "content")) {
-            SecuredResolver.getInstance().isGetPropertyAllowed(foreign, property);
-        }
-
-        assertThat(messages(Level.WARN))
-            .as("the classloader mismatch is a per-class anomaly, not a per-property one")
-            .singleElement()
-            .satisfies(message -> assertThat(message).contains(CLASSLOADER_MISMATCH));
     }
 
     private List<String> messages(Level level) {

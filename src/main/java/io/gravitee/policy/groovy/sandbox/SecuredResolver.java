@@ -15,8 +15,6 @@
  */
 package io.gravitee.policy.groovy.sandbox;
 
-import static java.util.Collections.emptyList;
-
 import groovy.lang.GString;
 import groovy.lang.GroovyClassLoader;
 import groovy.lang.Script;
@@ -28,7 +26,6 @@ import java.io.InputStreamReader;
 import java.lang.reflect.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
@@ -98,7 +95,6 @@ public class SecuredResolver {
     private static final List<String> ALLOWED_ARRAY_NATIVE_METHODS = Arrays.asList("getAt", "putAt", "getLength");
 
     private final Whitelist whitelist;
-    private final Map<Class<?>, List<Method>> methodsByTypeAndSuperTypes;
     private final Map<String, Boolean> resolved;
     private final SandboxDiagnostics diagnostics;
 
@@ -158,7 +154,6 @@ public class SecuredResolver {
     private SecuredResolver(Whitelist whitelist) {
         this.whitelist = whitelist;
         this.resolved = new ConcurrentHashMap<>();
-        this.methodsByTypeAndSuperTypes = new ConcurrentHashMap<>();
         this.diagnostics = new SandboxDiagnostics(whitelist);
     }
 
@@ -187,7 +182,7 @@ public class SecuredResolver {
         Class<?>[] argumentClasses = getClasses(constructorArgs);
         Constructor<?> constructor = ConstructorUtils.getMatchingAccessibleConstructor(clazz, argumentClasses);
 
-        boolean constructorAllowed = whitelist.allowsConstructor(clazz, constructor);
+        boolean constructorAllowed = whitelist.allows(constructor);
         resolved.put(key, constructorAllowed);
 
         if (!constructorAllowed) {
@@ -224,7 +219,7 @@ public class SecuredResolver {
         // Try to find accessible class property.
         Field field = FieldUtils.getDeclaredField(objectClass, propertyName);
 
-        if (field != null && getAllowedFields(objectClass).contains(field)) {
+        if (whitelist.allows(field)) {
             resolved.put(key, true);
             return true;
         }
@@ -256,7 +251,7 @@ public class SecuredResolver {
         // Try to find accessible class property.
         Field field = FieldUtils.getDeclaredField(objectClass, propertyName);
 
-        if (field != null && getAllowedFields(objectClass).contains(field)) {
+        if (whitelist.allows(field)) {
             resolved.put(key, true);
             return true;
         }
@@ -304,7 +299,7 @@ public class SecuredResolver {
 
         Method method = getMatchingAccessibleMethod(clazz, methodName, argumentClasses);
 
-        if (method != null && (isGroovyScriptDefinedMethod(method) || getAllowedMethods(clazz).contains(method))) {
+        if (method != null && (isGroovyScriptDefinedMethod(method) || whitelist.allows(method))) {
             // Allow method if directly defined in the script or if the method is explicitly allowed.
             return true;
         }
@@ -349,7 +344,7 @@ public class SecuredResolver {
         for (Class<?> dgmClass : DGM_CLASSES) {
             Method method = getMatchingAccessibleMethod(dgmClass, methodName, selfArgs);
 
-            if (method != null && getAllowedMethods(dgmClass).contains(method)) {
+            if (whitelist.allows(method)) {
                 return true;
             }
         }
@@ -395,42 +390,6 @@ public class SecuredResolver {
     private boolean isGroovyScriptDefinedMethod(Method method) {
         Class<?> clazz = method.getDeclaringClass();
         return clazz.getClassLoader() instanceof GroovyClassLoader && clazz != Script.class;
-    }
-
-    /**
-     * Returns all allowed methods for a given class.
-     *
-     * @param clazz the class.
-     * @return the list of all allowed methods for the specified class. If no method is allowed, an empty list will be returned.
-     */
-    private List<Method> getAllowedMethods(Class<?> clazz) {
-        if (methodsByTypeAndSuperTypes.containsKey(clazz)) {
-            return methodsByTypeAndSuperTypes.get(clazz);
-        }
-
-        List<Method> methods = whitelist.methodsOf(clazz);
-
-        if (clazz.getSuperclass() != null) {
-            methods = Stream.concat(methods.stream(), getAllowedMethods(clazz.getSuperclass()).stream()).collect(Collectors.toList());
-        }
-
-        for (Class<?> anInterface : clazz.getInterfaces()) {
-            methods = Stream.concat(methods.stream(), getAllowedMethods(anInterface).stream()).collect(Collectors.toList());
-        }
-
-        methodsByTypeAndSuperTypes.put(clazz, methods);
-
-        return methods;
-    }
-
-    /**
-     * Returns all allowed fields for a given class.
-     *
-     * @param clazz the class.
-     * @return the list of all allowed fields for the specified class. If no field is allowed, an empty list will be returned.
-     */
-    private List<Field> getAllowedFields(Class<?> clazz) {
-        return whitelist.fieldsOf(clazz);
     }
 
     private String getKey(Object object, String methodName, Object[] methodArgs) {
@@ -500,15 +459,11 @@ public class SecuredResolver {
         }
 
         return new Whitelist(
-            groupByDeclaringType(methods, Method::getDeclaringClass),
-            groupByDeclaringType(fields, Field::getDeclaringClass),
-            groupByDeclaringType(constructors, Constructor::getDeclaringClass),
-            new HashSet<>(annotationClasses)
+            methods.stream().map(Whitelist::signatureOf).collect(Collectors.toUnmodifiableSet()),
+            fields.stream().map(Whitelist::signatureOf).collect(Collectors.toUnmodifiableSet()),
+            constructors.stream().map(Whitelist::signatureOf).collect(Collectors.toUnmodifiableSet()),
+            annotationClasses.stream().map(Whitelist::namesOf).flatMap(Set::stream).collect(Collectors.toUnmodifiableSet())
         );
-    }
-
-    private static <T> Map<Class<?>, List<T>> groupByDeclaringType(List<T> members, Function<T, Class<?>> declaringType) {
-        return members.stream().collect(Collectors.groupingBy(declaringType, Collectors.toUnmodifiableList()));
     }
 
     private static void parseDeclaration(
@@ -561,7 +516,7 @@ public class SecuredResolver {
             return Arrays.asList(memberAccessor.apply(clazz));
         } catch (NoClassDefFoundError e) {
             log.error("Unable to load members from class [{}], a transitive dependency is missing: {}", clazzName, e.getMessage());
-            return emptyList();
+            return List.of();
         }
     }
 
