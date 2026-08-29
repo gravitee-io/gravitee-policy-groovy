@@ -18,22 +18,28 @@ package io.gravitee.policy.groovy.sandbox;
 import static io.gravitee.policy.groovy.sandbox.WhitelistLoader.WHITELIST_LIST_KEY;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
 import groovy.lang.Binding;
+import io.gravitee.policy.api.PolicyContextProvider;
+import io.gravitee.policy.groovy.GroovyInitializer;
 import io.gravitee.policy.groovy.model.http.BindableHttpRequest;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Set;
+import java.util.StringJoiner;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.env.Environment;
 import org.springframework.mock.env.MockEnvironment;
 
 /**
@@ -56,7 +62,6 @@ class SandboxDiagnosticsTest {
     /** Markers carried by the diagnostics messages, duplicated here on purpose so the tests do not depend on production constants. */
     private static final String CLASSLOADER_MISMATCH = "[APIM-14800/classloader-mismatch]";
 
-    private static final String WHITELIST_INCOMPLETE = "[APIM-14800/whitelist-incomplete]";
     private static final String CACHED_DENIAL = "[APIM-14800/cached-denial]";
     private static final String LAZY_INITIALIZATION = "[APIM-14800/lazy-initialization]";
 
@@ -129,21 +134,18 @@ class SandboxDiagnosticsTest {
     }
 
     @Test
-    @DisplayName("H1: a denial evaluated against an empty whitelist is reported as an incomplete whitelist")
-    void shouldReportIncompleteWhitelistOnDenial() {
+    @DisplayName("A resolver obtained before destroy() keeps working against a complete whitelist")
+    void shouldKeepServingAResolverObtainedBeforeDestroy() {
         SecuredResolver.initialize(null);
         SecuredResolver resolver = SecuredResolver.getInstance();
 
-        // Reproduces the visibility window of the startup race: destroy() clears the static maps while a thread still
-        // holds a reference to the instance it obtained from the unsynchronized getInstance().
+        // This is the startup race window: a thread holding a resolver while another destroys it must not suddenly see
+        // an empty whitelist and start denying everything.
         SecuredResolver.destroy();
         appender.list.clear();
 
-        resolver.isGetPropertyAllowed(BindableHttpRequest.class, "content");
-
-        assertThat(messages(Level.WARN)).anySatisfy(message ->
-            assertThat(message).contains(WHITELIST_INCOMPLETE).contains(BINDABLE_HTTP_REQUEST)
-        );
+        assertThat(resolver.isGetPropertyAllowed(BindableHttpRequest.class, "content")).isTrue();
+        assertThat(messages(Level.WARN)).isEmpty();
     }
 
     @Test
@@ -157,17 +159,61 @@ class SandboxDiagnosticsTest {
     }
 
     @Test
-    @DisplayName("H3: the lazy initialization report says when a configured whitelist has just been lost")
-    void shouldReportConfiguredWhitelistLossOnLazyInitialization() {
-        SecuredResolver.initialize(new MockEnvironment().withProperty(WHITELIST_LIST_KEY + "[0]", "class java.lang.String"));
+    @DisplayName("A whitelist configured through the environment survives destroy() and lazy re-initialization")
+    void shouldKeepTheConfiguredWhitelistAcrossDestroy() {
+        SecuredResolver.initialize(null);
+        assertThat(SecuredResolver.getInstance().isMethodAllowed(StringJoiner.class, "add", "x"))
+            .as("the probe must not be reachable through the built-in whitelist, otherwise this test proves nothing")
+            .isFalse();
         SecuredResolver.destroy();
-        appender.list.clear();
 
-        SecuredResolver.getInstance();
+        SecuredResolver.initialize(new MockEnvironment().withProperty(WHITELIST_LIST_KEY + "[0]", "class java.util.StringJoiner"));
+        assertThat(SecuredResolver.getInstance().isMethodAllowed(StringJoiner.class, "add", "x")).isTrue();
 
-        assertThat(messages(Level.WARN)).anySatisfy(message ->
-            assertThat(message).contains(LAZY_INITIALIZATION).contains(WHITELIST_LIST_KEY)
-        );
+        SecuredResolver.destroy();
+
+        assertThat(SecuredResolver.getInstance().isMethodAllowed(StringJoiner.class, "add", "x"))
+            .as("the configured whitelist must not be silently replaced by the built-in one")
+            .isTrue();
+    }
+
+    @Test
+    @DisplayName("An environment given to a later initialize() is applied, not merely recorded")
+    void shouldApplyAnEnvironmentGivenAfterAFirstInitialize() {
+        SecuredResolver.initialize(null);
+        assertThat(SecuredResolver.getInstance().isMethodAllowed(StringJoiner.class, "add", "x"))
+            .as("the probe must not be reachable through the built-in whitelist, otherwise this test proves nothing")
+            .isFalse();
+
+        // No destroy() in between: a configuration must not have to wait for one to take effect.
+        SecuredResolver.initialize(new MockEnvironment().withProperty(WHITELIST_LIST_KEY + "[0]", "class java.util.StringJoiner"));
+
+        assertThat(SecuredResolver.getInstance().isMethodAllowed(StringJoiner.class, "add", "x")).isTrue();
+    }
+
+    @Test
+    @DisplayName("Undeploying one API does not take the sandbox away from the others still serving traffic")
+    void shouldKeepTheSandboxUsableWhileAnotherDeploymentNeedsIt() {
+        GroovyInitializer first = initializer();
+        GroovyInitializer second = initializer();
+
+        first.onActivation();
+        second.onActivation();
+        first.onDeactivation();
+
+        assertThat(SecuredResolver.isInitialized()).isTrue();
+
+        second.onDeactivation();
+    }
+
+    private static GroovyInitializer initializer() {
+        PolicyContextProvider provider = mock(PolicyContextProvider.class);
+        when(provider.getComponent(Environment.class)).thenReturn(new MockEnvironment());
+
+        GroovyInitializer initializer = new GroovyInitializer();
+        initializer.setPolicyContextProvider(provider);
+
+        return initializer;
     }
 
     @Test

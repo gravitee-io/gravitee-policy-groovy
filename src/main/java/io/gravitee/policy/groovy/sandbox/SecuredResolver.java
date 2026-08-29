@@ -28,6 +28,7 @@ import java.io.InputStreamReader;
 import java.lang.reflect.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
@@ -96,29 +97,31 @@ public class SecuredResolver {
 
     private static final List<String> ALLOWED_ARRAY_NATIVE_METHODS = Arrays.asList("getAt", "putAt", "getLength");
 
-    private static Map<Class<?>, List<Method>> methodsByType;
-    private static Map<Class<?>, List<Field>> fieldsByType;
-    private static Map<Class<?>, List<Constructor<?>>> constructorsByType;
-    private static Set<Class<?>> annotations;
-
+    private final Whitelist whitelist;
     private final Map<Class<?>, List<Method>> methodsByTypeAndSuperTypes;
     private final Map<String, Boolean> resolved;
     private final SandboxDiagnostics diagnostics;
 
-    private static SecuredResolver instance;
+    /**
+     * Read on every sandbox check without holding the lock, so it must be volatile: together with the final fields of
+     * the instance it publishes, this guarantees that a thread seeing a resolver sees its whitelist fully built.
+     */
+    private static volatile SecuredResolver instance;
+
+    /**
+     * The environment the current whitelist was built from. Kept so that a resolver rebuilt after a {@link #destroy()}
+     * still honours the configured 'groovy.whitelist.list' instead of silently falling back to the built-in whitelist
+     * only. It is the single source of truth: whatever the live resolver was built from is what this names.
+     */
+    private static volatile Environment configuredEnvironment;
 
     public static synchronized void initialize(@Nullable Environment environment) {
-        initialize(environment, false);
-    }
+        if (instance != null && environment == configuredEnvironment) {
+            return;
+        }
 
-    private static synchronized void initialize(@Nullable Environment environment, boolean lazy) {
-        if (!isInitialized()) {
-            loadWhitelist(environment);
-            instance = new SecuredResolver();
-
-            if (lazy) {
-                SandboxDiagnostics.lazyInitialization(environment);
-            }
+        if (instance == null) {
+            instance = new SecuredResolver(loadWhitelist(environment));
         }
     }
 
@@ -126,42 +129,41 @@ public class SecuredResolver {
         return instance != null;
     }
 
+    /**
+     * Drops the current resolver. Nothing is cleared: a thread that already holds one keeps working against a whitelist
+     * that stays complete, and the discarded resolver is collected once the last of them is done with it.
+     */
     public static synchronized void destroy() {
-        if (isInitialized()) {
+        if (instance != null) {
             SandboxDiagnostics.destroyed(instance.diagnostics.generation());
-            methodsByType.clear();
-            fieldsByType.clear();
-            constructorsByType.clear();
-            annotations.clear();
             instance = null;
         }
     }
 
     public static SecuredResolver getInstance() {
-        if (!isInitialized()) {
-            initialize(null, true);
+        SecuredResolver current = instance;
+
+        return current != null ? current : initializeAndGet();
+    }
+
+    private static synchronized SecuredResolver initializeAndGet() {
+        if (instance == null) {
+            instance = new SecuredResolver(WhitelistLoader.load(configuredEnvironment));
+            SandboxDiagnostics.lazyInitialization(configuredEnvironment);
         }
 
         return instance;
     }
 
-    private SecuredResolver() {
-        resolved = new ConcurrentHashMap<>();
-        methodsByTypeAndSuperTypes = new ConcurrentHashMap<>();
-        diagnostics = new SandboxDiagnostics(methodsByType, fieldsByType, constructorsByType, annotations);
+    private SecuredResolver(Whitelist whitelist) {
+        this.whitelist = whitelist;
+        this.resolved = new ConcurrentHashMap<>();
+        this.methodsByTypeAndSuperTypes = new ConcurrentHashMap<>();
+        this.diagnostics = new SandboxDiagnostics(whitelist);
     }
 
     public boolean isAnnotationAllowed(String name) {
-        // We only have an annotation name. Just try to find corresponding annotation testing all combinations.
-        return annotations
-            .stream()
-            .anyMatch(
-                aClass ->
-                    aClass.getCanonicalName().equals(name) ||
-                    aClass.getName().equals(name) ||
-                    aClass.getSimpleName().equals(name) ||
-                    aClass.getTypeName().equals(name)
-            );
+        return whitelist.allowsAnnotation(name);
     }
 
     public boolean isConstructorAllowed(Class<?> clazz, Object... constructorArgs) {
@@ -171,7 +173,7 @@ public class SecuredResolver {
             boolean cachedDecision = resolved.get(key);
 
             if (!cachedDecision) {
-                diagnostics.reportDenial(methodsByType, clazz, key, true);
+                diagnostics.reportDenial(clazz, key, true);
             }
 
             return cachedDecision;
@@ -185,11 +187,11 @@ public class SecuredResolver {
         Class<?>[] argumentClasses = getClasses(constructorArgs);
         Constructor<?> constructor = ConstructorUtils.getMatchingAccessibleConstructor(clazz, argumentClasses);
 
-        boolean constructorAllowed = constructorsByType.getOrDefault(clazz, emptyList()).contains(constructor);
+        boolean constructorAllowed = whitelist.allowsConstructor(clazz, constructor);
         resolved.put(key, constructorAllowed);
 
         if (!constructorAllowed) {
-            diagnostics.reportDenial(methodsByType, clazz, key, false);
+            diagnostics.reportDenial(clazz, key, false);
         }
 
         return constructorAllowed;
@@ -270,7 +272,7 @@ public class SecuredResolver {
             boolean cachedDecision = resolved.get(key);
 
             if (!cachedDecision) {
-                diagnostics.reportDenial(methodsByType, objectClass, key, true);
+                diagnostics.reportDenial(objectClass, key, true);
             }
 
             return cachedDecision;
@@ -289,7 +291,7 @@ public class SecuredResolver {
         resolved.put(key, methodAllowed);
 
         if (!methodAllowed) {
-            diagnostics.reportDenial(methodsByType, objectClass, key, false);
+            diagnostics.reportDenial(objectClass, key, false);
         }
 
         return methodAllowed;
@@ -406,7 +408,7 @@ public class SecuredResolver {
             return methodsByTypeAndSuperTypes.get(clazz);
         }
 
-        List<Method> methods = methodsByType.getOrDefault(clazz, emptyList());
+        List<Method> methods = whitelist.methodsOf(clazz);
 
         if (clazz.getSuperclass() != null) {
             methods = Stream.concat(methods.stream(), getAllowedMethods(clazz.getSuperclass()).stream()).collect(Collectors.toList());
@@ -428,7 +430,7 @@ public class SecuredResolver {
      * @return the list of all allowed fields for the specified class. If no field is allowed, an empty list will be returned.
      */
     private List<Field> getAllowedFields(Class<?> clazz) {
-        return fieldsByType.getOrDefault(clazz, emptyList());
+        return whitelist.fieldsOf(clazz);
     }
 
     private String getKey(Object object, String methodName, Object[] methodArgs) {
@@ -459,7 +461,7 @@ public class SecuredResolver {
         return argumentClasses;
     }
 
-    private static void loadWhitelist(Environment environment) {
+    private static Whitelist loadWhitelist(@Nullable Environment environment) {
         List<Method> methods = new ArrayList<>();
         List<Field> fields = new ArrayList<>();
         List<Constructor<?>> constructors = new ArrayList<>();
@@ -475,10 +477,6 @@ public class SecuredResolver {
                 (ConfigurableEnvironment) environment,
                 WHITELIST_LIST_KEY
             ).values();
-
-            if (!configWhitelist.isEmpty()) {
-                SandboxDiagnostics.configuredWhitelistDetected();
-            }
 
             for (Object declaration : configWhitelist) {
                 parseDeclaration(String.valueOf(declaration), methods, fields, constructors, annotationClasses);
@@ -501,13 +499,16 @@ public class SecuredResolver {
             }
         }
 
-        methodsByType = methods.stream().collect(Collectors.groupingBy(Method::getDeclaringClass));
+        return new Whitelist(
+            groupByDeclaringType(methods, Method::getDeclaringClass),
+            groupByDeclaringType(fields, Field::getDeclaringClass),
+            groupByDeclaringType(constructors, Constructor::getDeclaringClass),
+            new HashSet<>(annotationClasses)
+        );
+    }
 
-        fieldsByType = fields.stream().collect(Collectors.groupingBy(Field::getDeclaringClass));
-
-        constructorsByType = constructors.stream().collect(Collectors.groupingBy(Constructor::getDeclaringClass));
-
-        annotations = new HashSet<>(annotationClasses);
+    private static <T> Map<Class<?>, List<T>> groupByDeclaringType(List<T> members, Function<T, Class<?>> declaringType) {
+        return members.stream().collect(Collectors.groupingBy(declaringType, Collectors.toUnmodifiableList()));
     }
 
     private static void parseDeclaration(
