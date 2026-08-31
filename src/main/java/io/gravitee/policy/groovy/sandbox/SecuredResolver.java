@@ -186,21 +186,15 @@ public class SecuredResolver {
             return cachedDecision;
         }
 
-        if (isGroovyScriptDefinedClass(clazz)) {
-            decisions.put(key, true);
-            return true;
-        }
+        boolean allowed =
+            isGroovyScriptDefinedClass(clazz) ||
+            whitelist.allows(ConstructorUtils.getMatchingAccessibleConstructor(clazz, argumentClasses));
 
-        Constructor<?> constructor = ConstructorUtils.getMatchingAccessibleConstructor(clazz, argumentClasses);
-
-        boolean constructorAllowed = whitelist.allows(constructor);
-        decisions.put(key, constructorAllowed);
-
-        return constructorAllowed;
+        return remember(decisions, key, allowed);
     }
 
     public boolean isGetPropertyAllowed(Object object, String propertyName) {
-        Class<?> objectClass = object instanceof Class ? (Class<?>) object : object.getClass();
+        Class<?> objectClass = receiverClass(object);
         Map<String, Boolean> decisions = resolved.get(objectClass);
         String key = memberKey(propertyName, NO_ARGUMENTS);
         Boolean cachedDecision = decisions.get(key);
@@ -209,35 +203,21 @@ public class SecuredResolver {
             return cachedDecision;
         }
 
-        if (isGroovyScriptDefinedClass(objectClass)) {
-            decisions.put(key, true);
-            return true;
+        boolean allowed =
+            isGroovyScriptDefinedClass(objectClass) ||
+            isReadableThroughGetter(object, propertyName) ||
+            whitelist.allows(FieldUtils.getDeclaredField(objectClass, propertyName));
+
+        if (allowed) {
+            return remember(decisions, key, true);
         }
 
-        // Try to find 'get' or 'is' method.
-        String[] getPrefixes = { "get", "is" };
-
-        for (String prefix : getPrefixes) {
-            String getter = prefix + StringUtils.capitalize(propertyName);
-            if (isMethodAllowed(object, getter)) {
-                decisions.put(key, true);
-                return true;
-            }
-        }
-
-        // Try to find accessible class property.
-        Field field = FieldUtils.getDeclaredField(objectClass, propertyName);
-
-        if (whitelist.allows(field)) {
-            decisions.put(key, true);
-            return true;
-        }
-
+        // TODO APIM-14800: unlike a denied method, a denied property is not remembered. Uniformised next.
         return false;
     }
 
     public boolean isSetPropertyAllowed(Object object, String propertyName, Object propertyValue) {
-        Class<?> objectClass = object instanceof Class ? (Class<?>) object : object.getClass();
+        Class<?> objectClass = receiverClass(object);
         Map<String, Boolean> decisions = resolved.get(objectClass);
         String key = memberKey(propertyName, NO_ARGUMENTS);
         Boolean cachedDecision = decisions.get(key);
@@ -246,32 +226,21 @@ public class SecuredResolver {
             return cachedDecision;
         }
 
-        if (isGroovyScriptDefinedClass(objectClass)) {
-            decisions.put(key, true);
-            return true;
+        boolean allowed =
+            isGroovyScriptDefinedClass(objectClass) ||
+            isMethodAllowed(object, "set" + StringUtils.capitalize(propertyName), propertyValue) ||
+            whitelist.allows(FieldUtils.getDeclaredField(objectClass, propertyName));
+
+        if (allowed) {
+            return remember(decisions, key, true);
         }
 
-        // Try to find 'set' method.
-        String getter = "set" + StringUtils.capitalize(propertyName);
-
-        if (isMethodAllowed(object, getter, propertyValue)) {
-            decisions.put(key, true);
-            return true;
-        }
-
-        // Try to find accessible class property.
-        Field field = FieldUtils.getDeclaredField(objectClass, propertyName);
-
-        if (whitelist.allows(field)) {
-            decisions.put(key, true);
-            return true;
-        }
-
+        // TODO APIM-14800: unlike a denied method, a denied property is not remembered. Uniformised next.
         return false;
     }
 
     public boolean isMethodAllowed(Object object, String methodName, Object... methodArgs) {
-        Class<?> objectClass = object instanceof Class ? (Class<?>) object : object.getClass();
+        Class<?> objectClass = receiverClass(object);
         Map<String, Boolean> decisions = resolved.get(objectClass);
         Class<?>[] argumentClasses = getClasses(methodArgs);
         String key = memberKey(methodName, argumentClasses);
@@ -281,17 +250,22 @@ public class SecuredResolver {
             return cachedDecision;
         }
 
-        if (object instanceof Number && NUMBER_MATH_METHOD_NAMES.contains(methodName)) {
+        boolean allowed =
             // Synthetic methods like Integer.plus(Integer).
-            decisions.put(key, true);
-            return true;
-        }
+            (object instanceof Number && NUMBER_MATH_METHOD_NAMES.contains(methodName)) ||
+            isMethodAllowed(objectClass, methodName, argumentClasses) ||
+            isDGMAllowed(objectClass, methodName, argumentClasses);
 
-        boolean methodAllowed =
-            isMethodAllowed(objectClass, methodName, argumentClasses) || isDGMAllowed(objectClass, methodName, argumentClasses);
-        decisions.put(key, methodAllowed);
+        return remember(decisions, key, allowed);
+    }
 
-        return methodAllowed;
+    /**
+     * A property is readable when either of the two getter shapes Groovy recognises is allowed.
+     */
+    private boolean isReadableThroughGetter(Object object, String propertyName) {
+        String capitalized = StringUtils.capitalize(propertyName);
+
+        return isMethodAllowed(object, "get" + capitalized) || isMethodAllowed(object, "is" + capitalized);
     }
 
     private boolean isMethodAllowed(Class<?> clazz, String methodName, Class<?>[] argumentClasses) {
@@ -400,6 +374,26 @@ public class SecuredResolver {
      */
     private static String memberKey(String memberName, Class<?>[] argumentClasses) {
         return memberName + Arrays.toString(argumentClasses);
+    }
+
+    /**
+     * The class a check applies to: a static access carries the class itself, anything else its instance.
+     */
+    private static Class<?> receiverClass(Object object) {
+        return object instanceof Class<?> clazz ? clazz : object.getClass();
+    }
+
+    /**
+     * Stores a decision and returns it, so a check can end on a single statement.
+     * <p/>
+     * Deliberately a get() followed by a put() rather than a computeIfAbsent(): resolving a property re-enters through
+     * isMethodAllowed() on the same receiving class, hence on this very map, and a nested computeIfAbsent() on a
+     * ConcurrentHashMap is rejected as a recursive update.
+     */
+    private static boolean remember(Map<String, Boolean> decisions, String key, boolean decision) {
+        decisions.put(key, decision);
+
+        return decision;
     }
 
     /**
