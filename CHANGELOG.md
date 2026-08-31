@@ -1,3 +1,19 @@
+# [5.1.0](https://github.com/gravitee-io/gravitee-policy-groovy/compare/5.0.5...5.1.0) (2026-08-31)
+
+
+### Bug Fixes
+
+* **sandbox:** apply the environment given to a later initialize() ([136468f](https://github.com/gravitee-io/gravitee-policy-groovy/commit/136468ff3666092de3b2aee54bdb55069da6610e))
+* **sandbox:** cache denied property lookups like denied methods ([d72859c](https://github.com/gravitee-io/gravitee-policy-groovy/commit/d72859c50d93b70d64324467e9c40ee8ff15ad93))
+* **sandbox:** key the decision cache by class identity ([3b4f4d4](https://github.com/gravitee-io/gravitee-policy-groovy/commit/3b4f4d4009edfb5c22abcd9ee1192d5362f231f3))
+* **sandbox:** key the whitelist by signature instead of class identity ([87483a9](https://github.com/gravitee-io/gravitee-policy-groovy/commit/87483a99ce488138af928bb26834a50e4aaad9ad))
+* **sandbox:** publish the whitelist safely and stop destroying it in use ([2a22adb](https://github.com/gravitee-io/gravitee-policy-groovy/commit/2a22adb3fdd2faf1eb99b66453205480efaee064))
+
+
+### Features
+
+* **sandbox:** instrument whitelist denials for diagnosis ([d2e84ef](https://github.com/gravitee-io/gravitee-policy-groovy/commit/d2e84ef917a932723ee9474086802fd0e1367030))
+
 ## [5.0.5](https://github.com/gravitee-io/gravitee-policy-groovy/compare/5.0.4...5.0.5) (2026-08-12)
 
 
