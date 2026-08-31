@@ -65,6 +65,14 @@ class SandboxDiagnosticsTest {
 
     private static final String BINDABLE_HTTP_REQUEST = BindableHttpRequest.class.getName();
 
+    private static final String CLASSLOADER_LEGACY_KEY = "classloader.legacy.enabled";
+
+    /** Each deployment gets its own copy of the plugin classes, so it gets its own sandbox to release. */
+    private static final boolean LEGACY_CLASSLOADER = true;
+
+    /** Deployments share the plugin classes, hence a single sandbox that outlives any of them. */
+    private static final boolean SHARED_CLASSLOADER = false;
+
     private final ListAppender<ILoggingEvent> appender = new ListAppender<>();
 
     private Logger diagnosticsLogger;
@@ -199,23 +207,38 @@ class SandboxDiagnosticsTest {
     }
 
     @Test
-    @DisplayName("Undeploying one API does not take the sandbox away from the others still serving traffic")
-    void shouldKeepTheSandboxUsableWhileAnotherDeploymentNeedsIt() {
-        GroovyInitializer first = initializer();
-        GroovyInitializer second = initializer();
+    @DisplayName("Only the last of several activations sharing the counter releases the whitelist")
+    void shouldKeepTheSandboxUsableWhileAnotherActivationNeedsIt() {
+        GroovyInitializer first = initializer(LEGACY_CLASSLOADER);
+        GroovyInitializer second = initializer(LEGACY_CLASSLOADER);
 
         first.onActivation();
         second.onActivation();
         first.onDeactivation();
 
-        assertThat(SecuredResolver.isInitialized()).isTrue();
+        assertThat(SecuredResolver.isInitialized()).as("the second activation is still serving traffic").isTrue();
 
         second.onDeactivation();
+
+        assertThat(SecuredResolver.isInitialized()).as("nobody relies on the sandbox any more").isFalse();
     }
 
-    private static GroovyInitializer initializer() {
+    @Test
+    @DisplayName("Sharing the plugin classes means the whitelist is never released, whatever the count says")
+    void shouldNeverReleaseTheSandboxWhenTheClassesAreShared() {
+        GroovyInitializer initializer = initializer(SHARED_CLASSLOADER);
+
+        initializer.onActivation();
+        initializer.onDeactivation();
+
+        assertThat(SecuredResolver.isInitialized()).isTrue();
+    }
+
+    private static GroovyInitializer initializer(boolean classLoaderLegacyMode) {
         PolicyContextProvider provider = mock(PolicyContextProvider.class);
-        when(provider.getComponent(Environment.class)).thenReturn(new MockEnvironment());
+        when(provider.getComponent(Environment.class)).thenReturn(
+            new MockEnvironment().withProperty(CLASSLOADER_LEGACY_KEY, String.valueOf(classLoaderLegacyMode))
+        );
 
         GroovyInitializer initializer = new GroovyInitializer();
         initializer.setPolicyContextProvider(provider);
