@@ -18,15 +18,14 @@ package io.gravitee.policy.groovy.sandbox;
 import groovy.lang.GString;
 import groovy.lang.GroovyClassLoader;
 import groovy.lang.Script;
-import io.gravitee.common.util.EnvironmentUtils;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.lang.reflect.*;
-import java.util.*;
+import java.lang.reflect.InaccessibleObjectException;
+import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.reflect.ConstructorUtils;
@@ -37,7 +36,6 @@ import org.apache.groovy.dateutil.extensions.DateUtilStaticExtensions;
 import org.codehaus.groovy.runtime.DefaultGroovyMethods;
 import org.codehaus.groovy.runtime.EncodingGroovyMethods;
 import org.codehaus.groovy.runtime.StringGroovyMethods;
-import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.Environment;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
@@ -53,15 +51,6 @@ import org.springframework.util.ClassUtils;
  */
 @Slf4j
 public class SecuredResolver {
-
-    static final String WHITELIST_MODE = "append";
-    static final String WHITELIST_MODE_KEY = "groovy.whitelist.mode";
-    static final String WHITELIST_LIST_KEY = "groovy.whitelist.list";
-    static final String WHITELIST_METHOD_PREFIX = "method ";
-    static final String WHITELIST_FIELD_PREFIX = "field ";
-    static final String WHITELIST_CLASS_PREFIX = "class ";
-    static final String WHITELIST_CONSTRUCTOR_PREFIX = "new ";
-    static final String WHITELIST_ANNOTATION_PREFIX = "annotation ";
 
     // Specific groovy methods on numbers.
     private static final Set<String> NUMBER_MATH_METHOD_NAMES = new HashSet<>(
@@ -406,160 +395,5 @@ public class SecuredResolver {
         }
 
         return argumentClasses;
-    }
-
-    private static Whitelist loadWhitelist(@Nullable Environment environment) {
-        List<Method> methods = new ArrayList<>();
-        List<Field> fields = new ArrayList<>();
-        List<Constructor<?>> constructors = new ArrayList<>();
-        List<Class<?>> annotationClasses = new ArrayList<>();
-        boolean loadBuiltInWhitelist = true;
-
-        // Load groovy-whitelist from configuration.
-        if (environment != null) {
-            // Built-in groovy-whitelist will not be loaded if mode is not 'append' (ie: set to 'replace').
-            loadBuiltInWhitelist = WHITELIST_MODE.equals(environment.getProperty(WHITELIST_MODE_KEY, WHITELIST_MODE));
-
-            Collection<Object> configWhitelist = EnvironmentUtils.getPropertiesStartingWith(
-                (ConfigurableEnvironment) environment,
-                WHITELIST_LIST_KEY
-            ).values();
-
-            for (Object declaration : configWhitelist) {
-                parseDeclaration(String.valueOf(declaration), methods, fields, constructors, annotationClasses);
-            }
-        }
-
-        // Load built-in groovy-whitelist if required.
-        if (loadBuiltInWhitelist) {
-            InputStream input = SecuredResolver.class.getResourceAsStream("/groovy-whitelist");
-            BufferedReader reader = new BufferedReader(new InputStreamReader(input));
-
-            String declaration;
-
-            try {
-                while ((declaration = reader.readLine()) != null) {
-                    parseDeclaration(declaration, methods, fields, constructors, annotationClasses);
-                }
-            } catch (IOException ioe) {
-                log.error("Unable to read Groovy built-in groovy-whitelist", ioe);
-            }
-        }
-
-        return new Whitelist(
-            methods.stream().map(Whitelist::signatureOf).collect(Collectors.toUnmodifiableSet()),
-            fields.stream().map(Whitelist::signatureOf).collect(Collectors.toUnmodifiableSet()),
-            constructors.stream().map(Whitelist::signatureOf).collect(Collectors.toUnmodifiableSet()),
-            annotationClasses.stream().map(Whitelist::namesOf).flatMap(Set::stream).collect(Collectors.toUnmodifiableSet())
-        );
-    }
-
-    private static void parseDeclaration(
-        String declaration,
-        List<Method> methods,
-        List<Field> fields,
-        List<Constructor<?>> constructors,
-        List<Class<?>> annotations
-    ) {
-        try {
-            if (declaration.startsWith(WHITELIST_METHOD_PREFIX)) {
-                methods.add(parseMethod(declaration));
-            } else if (declaration.startsWith(WHITELIST_FIELD_PREFIX)) {
-                fields.add(parseField(declaration));
-            } else if (declaration.startsWith(WHITELIST_CONSTRUCTOR_PREFIX)) {
-                constructors.add(parseConstructor(declaration));
-            } else if (declaration.startsWith(WHITELIST_ANNOTATION_PREFIX)) {
-                annotations.add(parseAnnotation(declaration));
-            } else if (declaration.startsWith(WHITELIST_CLASS_PREFIX)) {
-                methods.addAll(parseAllMethods(declaration));
-                fields.addAll(parseAllFields(declaration));
-                constructors.addAll(parseAllConstructors(declaration));
-            }
-        } catch (Exception e) {
-            log.warn("The Groovy whitelisted declaration [{}] cannot be loaded. Message is [{}]", declaration, e.toString());
-        }
-    }
-
-    private static Method parseMethod(String declaration) throws ClassNotFoundException, NoSuchMethodException {
-        String[] split = declaration.split(" ");
-        String clazzName = split[1];
-        String methodName = split[2];
-        String[] methodArgs = {};
-
-        if (split.length > 3) {
-            methodArgs = Arrays.copyOfRange(split, 3, split.length);
-        }
-
-        Class<?>[] argumentClasses = getArgumentClasses(methodArgs);
-
-        Class<?> clazz = ClassUtils.forName(clazzName, SecuredResolver.class.getClassLoader());
-
-        return clazz.getDeclaredMethod(methodName, argumentClasses);
-    }
-
-    private static <T> List<T> safeGetDeclaredMembers(String clazzName, java.util.function.Function<Class<?>, T[]> memberAccessor)
-        throws ClassNotFoundException {
-        try {
-            Class<?> clazz = ClassUtils.forName(clazzName, SecuredResolver.class.getClassLoader());
-            return Arrays.asList(memberAccessor.apply(clazz));
-        } catch (NoClassDefFoundError e) {
-            log.error("Unable to load members from class [{}], a transitive dependency is missing: {}", clazzName, e.getMessage());
-            return List.of();
-        }
-    }
-
-    private static List<Method> parseAllMethods(String declaration) throws ClassNotFoundException {
-        String[] split = declaration.split(" ");
-        return safeGetDeclaredMembers(split[1], Class::getDeclaredMethods);
-    }
-
-    private static Field parseField(String declaration) throws ClassNotFoundException, NoSuchFieldException {
-        String[] split = declaration.split(" ");
-        String clazzName = split[1];
-        String fieldName = split[2];
-        Class<?> clazz = ClassUtils.forName(clazzName, SecuredResolver.class.getClassLoader());
-
-        return clazz.getDeclaredField(fieldName);
-    }
-
-    private static List<Field> parseAllFields(String declaration) throws ClassNotFoundException {
-        String[] split = declaration.split(" ");
-        return safeGetDeclaredMembers(split[1], Class::getDeclaredFields);
-    }
-
-    private static Constructor<?> parseConstructor(String declaration) throws ClassNotFoundException, NoSuchMethodException {
-        String[] split = declaration.split(" ");
-        String clazzName = split[1];
-        String[] args = {};
-
-        if (split.length > 2) {
-            args = Arrays.copyOfRange(split, 2, split.length);
-        }
-
-        Class<?>[] argumentClasses = getArgumentClasses(args);
-
-        Class<?> clazz = ClassUtils.forName(clazzName, SecuredResolver.class.getClassLoader());
-
-        return clazz.getDeclaredConstructor(argumentClasses);
-    }
-
-    private static Class<?>[] getArgumentClasses(String[] args) throws ClassNotFoundException {
-        Class<?>[] argumentClasses = new Class<?>[args.length];
-        for (int i = 0; i < args.length; i++) {
-            argumentClasses[i] = ClassUtils.forName(args[i], SecuredResolver.class.getClassLoader());
-        }
-        return argumentClasses;
-    }
-
-    private static List<Constructor<?>> parseAllConstructors(String declaration) throws ClassNotFoundException {
-        String[] split = declaration.split(" ");
-        return safeGetDeclaredMembers(split[1], Class::getDeclaredConstructors);
-    }
-
-    private static Class<?> parseAnnotation(String declaration) throws ClassNotFoundException {
-        String[] split = declaration.split(" ");
-        String clazzName = split[1];
-
-        return ClassUtils.forName(clazzName, SecuredResolver.class.getClassLoader());
     }
 }

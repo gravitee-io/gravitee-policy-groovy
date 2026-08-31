@@ -19,8 +19,8 @@ import static io.gravitee.policy.groovy.sandbox.SecuredGroovyShell.SCRIPT_TIMEOU
 import static io.gravitee.policy.groovy.sandbox.SecuredGroovyShell.SCRIPT_TIMEOUT_MAX_SECONDS;
 import static io.gravitee.policy.groovy.sandbox.SecuredGroovyShell.SCRIPT_TIMEOUT_MIN_SECONDS;
 import static io.gravitee.policy.groovy.sandbox.SecuredGroovyShell.SCRIPT_TIMEOUT_PROPERTY;
-import static io.gravitee.policy.groovy.sandbox.SecuredResolver.WHITELIST_LIST_KEY;
-import static io.gravitee.policy.groovy.sandbox.SecuredResolver.WHITELIST_MODE_KEY;
+import static io.gravitee.policy.groovy.sandbox.WhitelistLoader.WHITELIST_LIST_KEY;
+import static io.gravitee.policy.groovy.sandbox.WhitelistLoader.WHITELIST_MODE_KEY;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import groovy.lang.Binding;
@@ -895,7 +895,7 @@ public class SecuredGroovyShellTest {
 
     @Test(expected = SecurityException.class)
     public void getPropertyNotAllowed() {
-        String script = SecuredResolver.class.getCanonicalName() + ".WHITELIST_MODE";
+        String script = WhitelistLoader.class.getCanonicalName() + ".WHITELIST_MODE";
 
         securedGroovyShell.evaluate(script, new Binding());
     }
@@ -909,7 +909,7 @@ public class SecuredGroovyShellTest {
 
     @Test(expected = SecurityException.class)
     public void setPropertyNotAllowed() {
-        String script = SecuredResolver.class.getCanonicalName() + ".WHITELIST_MODE = 'test'";
+        String script = WhitelistLoader.class.getCanonicalName() + ".WHITELIST_MODE = 'test'";
 
         securedGroovyShell.evaluate(script, new Binding());
     }
