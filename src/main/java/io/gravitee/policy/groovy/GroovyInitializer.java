@@ -29,9 +29,12 @@ import org.springframework.core.env.Environment;
 public class GroovyInitializer implements PolicyContext, PolicyContextProviderAware {
 
     /**
-     * How many deployments currently rely on the sandbox. When the plugin classes are shared, one API being undeployed
-     * must not take the whitelist away from the others still serving traffic. In legacy mode each API gets its own copy
-     * of this class, hence its own counter and its own resolver, and the previous behaviour is unchanged.
+     * How many activations currently rely on the sandbox, counted among those that share this class. Whichever way the
+     * gateway lays its classloaders out, only the last deactivation of a group sharing this counter releases the
+     * whitelist, so an undeployment cannot take it away from a deployment still serving traffic.
+     * <p/>
+     * Should the gateway be confirmed to hand every deployment its own copy of this class, the counter could never
+     * exceed one and this whole mechanism could go, along with the test that exercises it.
      */
     private static final AtomicInteger ACTIVATIONS = new AtomicInteger();
 
