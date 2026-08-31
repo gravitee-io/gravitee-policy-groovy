@@ -29,7 +29,7 @@ import org.springframework.lang.Nullable;
  * <p/>
  * Members are held as textual signatures rather than as reflective objects, for two reasons. Identity comparison made
  * the whitelist blind to a class loaded by a different classloader than the one it was built from, which is the defect
- * reported in APIM-14800: the very same class, reached through another classloader, was denied. And holding
+ * this whitelist was reworked to fix: the very same class, reached through another classloader, was denied. And holding
  * {@link Class} objects pinned the classloader that defined them, which is what the JVM-wide destroy() existed to work
  * around.
  * <p/>

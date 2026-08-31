@@ -44,7 +44,7 @@ import org.springframework.core.env.Environment;
 import org.springframework.mock.env.MockEnvironment;
 
 /**
- * Acceptance tests for APIM-14800.
+ * Acceptance tests for the sandbox whitelist defects.
  * <p/>
  * The sandbox intermittently denied a whitelisted property — typically <code>request.content</code> — on a single
  * gateway instance, and only recycling it helped. These tests pin down the behaviours that made that possible: a class
@@ -61,7 +61,7 @@ class SandboxDiagnosticsTest {
     private static final String DIAGNOSTICS_LOGGER = "io.gravitee.policy.groovy.sandbox.diagnostics";
 
     /** Marker carried by the diagnostics messages, duplicated here on purpose so the tests do not depend on production constants. */
-    private static final String LAZY_INITIALIZATION = "[APIM-14800/lazy-initialization]";
+    private static final String LAZY_INITIALIZATION = "[groovy-sandbox/lazy-initialization]";
 
     private static final String BINDABLE_HTTP_REQUEST = BindableHttpRequest.class.getName();
 
@@ -280,7 +280,7 @@ class SandboxDiagnosticsTest {
     /**
      * A parent-last classloader for a handful of classes only: it redefines them from the bytecode served by its
      * parent, and delegates everything else. The redefined classes therefore share their fully qualified name with the
-     * ones the whitelist was built from, but not their identity — which is exactly the situation APIM-14800 describes.
+     * ones the whitelist was built from, but not their identity — which is exactly the situation those denials describe.
      */
     private static final class ForeignClassLoader extends ClassLoader {
 
