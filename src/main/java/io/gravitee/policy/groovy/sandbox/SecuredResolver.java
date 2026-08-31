@@ -123,14 +123,18 @@ public class SecuredResolver {
      */
     private static volatile Environment configuredEnvironment;
 
+    /**
+     * Installs a whitelist built from the given environment. Handing over a different environment rebuilds the
+     * whitelist rather than recording a configuration that would only take effect at the next {@link #destroy()}.
+     * Handing over the same one again is a no-op, so repeated activations do not pay for a rebuild.
+     */
     public static synchronized void initialize(@Nullable Environment environment) {
         if (instance != null && environment == configuredEnvironment) {
             return;
         }
 
-        if (instance == null) {
-            instance = new SecuredResolver(loadWhitelist(environment));
-        }
+        configuredEnvironment = environment;
+        instance = new SecuredResolver(WhitelistLoader.load(environment));
     }
 
     public static synchronized boolean isInitialized() {
