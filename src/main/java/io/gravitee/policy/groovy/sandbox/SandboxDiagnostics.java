@@ -22,11 +22,11 @@ import org.springframework.core.env.Environment;
 import org.springframework.lang.Nullable;
 
 /**
- * Traces the life of the Groovy sandbox whitelist (APIM-14800).
+ * Traces the life of the Groovy sandbox whitelist.
  * <p/>
- * The defects behind APIM-14800 were hard to pin down partly because nothing said when the whitelist was built,
- * rebuilt or dropped. This keeps that visible: a gateway that keeps rebuilding its whitelist, or that rebuilds it
- * outside of the policy activation, is worth looking at.
+ * The defects behind the intermittent sandbox denials were hard to pin down partly because nothing said when the
+ * whitelist was built, rebuilt or dropped. This keeps that visible: a gateway that keeps rebuilding its whitelist, or
+ * that rebuilds it outside of the policy activation, is worth looking at.
  * <p/>
  * Output goes to the dedicated <code>io.gravitee.policy.groovy.sandbox.diagnostics</code> logger, so that support can
  * raise its verbosity without touching the rest of the policy.
@@ -36,7 +36,7 @@ import org.springframework.lang.Nullable;
 class SandboxDiagnostics {
 
     /** The whitelist was (re)built by the lazy getInstance() path rather than by GroovyInitializer.onActivation(). */
-    static final String MARKER_LAZY_INITIALIZATION = "[APIM-14800/lazy-initialization]";
+    static final String MARKER_LAZY_INITIALIZATION = "[groovy-sandbox/lazy-initialization]";
 
     private static final Logger log = LoggerFactory.getLogger("io.gravitee.policy.groovy.sandbox.diagnostics");
 
