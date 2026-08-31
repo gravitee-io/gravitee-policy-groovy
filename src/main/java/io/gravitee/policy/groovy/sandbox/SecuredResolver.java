@@ -208,12 +208,7 @@ public class SecuredResolver {
             isReadableThroughGetter(object, propertyName) ||
             whitelist.allows(FieldUtils.getDeclaredField(objectClass, propertyName));
 
-        if (allowed) {
-            return remember(decisions, key, true);
-        }
-
-        // TODO APIM-14800: unlike a denied method, a denied property is not remembered. Uniformised next.
-        return false;
+        return remember(decisions, key, allowed);
     }
 
     public boolean isSetPropertyAllowed(Object object, String propertyName, Object propertyValue) {
@@ -231,12 +226,7 @@ public class SecuredResolver {
             isMethodAllowed(object, "set" + StringUtils.capitalize(propertyName), propertyValue) ||
             whitelist.allows(FieldUtils.getDeclaredField(objectClass, propertyName));
 
-        if (allowed) {
-            return remember(decisions, key, true);
-        }
-
-        // TODO APIM-14800: unlike a denied method, a denied property is not remembered. Uniformised next.
-        return false;
+        return remember(decisions, key, allowed);
     }
 
     public boolean isMethodAllowed(Object object, String methodName, Object... methodArgs) {
