@@ -892,7 +892,6 @@ public class SandboxTransformer extends CompilationCustomizer {
         return clazz != null && clazz != Object.class && !Modifier.isAbstract(clazz.getModifiers());
     }
 
-    static final Token ASSIGNMENT_OP = new Token(Types.ASSIGN, "=", -1, -1);
 
     static final ClassNode checkerClass = new ClassNode(Checker.class);
     static final ClassNode ScriptBytecodeAdapterClass = new ClassNode(ScriptBytecodeAdapter.class);
