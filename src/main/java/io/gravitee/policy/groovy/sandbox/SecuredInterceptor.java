@@ -15,6 +15,7 @@
  */
 package io.gravitee.policy.groovy.sandbox;
 
+import groovy.lang.Binding;
 import groovy.lang.GroovyRuntimeException;
 import groovy.lang.MetaClass;
 import groovy.lang.Script;
@@ -62,6 +63,12 @@ public class SecuredInterceptor extends GroovyInterceptor {
 
     @Override
     public Object onNewInstance(Invoker invoker, Class receiver, Object... args) throws Throwable {
+        // SECURITY-3341: the fixed sandbox intercepts the super(binding) call every generated script
+        // makes to its abstract superclass groovy.lang.Script, whose protected constructor cannot be
+        // resolved through the whitelist. Allow that initial instantiation (mirrors GroovyValueFilter).
+        if (receiver == Script.class && args.length == 1 && args[0] instanceof Binding) {
+            return super.onNewInstance(invoker, receiver, args);
+        }
         if (SecuredResolver.getInstance().isConstructorAllowed(receiver, args)) {
             return super.onNewInstance(invoker, receiver, args);
         }
@@ -90,6 +97,11 @@ public class SecuredInterceptor extends GroovyInterceptor {
 
     @Override
     public void onSuperConstructor(Invoker invoker, Class receiver, Object... args) throws Throwable {
+        // SECURITY-3341: allow the initial script instantiation (super(binding) to abstract Script).
+        if (receiver == Script.class && args.length == 1 && args[0] instanceof Binding) {
+            super.onSuperConstructor(invoker, receiver, args);
+            return;
+        }
         if (SecuredResolver.getInstance().isConstructorAllowed(receiver, args)) {
             super.onSuperConstructor(invoker, receiver, args);
         } else {
