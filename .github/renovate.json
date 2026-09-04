@@ -1,3 +1,11 @@
 {
-    "extends": ["github>gravitee-io/renovate-config:plugin"]
+    "extends": ["github>gravitee-io/renovate-config:plugin"],
+    "packageRules": [
+        {
+            "matchDatasources": ["maven"],
+            "matchPackageNames": ["org.kohsuke:groovy-sandbox"],
+            "registryUrls": ["https://repo.jenkins-ci.org/releases/"],
+            "automerge": false
+        }
+    ]
 }
