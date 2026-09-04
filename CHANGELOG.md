@@ -1,3 +1,10 @@
+## [4.3.8](https://github.com/gravitee-io/gravitee-policy-groovy/compare/4.3.7...4.3.8) (2026-09-04)
+
+
+### Bug Fixes
+
+* **sandbox:** intercept the typed for-each implicit cast (SECURITY-3792) ([8de8889](https://github.com/gravitee-io/gravitee-policy-groovy/commit/8de88899743d33e557ba335b18c85c7ddf8ee8e7))
+
 ## [4.3.7](https://github.com/gravitee-io/gravitee-policy-groovy/compare/4.3.6...4.3.7) (2026-08-12)
 
 
