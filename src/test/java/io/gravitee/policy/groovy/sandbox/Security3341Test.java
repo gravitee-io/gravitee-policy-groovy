@@ -55,4 +55,18 @@ class Security3341Test {
         assertThat((Object) evaluate("def n = 0; for (x in 0..3) { n += x }; return n")).isEqualTo(6);
         assertThat((Object) evaluate("return (1..5).collect { it * 2 }")).isEqualTo(List.of(2, 4, 6, 8, 10));
     }
+
+    /**
+     * Per review: only IntRange construction is gated by 1.34 (hence its whitelist entry). The other
+     * range flavours build a NumberRange/ObjectRange and need no Range whitelist entry; this pins that
+     * they keep working. (String ranges are left out: their per-element next() is whitelisted on master
+     * only, an orthogonal, pre-existing difference unrelated to this bump.)
+     */
+    @Test
+    void everyRangeFlavourWorks() {
+        assertThat((Object) evaluate("return (0..3).toList()")).isEqualTo(List.of(0, 1, 2, 3)); // IntRange
+        assertThat((Object) evaluate("return (0..<3).toList()")).isEqualTo(List.of(0, 1, 2)); // IntRange, exclusive
+        assertThat((Object) evaluate("return (0L..2L).toList()")).isEqualTo(List.of(0L, 1L, 2L)); // NumberRange
+        assertThat((Object) evaluate("return (0.0..2.0).size()")).isEqualTo(3); // NumberRange (BigDecimal)
+    }
 }
