@@ -45,6 +45,10 @@
 
         <properties-maven-plugin.version>1.2.1</properties-maven-plugin.version>
 
+        <!-- Vendored groovy-sandbox sources are kept verbatim from upstream; exclude them from
+             analysis like the license and prettier checks already do. -->
+        <sonar.exclusions>**/org/kohsuke/groovy/sandbox/**</sonar.exclusions>
+
         <!-- Property used by the publication job in CI-->
         <publish-folder-path>graviteeio-apim/plugins/policies</publish-folder-path>
     </properties>
