@@ -290,12 +290,12 @@ The `groovy` policy can be applied to the following API types and flow phases.
 ## Compatibility matrix
 Strikethrough text indicates that a version is deprecated.
 
-| Plugin version| APIM| AM |
-| --- | --- | ---  |
-|5.x|-|4.12.x and above |
-|4.x|4.9.x and above|- |
-|3.x|4.6.x to 4.8.x|- |
-|2.x|4.5.x and below|4.0.x to 4.11.x |
+| Plugin version| APIM| AM| Java version |
+| --- | --- | --- | ---  |
+|5.x|4.12.x and above|4.12.x and above|21 |
+|4.x|4.9.x to 4.11.x|-|21 |
+|3.x|4.6.x to 4.8.x|-|17 |
+|2.x|4.5.x and below|4.0.x to 4.11.x|17 |
 
 
 
