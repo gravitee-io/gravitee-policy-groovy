@@ -68,6 +68,7 @@ class java.util.Collection
 class java.util.Collections
 class java.util.Date
 class java.util.Deque
+class groovy.lang.IntRange
 class java.util.List
 class java.util.Map
 class java.util.Queue

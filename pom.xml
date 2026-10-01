@@ -39,11 +39,15 @@
         <gravitee-entrypoint-http-get.version>2.1.0</gravitee-entrypoint-http-get.version>
         <gravitee-reactor-message.version>8.2.0</gravitee-reactor-message.version>
         <groovy.version>4.0.30</groovy.version>
-        <groovy-sandbox.version>1.30</groovy-sandbox.version>
+        <groovy-sandbox.version>1.34.1</groovy-sandbox.version>
         <commons-lang3.version>3.18.0</commons-lang3.version>
         <guava.version>30.1.1-jre</guava.version>
 
         <properties-maven-plugin.version>1.3.1</properties-maven-plugin.version>
+
+        <!-- Vendored groovy-sandbox sources are kept verbatim from upstream; exclude them from
+             analysis like the license and prettier checks already do. -->
+        <sonar.exclusions>**/org/kohsuke/groovy/sandbox/**</sonar.exclusions>
 
         <!-- Property used by the publication job in CI-->
         <publish-folder-path>graviteeio-apim/plugins/policies</publish-folder-path>
