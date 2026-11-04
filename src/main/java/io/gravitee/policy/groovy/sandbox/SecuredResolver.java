@@ -18,6 +18,7 @@ package io.gravitee.policy.groovy.sandbox;
 import groovy.lang.GString;
 import groovy.lang.GroovyClassLoader;
 import groovy.lang.Script;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InaccessibleObjectException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -83,6 +84,10 @@ public class SecuredResolver {
     private static final List<String> ALLOWED_ARRAY_NATIVE_METHODS = Arrays.asList("getAt", "putAt", "getLength");
 
     private static final Class<?>[] NO_ARGUMENTS = {};
+
+    // Reserved decision key for the asType-construction check. Cannot collide with a real member key,
+    // which is always a member name followed by its argument classes in brackets.
+    private static final String AS_TYPE_CONSTRUCTION_KEY = "asType#<init>";
 
     private final Whitelist whitelist;
     /**
@@ -180,6 +185,31 @@ public class SecuredResolver {
             whitelist.allows(ConstructorUtils.getMatchingAccessibleConstructor(clazz, argumentClasses));
 
         return remember(decisions, key, allowed);
+    }
+
+    /**
+     * Whether {@code asType}/{@code as} may instantiate the given target. Authorised on the same basis as a {@code new}:
+     * the target is script-defined, or at least one of its declared constructors is whitelisted.
+     */
+    public boolean isAsTypeConstructionAllowed(Class<?> target) {
+        Map<String, Boolean> decisions = resolved.get(target);
+        Boolean cachedDecision = decisions.get(AS_TYPE_CONSTRUCTION_KEY);
+
+        if (cachedDecision != null) {
+            return cachedDecision;
+        }
+
+        return remember(decisions, AS_TYPE_CONSTRUCTION_KEY, isGroovyScriptDefinedClass(target) || hasWhitelistedConstructor(target));
+    }
+
+    private boolean hasWhitelistedConstructor(Class<?> target) {
+        for (Constructor<?> constructor : target.getDeclaredConstructors()) {
+            if (whitelist.allows(constructor)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public boolean isGetPropertyAllowed(Object object, String propertyName) {

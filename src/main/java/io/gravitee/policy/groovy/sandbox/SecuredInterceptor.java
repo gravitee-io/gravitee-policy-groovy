@@ -20,9 +20,12 @@ import groovy.lang.MetaClass;
 import groovy.lang.Script;
 import io.gravitee.common.util.MultiValueMap;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import org.codehaus.groovy.runtime.InvokerHelper;
+import org.codehaus.groovy.runtime.MethodClosure;
 import org.codehaus.groovy.runtime.ScriptBytecodeAdapter;
 import org.kohsuke.groovy.sandbox.GroovyInterceptor;
 
@@ -34,6 +37,25 @@ public class SecuredInterceptor extends GroovyInterceptor {
 
     @Override
     public Object onMethodCall(Invoker invoker, Object receiver, String method, Object... args) throws Throwable {
+        // The whitelisted Closure.call(..) would let a MethodClosure invoke an arbitrary target method, so re-check
+        // the wrapped target. A raw MethodClosure is only reachable via asType (guarded below), so guarding the direct
+        // call suffices; revisit if that stops holding.
+        if (receiver instanceof MethodClosure methodClosure && isClosureInvocation(method)) {
+            Object target = methodClosure.getOwner();
+            String targetMethod = methodClosure.getMethod();
+
+            if (SecuredResolver.getInstance().isMethodAllowed(target, targetMethod, args)) {
+                return super.onMethodCall(invoker, receiver, method, args);
+            }
+
+            throw new SecurityException("Failed to resolve method [ " + prettyPrint(target, targetMethod, args) + " ]");
+        }
+
+        // asType(target) reaches the target constructor through trusted Groovy code, bypassing onNewInstance.
+        if (isAsTypeToClass(method, args)) {
+            guardAsTypeConstruction(receiver, (Class<?>) args[0]);
+        }
+
         // Special case to handle HttpHeaders.set(Object, Object). Fallback to original method if generic 'set' method is not allowed (or found).
         if (
             receiver instanceof MultiValueMap &&
@@ -53,6 +75,11 @@ public class SecuredInterceptor extends GroovyInterceptor {
 
     @Override
     public Object onStaticCall(Invoker invoker, Class receiver, String method, Object... args) throws Throwable {
+        // Defence in depth for the static DefaultGroovyMethods.asType(source, target) form.
+        if (method.equals("asType") && args.length == 2 && args[1] instanceof Class<?> target) {
+            guardAsTypeConstruction(args[0], target);
+        }
+
         if (SecuredResolver.getInstance().isMethodAllowed(receiver, method, args)) {
             return super.onStaticCall(invoker, receiver, method, args);
         }
@@ -174,5 +201,51 @@ public class SecuredInterceptor extends GroovyInterceptor {
 
     private boolean isArrayAccess(Object receiver, Object index) {
         return (receiver.getClass().isArray() || List.class.isAssignableFrom(receiver.getClass())) && index instanceof Integer;
+    }
+
+    private static boolean isClosureInvocation(String method) {
+        return method.equals("call") || method.equals("doCall");
+    }
+
+    private static boolean isAsTypeToClass(String method, Object[] args) {
+        return method.equals("asType") && args.length == 1 && args[0] instanceof Class<?>;
+    }
+
+    /**
+     * Rejects an {@code asType} conversion that would instantiate a non-whitelisted target. Conversions that do not
+     * reach an arbitrary constructor are left alone: a source already matching the target, coercion to an interface,
+     * array, primitive, enum or Number / CharSequence value type, and the standard {@code java.util} collection and
+     * map targets Groovy knows how to build. Any other concrete target is authorised like a {@code new}.
+     */
+    private void guardAsTypeConstruction(Object source, Class<?> target) {
+        // No construction happens when the source already matches the target (castToType returns it unchanged).
+        if (target.isInstance(source)) {
+            return;
+        }
+
+        if (reachesConstructorViaAsType(target) && !SecuredResolver.getInstance().isAsTypeConstructionAllowed(target)) {
+            throw new SecurityException("Failed to resolve constructor [" + prettyPrint(target, "<init>", source) + "]");
+        }
+    }
+
+    private static boolean reachesConstructorViaAsType(Class<?> target) {
+        return !(
+            target == null ||
+            target.isInterface() ||
+            target.isArray() ||
+            target.isPrimitive() ||
+            target.isEnum() ||
+            Number.class.isAssignableFrom(target) ||
+            CharSequence.class.isAssignableFrom(target) ||
+            Boolean.class == target ||
+            Character.class == target ||
+            isStandardJdkCollection(target)
+        );
+    }
+
+    private static boolean isStandardJdkCollection(Class<?> target) {
+        return (
+            (Collection.class.isAssignableFrom(target) || Map.class.isAssignableFrom(target)) && "java.util".equals(target.getPackageName())
+        );
     }
 }
