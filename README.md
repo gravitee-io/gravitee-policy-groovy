@@ -442,6 +442,13 @@ spec:
 
 ## Changelog
 
+#### [5.1.2](https://github.com/gravitee-io/gravitee-policy-groovy/compare/5.1.1...5.1.2) (2026-11-05)
+
+
+##### Bug Fixes
+
+* **sandbox:** harden whitelist against asType and MethodClosure bypass ([dfce1e4](https://github.com/gravitee-io/gravitee-policy-groovy/commit/dfce1e45841ba62a89322ccf0bcdae085dc20be3))
+
 #### [5.1.1](https://github.com/gravitee-io/gravitee-policy-groovy/compare/5.1.0...5.1.1) (2026-09-04)
 
 
