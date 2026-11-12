@@ -188,8 +188,9 @@ public class SecuredResolver {
     }
 
     /**
-     * Whether {@code asType}/{@code as} may instantiate the given target. Authorised on the same basis as a {@code new}:
-     * the target is script-defined, or at least one of its declared constructors is whitelisted.
+     * Whether {@code asType} may instantiate the given target. The constructor it calls depends on the
+     * source's elements, so the target is allowed only when it is script-defined or every declared constructor is
+     * whitelisted: a partly whitelisted class would otherwise be reachable through its non-whitelisted constructors.
      */
     public boolean isAsTypeConstructionAllowed(Class<?> target) {
         Map<String, Boolean> decisions = resolved.get(target);
@@ -199,17 +200,13 @@ public class SecuredResolver {
             return cachedDecision;
         }
 
-        return remember(decisions, AS_TYPE_CONSTRUCTION_KEY, isGroovyScriptDefinedClass(target) || hasWhitelistedConstructor(target));
+        return remember(decisions, AS_TYPE_CONSTRUCTION_KEY, isGroovyScriptDefinedClass(target) || hasOnlyWhitelistedConstructors(target));
     }
 
-    private boolean hasWhitelistedConstructor(Class<?> target) {
-        for (Constructor<?> constructor : target.getDeclaredConstructors()) {
-            if (whitelist.allows(constructor)) {
-                return true;
-            }
-        }
+    private boolean hasOnlyWhitelistedConstructors(Class<?> target) {
+        Constructor<?>[] constructors = target.getDeclaredConstructors();
 
-        return false;
+        return constructors.length > 0 && Arrays.stream(constructors).allMatch(whitelist::allows);
     }
 
     public boolean isGetPropertyAllowed(Object object, String propertyName) {

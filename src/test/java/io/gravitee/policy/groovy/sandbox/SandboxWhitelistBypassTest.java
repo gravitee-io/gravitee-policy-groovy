@@ -93,6 +93,11 @@ class SandboxWhitelistBypassTest {
     }
 
     @Test
+    void asTypeToAWhollyWhitelistedClassIsPreserved() {
+        assertThat((Object) evaluate("([]).asType(groovy.json.JsonSlurper)")).isInstanceOf(groovy.json.JsonSlurper.class);
+    }
+
+    @Test
     void asTypeToNonWhitelistedConcreteCollectionSubtypeIsBlocked() {
         // java.util.concurrent is outside the exempt java.util collection targets, so it is a real construction.
         assertThatThrownBy(() -> evaluate("[1].asType(java.util.concurrent.CopyOnWriteArrayList)")).isInstanceOf(SecurityException.class);
