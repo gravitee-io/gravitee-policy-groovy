@@ -4,7 +4,6 @@ class groovy.json.JsonParserType
 class groovy.json.JsonSlurper
 class groovy.xml.slurpersupport.Node
 class groovy.xml.slurpersupport.NodeChild
-class groovy.xml.XmlSlurper
 class io.gravitee.am.model.safe.ClientProperties
 class io.gravitee.am.model.safe.DomainProperties
 class io.gravitee.am.model.safe.UserProperties
@@ -99,6 +98,13 @@ method groovy.lang.Range getFrom
 method groovy.lang.Range getTo
 method groovy.lang.Range step int
 method groovy.lang.Range step int groovy.lang.Closure
+method groovy.xml.XmlSlurper getDocument
+method groovy.xml.XmlSlurper isKeepIgnorableWhitespace
+method groovy.xml.XmlSlurper parse java.io.InputStream
+method groovy.xml.XmlSlurper parse java.io.Reader
+method groovy.xml.XmlSlurper parseText java.lang.String
+method groovy.xml.XmlSlurper setKeepIgnorableWhitespace boolean
+method groovy.xml.XmlSlurper setKeepWhitespace boolean
 method java.lang.Comparable compareTo java.lang.Object
 method java.lang.Enum name
 method java.lang.Enum ordinal
@@ -1185,6 +1191,8 @@ method org.codehaus.groovy.runtime.StringGroovyMethods unexpandLine java.lang.Ch
 method java.lang.String format java.lang.String java.lang.Object[]
 
 # Allows constructor signatures
+new groovy.xml.XmlSlurper
+new groovy.xml.XmlSlurper boolean boolean
 
 # Allows annotations
 
