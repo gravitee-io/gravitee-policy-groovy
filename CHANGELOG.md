@@ -1,3 +1,10 @@
+## [5.1.3](https://github.com/gravitee-io/gravitee-policy-groovy/compare/5.1.2...5.1.3) (2026-11-19)
+
+
+### Bug Fixes
+
+* **sandbox:** restrict XmlSlurper to safe members ([06f0d9f](https://github.com/gravitee-io/gravitee-policy-groovy/commit/06f0d9fed43776286002851bcef02dced3c0538a))
+
 ## [5.1.2](https://github.com/gravitee-io/gravitee-policy-groovy/compare/5.1.1...5.1.2) (2026-11-05)
 
 
