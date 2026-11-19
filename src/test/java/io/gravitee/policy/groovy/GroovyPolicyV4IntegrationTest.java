@@ -47,6 +47,7 @@ import io.vertx.rxjava3.core.buffer.Buffer;
 import io.vertx.rxjava3.core.http.HttpClient;
 import io.vertx.rxjava3.core.http.HttpClientRequest;
 import io.vertx.rxjava3.core.http.HttpClientResponse;
+import java.util.Base64;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -207,6 +208,55 @@ public class GroovyPolicyV4IntegrationTest {
                 .assertComplete();
 
             wiremock.verify(1, postRequestedFor(urlPathEqualTo("/team")));
+        }
+
+        private static final byte[] PNG_BYTES = { (byte) 0x89, 'P', 'N', 'G', 0x0D, 0x0A, 0x1A, 0x0A, 0x00, (byte) 0x80, (byte) 0xFF };
+
+        @Test
+        @DeployApi("/apis/v4/api-response-binary.json")
+        void should_return_binary_content_decoded_by_response_script(HttpClient client) {
+            String encoded = Base64.getEncoder().encodeToString(PNG_BYTES);
+            String envelope =
+                "{\"statusCode\":201,\"headers\":{\"Content-Type\":\"image/png\"},\"body\":\"" + encoded + "\",\"isBase64Encoded\":true}";
+            wiremock.stubFor(post("/team").willReturn(okJson(envelope)));
+
+            client
+                .rxRequest(POST, "/test")
+                .flatMap(HttpClientRequest::rxSend)
+                .doOnSuccess(response -> {
+                    assertThat(response.statusCode()).isEqualTo(201);
+                    assertThat(response.getHeader(HttpHeaderNames.CONTENT_TYPE)).isEqualTo("image/png");
+                    assertThat(response.getHeader(HttpHeaderNames.CONTENT_LENGTH)).isEqualTo(Integer.toString(PNG_BYTES.length));
+                })
+                .flatMap(HttpClientResponse::body)
+                .doOnSuccess(body -> assertThat(body.getBytes()).containsExactly(PNG_BYTES))
+                .test()
+                .awaitDone(5, TimeUnit.SECONDS)
+                .assertComplete()
+                .assertNoErrors();
+        }
+
+        @Test
+        @DeployApi("/apis/v4/api-request-binary.json")
+        void should_forward_binary_request_content_as_base64(HttpClient client) {
+            wiremock.stubFor(post("/team").willReturn(ok("")));
+            String encoded = Base64.getEncoder().encodeToString(PNG_BYTES);
+
+            client
+                .rxRequest(POST, "/test")
+                .flatMap(request -> request.rxSend(Buffer.buffer(PNG_BYTES)))
+                .doOnSuccess(response -> assertThat(response.statusCode()).isEqualTo(200))
+                .test()
+                .awaitDone(5, TimeUnit.SECONDS)
+                .assertComplete()
+                .assertNoErrors();
+
+            wiremock.verify(
+                1,
+                postRequestedFor(urlPathEqualTo("/team")).withRequestBody(
+                    equalToJson("{\"body\":\"" + encoded + "\",\"isBase64Encoded\":true}")
+                )
+            );
         }
     }
 

@@ -21,7 +21,7 @@
         },
         "overrideContent": {
             "title": "Override content",
-            "description": "Enable to override the content of the request or response with the value returned by your script.",
+            "description": "Enable to override the content of the request or response with the value returned by your script. For HTTP proxy APIs, the script can return a String, a byte[] or a Buffer.",
             "type": "boolean",
             "x-schema-form": {
                 "hidden": true

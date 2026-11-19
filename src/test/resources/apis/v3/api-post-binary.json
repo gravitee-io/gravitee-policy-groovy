@@ -1,0 +1,42 @@
+{
+    "id": "api-post-binary",
+    "name": "api-post-binary",
+    "gravitee": "2.0.0",
+    "proxy": {
+        "context_path": "/api-post-binary",
+        "endpoints": [
+            {
+                "name": "default",
+                "target": "http://localhost:8080/team",
+                "http": {
+                    "connectTimeout": 3000,
+                    "readTimeout": 60000
+                }
+            }
+        ]
+    },
+    "flows": [
+        {
+            "name": "flow-1",
+            "methods": [],
+            "enabled": true,
+            "path-operator": {
+                "path": "/",
+                "operator": "STARTS_WITH"
+            },
+            "pre": [],
+            "post": [
+                {
+                    "name": "Groovy",
+                    "description": "",
+                    "enabled": true,
+                    "policy": "groovy",
+                    "configuration": {
+                        "onResponseContentScript": "import groovy.json.JsonSlurper\n\ndef envelope = new JsonSlurper().parseText(response.content)\nresponse.status(envelope.statusCode)\nresponse.headers.'Content-Type' = envelope.headers.'Content-Type'\nreturn envelope.body.decodeBase64()"
+                    }
+                }
+            ]
+        }
+    ],
+    "resources": []
+}

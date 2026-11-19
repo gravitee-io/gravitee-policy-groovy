@@ -22,6 +22,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 import io.gravitee.gateway.api.buffer.Buffer;
+import io.gravitee.gateway.api.http.HttpHeaderNames;
 import io.gravitee.gateway.api.http.HttpHeaders;
 import io.gravitee.gateway.reactive.api.ExecutionFailure;
 import io.gravitee.gateway.reactive.api.context.ExecutionContext;
@@ -410,8 +411,113 @@ class GroovyPolicyTest {
             });
     }
 
+    private static final byte[] PNG_BYTES = { (byte) 0x89, 'P', 'N', 'G', 0x0D, 0x0A, 0x1A, 0x0A, 0x00, (byte) 0x80, (byte) 0xFF };
+
+    @Test
+    void should_override_http_response_content_with_byte_array_returned_by_script() {
+        var policy = new GroovyPolicy(buildOverrideConfig("return_decoded_binary_content.groovy"));
+        var headers = HttpHeaders.create();
+        when(response.headers()).thenReturn(headers);
+        when(response.onBody(onBodyCaptor.capture())).thenReturn(Completable.complete());
+
+        policy.onResponse(ctx).test().assertNoValues();
+
+        String envelope =
+            "{\"statusCode\":200,\"headers\":{\"Content-Type\":\"image/png\"},\"body\":\"" +
+            Base64.getEncoder().encodeToString(PNG_BYTES) +
+            "\",\"isBase64Encoded\":true}";
+
+        ((Maybe<Buffer>) onBodyCaptor.getValue().apply(Maybe.just(Buffer.buffer(envelope)))).test()
+            .awaitDone(10, TimeUnit.SECONDS)
+            .assertComplete()
+            .assertNoErrors()
+            .assertValue(buffer -> {
+                assertThat(buffer.getBytes()).containsExactly(PNG_BYTES);
+                assertThat(buffer.toString()).doesNotStartWith("[B@");
+                return true;
+            });
+
+        assertThat(headers.get(HttpHeaderNames.CONTENT_LENGTH)).isEqualTo(Integer.toString(PNG_BYTES.length));
+        assertThat(headers.get(HttpHeaderNames.CONTENT_TYPE)).isEqualTo("image/png");
+    }
+
+    @Test
+    void should_override_http_request_content_with_buffer_returned_by_script() {
+        var policy = new GroovyPolicy(buildOverrideConfig("return_buffer_content.groovy"));
+        var headers = HttpHeaders.create();
+        when(request.headers()).thenReturn(headers);
+        when(request.onBody(onBodyCaptor.capture())).thenReturn(Completable.complete());
+
+        policy.onRequest(ctx).test().assertNoValues();
+
+        byte[] prefix = "BIN:".getBytes(StandardCharsets.US_ASCII);
+        byte[] expected = Arrays.copyOf(prefix, prefix.length + PNG_BYTES.length);
+        System.arraycopy(PNG_BYTES, 0, expected, prefix.length, PNG_BYTES.length);
+
+        ((Maybe<Buffer>) onBodyCaptor.getValue().apply(Maybe.just(Buffer.buffer(PNG_BYTES)))).test()
+            .awaitDone(10, TimeUnit.SECONDS)
+            .assertComplete()
+            .assertNoErrors()
+            .assertValue(buffer -> {
+                assertThat(buffer.getBytes()).containsExactly(expected);
+                return true;
+            });
+
+        assertThat(headers.get(HttpHeaderNames.CONTENT_LENGTH)).isEqualTo(Integer.toString(expected.length));
+    }
+
+    @Test
+    void should_keep_original_http_content_when_override_is_disabled() {
+        var policy = new GroovyPolicy(
+            GroovyPolicyConfiguration.builder().script("return 'AQID'.decodeBase64()").readContent(true).overrideContent(false).build()
+        );
+        var headers = HttpHeaders.create();
+        when(response.headers()).thenReturn(headers);
+        when(response.onBody(onBodyCaptor.capture())).thenReturn(Completable.complete());
+
+        policy.onResponse(ctx).test().assertNoValues();
+
+        ((Maybe<Buffer>) onBodyCaptor.getValue().apply(Maybe.just(Buffer.buffer(PNG_BYTES)))).test()
+            .awaitDone(10, TimeUnit.SECONDS)
+            .assertComplete()
+            .assertNoErrors()
+            .assertValue(buffer -> {
+                assertThat(buffer.getBytes()).containsExactly(PNG_BYTES);
+                return true;
+            });
+
+        assertThat(headers.get(HttpHeaderNames.CONTENT_LENGTH)).isNull();
+    }
+
+    @Test
+    void should_override_http_content_with_string_returned_by_script() {
+        var policy = new GroovyPolicy(
+            GroovyPolicyConfiguration.builder()
+                .script("return '{\"message\":\"Hello World!\"}'")
+                .readContent(true)
+                .overrideContent(true)
+                .build()
+        );
+        when(response.onBody(onBodyCaptor.capture())).thenReturn(Completable.complete());
+
+        policy.onResponse(ctx).test().assertNoValues();
+
+        ((Maybe<Buffer>) onBodyCaptor.getValue().apply(Maybe.just(Buffer.buffer("{}")))).test()
+            .awaitDone(10, TimeUnit.SECONDS)
+            .assertComplete()
+            .assertNoErrors()
+            .assertValue(buffer -> {
+                assertThat(buffer.toString()).isEqualTo("{\"message\":\"Hello World!\"}");
+                return true;
+            });
+    }
+
     private static GroovyPolicyConfiguration buildConfig(String script) {
         return GroovyPolicyConfiguration.builder().script(loadScript(script)).readContent(true).build();
+    }
+
+    private static GroovyPolicyConfiguration buildOverrideConfig(String script) {
+        return GroovyPolicyConfiguration.builder().script(loadScript(script)).readContent(true).overrideContent(true).build();
     }
 
     @Test
