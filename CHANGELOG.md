@@ -1,3 +1,10 @@
+# [5.2.0](https://github.com/gravitee-io/gravitee-policy-groovy/compare/5.1.3...5.2.0) (2026-11-19)
+
+
+### Features
+
+* **http:** write byte[] and Buffer script returns as raw bytes ([#152](https://github.com/gravitee-io/gravitee-policy-groovy/issues/152)) ([c3a20cf](https://github.com/gravitee-io/gravitee-policy-groovy/commit/c3a20cf6962b5882ba008d0faf4eea7c32736b24))
+
 ## [5.1.3](https://github.com/gravitee-io/gravitee-policy-groovy/compare/5.1.2...5.1.3) (2026-11-19)
 
 
