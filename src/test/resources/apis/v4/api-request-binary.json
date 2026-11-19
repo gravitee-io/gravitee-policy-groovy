@@ -1,0 +1,69 @@
+{
+    "id": "api-request-binary",
+    "name": "api-request-binary",
+    "apiVersion": "1.0",
+    "definitionVersion": "4.0.0",
+    "type": "proxy",
+    "analytics": {},
+    "description": "api-request-binary",
+    "properties": [],
+    "listeners": [
+        {
+            "type": "http",
+            "paths": [
+                {
+                    "path": "/test"
+                }
+            ],
+            "entrypoints": [
+                {
+                    "type": "http-proxy"
+                }
+            ]
+        }
+    ],
+    "endpointGroups": [
+        {
+            "name": "default",
+            "type": "http-proxy",
+            "endpoints": [
+                {
+                    "name": "default",
+                    "type": "http-proxy",
+                    "configuration": {
+                        "target": "http://localhost:8080/team"
+                    }
+                }
+            ]
+        }
+    ],
+    "flows": [
+        {
+            "name": "flow-1",
+            "enabled": true,
+            "selectors": [
+                {
+                    "type": "http",
+                    "path": "/",
+                    "pathOperator": "STARTS_WITH"
+                }
+            ],
+            "request": [
+                {
+                    "name": "Groovy",
+                    "description": "",
+                    "enabled": true,
+                    "policy": "groovy",
+                    "configuration": {
+                        "overrideContent": true,
+                        "readContent": true,
+                        "script": "import groovy.json.JsonOutput\n\nreturn JsonOutput.toJson([body: request.contentAsBase64, isBase64Encoded: true])"
+                    }
+                }
+            ],
+            "response": [],
+            "subscribe": [],
+            "publish": []
+        }
+    ]
+}

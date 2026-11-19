@@ -68,43 +68,64 @@ return JsonOutput.toJson(content)
 }
 ```
 
+### Return binary content
+
+In HTTP proxy APIs, with "Override content" enabled, a request or response script may return a `String`, a `byte[]`, or a Gravitee `Buffer`. A `String` is written as text, which is the behavior existing scripts rely on. A `byte[]` or `Buffer` is written as those bytes, including bytes at `0x80` and above. Any other return value is written with `toString()`.
+
+Message and native Kafka scripts still write the returned value with `toString()`, so return a `String` there. v2 APIs on the v4 emulation engine accept a `byte[]` or `Buffer`. v2 APIs running on the legacy v3 execution engine still require the script to return a `String`.
+
+The script can also set the response status and headers. This decodes an AWS Lambda proxy response:
+
+```groovy
+import groovy.json.JsonSlurper
+
+def envelope = new JsonSlurper().parseText(response.content)
+response.status(envelope.statusCode)
+response.headers.'Content-Type' = envelope.headers.'Content-Type'
+return envelope.body.decodeBase64()
+```
+
 ## Bound objects properties and methods
 
 ### Request
 
 `request.<property>`
 
-| Property           | Type                         | Mutable | Description                                                                                                                                              |
-|--------------------|------------------------------|---------|----------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `content`          | `String`                     |         | Body of the request.                                                                                                                                     |
-| `transactionId`    | `String`                     |         | Unique identifier for the transaction.                                                                                                                   |
-| `clientIdentifier` | `String`                     |         | Identifies the client that made the request.                                                                                                             |
-| `uri`              | `String`                     |         | The complete request URI.                                                                                                                                |
-| `host`             | `String`                     |         | Host from the incoming request.                                                                                                                          |
-| `originalHost`     | `String`                     |         | Host as originally received before any internal rewriting.                                                                                               |
-| `contextPath`      | `String`                     |         | API context path.                                                                                                                                         |
-| `pathInfo`         | `String`                     |         | Path beyond the context path.                                                                                                                             |
-| `path`             | `String`                     |         | The full path component of the request URI.                                                                                                              |
-| `parameters`       | `Map<String, <List<String>>` | ✅️      | Query parameters as a multi-value map. For methods, refer to [Multimap methods](#multimap-methods).                                                           |
-| `pathParameters`   | `Map<String, <List<String>>` |         | Parameters extracted from path templates. For methods, refer to [Multimap methods](#multimap-methods). Note that altering method are useless in this context. |
-| `headers`          | `Map<String, String>`        | ✅       | HTTP headers. For methods, refer to [Headers methods](#headers-methods).                                                                                     |
-| `method`           | `HttpMethod` (enum)          |         | HTTP method used in the request (e.g., GET, POST).                                                                                                       |
-| `scheme`           | `String`                     |         | The scheme (HTTP or HTTPS) used by the request.                                                                                                          |
-| `version`          | `HttpVersion` (enum)         |         | HTTP protocol version: `HTTP_1_0`,  `HTTP_1_1`,  `HTTP_2`.                                                                                               |
-| `timestamp`        | `long`                       |         | Epoch timestamp of when the request was received.                                                                                                        |
-| `remoteAddress`    | `String`                     |         | IP address of the client.                                                                                                                                 |
-| `localAddress`     | `String`                     |         | Local IP address of the server handling the request.                                                                                                          |
+| Property             | Type                         | Mutable | Description                                                                                                                                              |
+|----------------------|------------------------------|---------|----------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `content`            | `String`                     |         | Body of the request. Requires "Read content".                                                                                                            |
+| `contentAsByteArray` | `byte[]`                     |         | Body bytes. Requires "Read content".                                                                                                                     |
+| `contentAsBase64`    | `String`                     |         | Body bytes as a basic base64 string. Requires "Read content".                                                                                            |
+| `transactionId`      | `String`                     |         | Unique identifier for the transaction.                                                                                                                   |
+| `clientIdentifier`   | `String`                     |         | Identifies the client that made the request.                                                                                                             |
+| `uri`                | `String`                     |         | The complete request URI.                                                                                                                                |
+| `host`               | `String`                     |         | Host from the incoming request.                                                                                                                          |
+| `originalHost`       | `String`                     |         | Host as originally received before any internal rewriting.                                                                                               |
+| `contextPath`        | `String`                     |         | API context path.                                                                                                                                         |
+| `pathInfo`           | `String`                     |         | Path beyond the context path.                                                                                                                             |
+| `path`               | `String`                     |         | The full path component of the request URI.                                                                                                              |
+| `parameters`         | `Map<String, <List<String>>` | ✅️      | Query parameters as a multi-value map. For methods, refer to [Multimap methods](#multimap-methods).                                                           |
+| `pathParameters`     | `Map<String, <List<String>>` |         | Parameters extracted from path templates. For methods, refer to [Multimap methods](#multimap-methods). Note that altering method are useless in this context. |
+| `headers`            | `Map<String, String>`        | ✅       | HTTP headers. For methods, refer to [Headers methods](#headers-methods).                                                                                     |
+| `method`             | `HttpMethod` (enum)          |         | HTTP method used in the request (e.g., GET, POST).                                                                                                       |
+| `scheme`             | `String`                     |         | The scheme (HTTP or HTTPS) used by the request.                                                                                                          |
+| `version`            | `HttpVersion` (enum)         |         | HTTP protocol version: `HTTP_1_0`,  `HTTP_1_1`,  `HTTP_2`.                                                                                               |
+| `timestamp`          | `long`                       |         | Epoch timestamp of when the request was received.                                                                                                        |
+| `remoteAddress`      | `String`                     |         | IP address of the client.                                                                                                                                 |
+| `localAddress`       | `String`                     |         | Local IP address of the server handling the request.                                                                                                          |
 
 ### Response
 
 `response.<property>`
 
-| Property  | Type                  | Mutable | Description                                                                                       |
-|-----------|-----------------------|---------|---------------------------------------------------------------------------------------------------|
-| `content` | `String`              |         | Body of the response.                                                                              |
-| `status`  | `int`                 |         | Response status code.                                                                              |
-| `reason`  | `String`              |         | Reason for the status.                                                                              |
-| `headers` | `Map<String, String>` | ✅       | HTTP headers wrapped in a bindable object. For methods, refer to [Headers methods](#headers-methods). |
+| Property             | Type                  | Mutable | Description                                                                                       |
+|----------------------|-----------------------|---------|---------------------------------------------------------------------------------------------------|
+| `content`            | `String`              |         | Body of the response. Requires "Read content".                                                     |
+| `contentAsByteArray` | `byte[]`              |         | Body bytes. Requires "Read content".                                                               |
+| `contentAsBase64`    | `String`              |         | Body bytes as a basic base64 string. Requires "Read content".                                      |
+| `status`             | `int`                 |         | Response status code.                                                                              |
+| `reason`             | `String`              |         | Reason for the status.                                                                              |
+| `headers`            | `Map<String, String>` | ✅       | HTTP headers wrapped in a bindable object. For methods, refer to [Headers methods](#headers-methods). |
 
 
 

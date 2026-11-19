@@ -34,14 +34,16 @@ import lombok.Getter;
  */
 public class BindableHttpRequest implements GenericRequest {
 
+    private static final String CONTENT_DISABLED = "Accessing request content must be enabled in the policy configuration";
+
     @Getter
     private final HttpRequest request;
 
-    private final String content;
+    private final BindableHttpContent body;
 
     public BindableHttpRequest(HttpRequest request, @Nullable Buffer buffer) {
         this.request = request;
-        this.content = buffer != null ? buffer.toString() : null;
+        this.body = new BindableHttpContent(buffer, CONTENT_DISABLED);
     }
 
     public BindableHttpRequest(HttpRequest request) {
@@ -49,10 +51,15 @@ public class BindableHttpRequest implements GenericRequest {
     }
 
     public String getContent() {
-        if (content == null) {
-            throw new UnsupportedOperationException("Accessing request content must be enabled in the policy configuration");
-        }
-        return content;
+        return body.asString();
+    }
+
+    public byte[] getContentAsByteArray() {
+        return body.asByteArray();
+    }
+
+    public String getContentAsBase64() {
+        return body.asBase64();
     }
 
     @Override

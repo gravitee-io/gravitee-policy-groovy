@@ -176,7 +176,24 @@ public class GroovyPolicy extends GroovyPolicyV3 implements Policy, KafkaPolicy 
             );
         }
 
-        return content == null ? Maybe.just(Buffer.buffer()) : Maybe.just(Buffer.buffer(content.toString()));
+        return Maybe.just(toBuffer(content));
+    }
+
+    /**
+     * A {@code String} stays on the historical path. A {@code byte[]} or Gravitee {@code Buffer} is written as-is,
+     * so bytes at {@code 0x80} and above are not re-encoded.
+     */
+    private static Buffer toBuffer(Object content) {
+        if (content == null) {
+            return Buffer.buffer();
+        }
+        if (content instanceof byte[] bytes) {
+            return Buffer.buffer(bytes);
+        }
+        if (content instanceof Buffer buffer) {
+            return buffer;
+        }
+        return Buffer.buffer(content.toString());
     }
 
     private Completable runScript(HttpExecutionContext ctx, Binding binding, String script) {

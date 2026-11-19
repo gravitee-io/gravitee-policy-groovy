@@ -1,0 +1,69 @@
+{
+    "id": "api-response-binary",
+    "name": "api-response-binary",
+    "apiVersion": "1.0",
+    "definitionVersion": "4.0.0",
+    "type": "proxy",
+    "analytics": {},
+    "description": "api-response-binary",
+    "properties": [],
+    "listeners": [
+        {
+            "type": "http",
+            "paths": [
+                {
+                    "path": "/test"
+                }
+            ],
+            "entrypoints": [
+                {
+                    "type": "http-proxy"
+                }
+            ]
+        }
+    ],
+    "endpointGroups": [
+        {
+            "name": "default",
+            "type": "http-proxy",
+            "endpoints": [
+                {
+                    "name": "default",
+                    "type": "http-proxy",
+                    "configuration": {
+                        "target": "http://localhost:8080/team"
+                    }
+                }
+            ]
+        }
+    ],
+    "flows": [
+        {
+            "name": "flow-1",
+            "enabled": true,
+            "selectors": [
+                {
+                    "type": "http",
+                    "path": "/",
+                    "pathOperator": "STARTS_WITH"
+                }
+            ],
+            "request": [],
+            "response": [
+                {
+                    "name": "Groovy",
+                    "description": "",
+                    "enabled": true,
+                    "policy": "groovy",
+                    "configuration": {
+                        "overrideContent": true,
+                        "readContent": true,
+                        "script": "import groovy.json.JsonSlurper\n\ndef envelope = new JsonSlurper().parseText(response.content)\nresponse.status(envelope.statusCode)\nresponse.headers.'Content-Type' = envelope.headers.'Content-Type'\nreturn envelope.body.decodeBase64()"
+                    }
+                }
+            ],
+            "subscribe": [],
+            "publish": []
+        }
+    ]
+}

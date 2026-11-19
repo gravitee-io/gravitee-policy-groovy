@@ -28,11 +28,15 @@ See the [Usage](#usage) section for object attributes and methods.
 
 ### Content
 
-| Variable           | Description                      |
-|--------------------|----------------------------------|
-| `request.content`  | When "Read content" is enabled   |
-| `response.content` | When "Read content" is enabled   |
-| `message.content`  | Always available                 |
+| Variable                      | Description                      |
+|-------------------------------|----------------------------------|
+| `request.content`             | When "Read content" is enabled   |
+| `request.contentAsByteArray`  | When "Read content" is enabled   |
+| `request.contentAsBase64`     | When "Read content" is enabled   |
+| `response.content`            | When "Read content" is enabled   |
+| `response.contentAsByteArray` | When "Read content" is enabled   |
+| `response.contentAsBase64`    | When "Read content" is enabled   |
+| `message.content`             | Always available                 |
 
 ### Native Kafka APIs
 
